@@ -14,6 +14,11 @@ projects_list = [
     |]),
     ("P2", [hsx|
         A Project was about cruise control
+    |]),
+    ("Snake", [hsx|
+        Subproject of this page, and its all contained here!
+        <br>
+        I taught myself javascript...
     |])]
 
 mapHtml :: (a -> Html) -> [a] -> Html
