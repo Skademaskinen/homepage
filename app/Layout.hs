@@ -5,17 +5,23 @@ import Text.Blaze.Html
 
 import Header
 import Footer
-import Stylesheet
 
 layout :: Html -> Html
 layout content = [hsx|
-    {stylesheet}
+    <link rel="stylesheet" href="/static/stylesheet.css">
+    <link rel="stylesheet" href="/static/prism/prism.css">
     <html>
         {header [
+            ("Home", "/"),
+            ("Contact", "/contact"),
+            ("Projects", "/projects"),
             ("Old Site", "https://about.skademaskinen.win")
         ]}
         <body>
-            {content}
+            <div class="mainmatter">
+                <hr>
+                {content}
+            </div>
         </body>
         {footer}
     </html>

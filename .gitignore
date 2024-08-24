@@ -1,1 +1,9 @@
+# cabal
 dist-newstyle
+
+# nix
+.envrc
+.direnv
+
+# qemu
+*.qcow2

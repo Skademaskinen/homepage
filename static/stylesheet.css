@@ -1,0 +1,38 @@
+:root {
+    --main-color: #ff5500;
+}
+
+* {
+    color: white;
+    font-family: sans-serif;
+}
+
+html {
+    background-color: black;
+    color: white;
+    text-align: center;
+  }
+
+a {
+    color: red;
+}
+
+hr {
+    color: var(--main-color)
+}
+
+.section {
+    margin-left: 5%;
+    margin-right: 5%;
+    padding: 1%;
+    background-color: #111111;
+    color: white;
+    text-align: left;
+}
+
+.mainmatter {
+    background-color: #222222;
+    color: white;
+    margin-left: 10%;
+    margin-right: 10%;
+}
