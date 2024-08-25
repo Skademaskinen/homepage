@@ -43,7 +43,7 @@ build_sidebar_item (Tree (name,_) children) indent path = [hsx|
 
 sidebar :: Html
 sidebar = [hsx|
-    <div style="float: left; width: 15%; text-align: left; background-color: #111111; border: 1px solid #ff5500; border-radius: 5px;">
+    <div style="background-color: #111111; border: 1px solid #ff5500; border-radius: 5px;">
         <pre>
             <code>
                 {build_sidebar_item projects_tree 0 ""}
@@ -75,11 +75,15 @@ default_project = ("", [hsx|
 
 mainView :: [String] -> Html
 mainView target = [hsx|
-    {sidebar}
-    <div style="width: 85%; min-height: 1000px;">
-        <h1>{title}</h1>
-        {content}
-    </div>
+    <table style="width: 100%;">
+        <tr>
+            <th style="width:15%; text-align: left; vertical-align: top;">{sidebar}</th>
+            <th style="width:85%;">
+                <h1>{title}</h1>
+                {content}
+            </th>
+        </tr>
+    </table>
 |]
     where
         (title, content) = find_correct_path target projects_tree
