@@ -19,6 +19,7 @@ layout content = [hsx|
             ("Sources", "/sources"),
             ("Old Site", "https://about.skademaskinen.win")
         ]}
+        <title>Skademaskinen</title>
         <body>
             <div class="mainmatter">
                 <hr>

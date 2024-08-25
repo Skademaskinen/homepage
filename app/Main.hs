@@ -46,6 +46,7 @@ handleRequest ("api":args) request = do
     return (responseBuilder status200 [("Content-Type", "text/plain")] $ mconcat $ map copyByteString [BU.fromString value])
 handleRequest ["contact"] request = do return (serve (layout contact))
 handleRequest ("projects":project) request = do return (serve (layout (projects project)))
+handleRequest ["favicon.ico"] request = do return (serveFile "static/favicon.ico")
 handleRequest [] request = do return (serve (layout index))
 handleRequest x request = do return (page404 x)
 

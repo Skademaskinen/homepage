@@ -37,7 +37,7 @@ contact = [hsx|
             {row ["Type", "Address"]}
             {row ["Email", "mast3r@skade.dev"]}
             {row ["University Email", "tjen19@student.aau.dk"]}
-            {row ["Matrix", "mast3r@skade.dev"]}
+            {row ["Matrix", "@mast3r:skade.dev"]}
             {row ["Discord", "mast3r_waf1z"]}
         </table>
 

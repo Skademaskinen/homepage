@@ -31,8 +31,6 @@ uuidExists :: String -> IO Bool
 uuidExists uuid = do
     conn <- open db_file
     visits <- query conn "SELECT uuid FROM visits WHERE uuid = ?" (Only (uuid :: String)) :: IO [Only String]
-    putStrLn $ show (length visits)
-    putStrLn uuid
     close conn
     return (not ((length visits) > 0))
 
