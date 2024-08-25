@@ -1,0 +1,22 @@
+name: website-compile
+
+on:
+  push:
+    branches: [main]
+  pull_request: 
+    branches: [main]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4.1.1
+
+    - name: depends
+    - run: sudo apt update && sudo apt install cabal-install
+
+    - name: prepare cabal
+    - run: cabal update
+
+    - name: compile
+    - run: cabal build
