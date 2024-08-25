@@ -21,6 +21,7 @@ import Layout
 import Index
 import Pages.Contact.Contact
 import Pages.Projects.Projects
+import Pages.Sources.Sources
 
 import Helpers.Database
 import Api.Api
@@ -45,6 +46,7 @@ handleRequest ("api":args) request = do
     value <- api args request
     return (responseBuilder status200 [("Content-Type", "text/plain")] $ mconcat $ map copyByteString [BU.fromString value])
 handleRequest ["contact"] request = do return (serve (layout contact))
+handleRequest ["sources"] request = do return (serve (layout sources))
 handleRequest ("projects":project) request = do return (serve (layout (projects project)))
 handleRequest ["favicon.ico"] request = do return (serveFile "static/favicon.ico")
 handleRequest [] request = do return (serve (layout index))

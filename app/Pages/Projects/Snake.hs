@@ -3,7 +3,7 @@ module Pages.Projects.Snake where
 import IHP.HSX.QQ
 import Text.Blaze.Html
 
-import Helpers.Utils
+import Helpers.Utils (forEach)
 
 tile :: Int -> Html
 tile id = [hsx|

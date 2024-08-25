@@ -17,7 +17,8 @@ executable homepage
         Api.Api,
         Pages.Contact.Contact,
         Pages.Projects.Projects,
-        Pages.Projects.Snake
+        Pages.Projects.Snake,
+        Pages.Sources.Sources
 
     build-depends:
         base,
