@@ -40,7 +40,7 @@ init_db = do
     conn <- open db_file
     execute conn "CREATE TABLE IF NOT EXISTS visits (id INTEGER PRIMARY KEY, timestamp INTEGER NOT NULL, uuid VARCHAR NOT NULL)" ()
     close conn
-    putStrLn "Initialized db..."
+    Prelude.putStrLn "Initialized db..."
 
 test_db :: IO ()
 test_db = do
