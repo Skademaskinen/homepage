@@ -13,7 +13,9 @@ executable homepage
         Helpers.Section,
         Helpers.Tree,
         Helpers.Utils,
-        Pages.Contact.Contact
+        Helpers.Database,
+        Api.Api,
+        Pages.Contact.Contact,
         Pages.Projects.Projects,
         Pages.Projects.Snake
 
@@ -28,7 +30,9 @@ executable homepage
         blaze-builder,
         utf8-string,
         bytestring,
-        sqlite-simple
+        sqlite-simple,
+        time,
+        uuid
 
     hs-source-dirs:   app
     default-language: Haskell2010

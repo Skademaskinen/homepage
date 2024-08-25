@@ -8,7 +8,6 @@ import Footer
 
 layout :: Html -> Html
 layout content = [hsx|
-    <!DOCTYPE html>
     <link rel="stylesheet" href="/static/stylesheet.css">
     <link rel="stylesheet" href="/static/prism/prism.css">
     <html>

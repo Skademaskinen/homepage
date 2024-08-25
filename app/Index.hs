@@ -36,8 +36,10 @@ visitor_counter = [hsx|
     <script>
         async function visit(){
             await fetch("/api/visits/new", {
+                method: "post",
+                body: getCookie("visitId")
 
-            })
+            }).then(res => res.text().then(uuid => setCookie("visitId="+uuid)))
             fetch("/api/visits/get", {}).then(response => {
                 response.text().then(text => {
                     document.getElementById("visitor_count").innerHTML = text

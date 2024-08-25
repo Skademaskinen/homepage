@@ -20,12 +20,22 @@ insert query args = do
     execute conn query args
     close conn
 
-get :: Query -> IO [(Int, Int, String)]
-get query = do
+getVisits :: IO [(Int, Int, String)]
+getVisits = do
     conn <- open db_file
-    visits <- query_ conn query :: IO [VisitsField]
-    let result = map (\(VisitsField id timestamp uuid) -> (id, timestamp, uuid)) visits
-    return result
+    visits <- query conn "SELECT * FROM visits" () :: IO [(Int, Int, String)]
+    close conn
+    return visits
+
+uuidExists :: String -> IO Bool
+uuidExists uuid = do
+    conn <- open db_file
+    visits <- query conn "SELECT uuid FROM visits WHERE uuid = ?" (Only (uuid :: String)) :: IO [Only String]
+    putStrLn $ show (length visits)
+    putStrLn uuid
+    close conn
+    return (not ((length visits) > 0))
+
 
 init_db :: IO ()
 init_db = do
@@ -38,6 +48,6 @@ test_db :: IO ()
 test_db = do
     conn <- open db_file
     execute conn "INSERT INTO visits (timestamp, uuid) VALUES (?, ?)" (0 :: Int, "1234" :: String)
-    result <- query_ conn "SELECT * FROM visits" :: IO [VisitsField]
+    result <- query_ conn "SELECT * FROM visits" :: IO [(Int, Int, String)]
     mapM_ print result
     close conn

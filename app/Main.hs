@@ -42,7 +42,7 @@ serveFile path = responseFile status200 [] path Nothing
 handleRequest :: [String] -> Request ->  IO Response
 handleRequest ("static":xs) request = do return (serveFile $ intercalate "/" ("static":xs))
 handleRequest ("api":args) request = do 
-    value <- api args
+    value <- api args request
     return (responseBuilder status200 [("Content-Type", "text/plain")] $ mconcat $ map copyByteString [BU.fromString value])
 handleRequest ["contact"] request = do return (serve (layout contact))
 handleRequest ("projects":project) request = do return (serve (layout (projects project)))
