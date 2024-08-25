@@ -1,9 +1,9 @@
 module Pages.Projects.Projects where
 
-import IHP.HSX.QQ
-import Text.Blaze.Html
+import IHP.HSX.QQ (hsx)
+import Text.Blaze.Html (Html)
 
-import Data.List
+import Data.List (replicate, intercalate)
 
 import Helpers.Tree
 import Pages.Projects.Snake

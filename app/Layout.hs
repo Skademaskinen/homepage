@@ -1,7 +1,7 @@
 module Layout where
 
-import IHP.HSX.QQ
-import Text.Blaze.Html
+import IHP.HSX.QQ (hsx)
+import Text.Blaze.Html (Html)
 
 import Header
 import Footer

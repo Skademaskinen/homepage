@@ -1,7 +1,7 @@
 module Helpers.CodeBlock where
 
-import IHP.HSX.QQ
-import Text.Blaze.Html
+import IHP.HSX.QQ (hsx)
+import Text.Blaze.Html (Html)
 
 codeBlock :: String -> String -> Html
 codeBlock language code = [hsx|

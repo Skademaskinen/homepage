@@ -1,7 +1,11 @@
 module Helpers.Utils where
 
-import IHP.HSX.QQ
-import Text.Blaze.Html
+import IHP.HSX.QQ (hsx)
+import Text.Blaze.Html (Html)
+
+import Data.ByteString (ByteString)
+import Data.Text (unpack)
+import Data.Text.Encoding (decodeUtf8)
 
 forEach :: [Int] -> (Int -> Html) -> Html
 forEach (x:xs) f = [hsx|
@@ -33,4 +37,5 @@ row values = [hsx|
     </tr>
 |]
 
-
+unpackBS :: ByteString -> String
+unpackBS = (unpack . decodeUtf8)

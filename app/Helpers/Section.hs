@@ -1,7 +1,7 @@
 module Helpers.Section where
 
-import IHP.HSX.QQ
-import Text.Blaze.Html
+import IHP.HSX.QQ (hsx)
+import Text.Blaze.Html (Html)
 
 section :: Html -> Html
 section content = [hsx|

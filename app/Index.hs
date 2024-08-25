@@ -1,7 +1,7 @@
 module Index where
 
-import IHP.HSX.QQ
-import Text.Blaze.Html
+import IHP.HSX.QQ (hsx)
+import Text.Blaze.Html (Html)
 
 import Helpers.CodeBlock
 import Helpers.Section

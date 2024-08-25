@@ -1,22 +1,17 @@
 module Api.Api where
 
 import Helpers.Database
+import Helpers.Utils
 
-import IHP.HSX.QQ
-import Text.Blaze.Html
+import IHP.HSX.QQ (hsx)
+import Text.Blaze.Html (Html)
 
-import Data.Time.Clock.POSIX
-import Data.UUID.V4
-import Data.UUID
+import Data.Time.Clock.POSIX (getPOSIXTime)
+import Data.UUID.V4 (nextRandom)
+import Data.UUID (toString)
 
-import Data.Text as T
-import Data.Text.Encoding as T
-import Data.ByteString
+import Network.Wai (getRequestBodyChunk, Request)
 
-import Network.Wai
-
-unpackBS :: ByteString -> String
-unpackBS = (T.unpack . T.decodeUtf8)
 
 api :: [String] -> Request -> IO String
 api ["visits", "new"] request = do

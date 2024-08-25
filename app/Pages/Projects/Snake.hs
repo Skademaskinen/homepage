@@ -1,9 +1,9 @@
 module Pages.Projects.Snake where
 
-import IHP.HSX.QQ
-import Text.Blaze.Html
+import IHP.HSX.QQ (hsx)
+import Text.Blaze.Html (Html)
 
-import Helpers.Utils (forEach)
+import Helpers.Utils
 
 tile :: Int -> Html
 tile id = [hsx|
@@ -11,15 +11,15 @@ tile id = [hsx|
     </div>
 |]
 
-row :: Int -> Html
-row offset = [hsx|
+tileRow :: Int -> Html
+tileRow offset = [hsx|
     {forEach [(offset*20)..19+(offset*20)] tile}
     <br>
 |]
 
 grid :: Html
 grid = [hsx|
-    {forEach [0..19] row}
+    {forEach [0..19] tileRow}
 |]
 
 fire :: Int -> Html

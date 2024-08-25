@@ -1,7 +1,7 @@
 module Pages.Contact.Contact where
 
-import IHP.HSX.QQ
-import Text.Blaze.Html
+import IHP.HSX.QQ (hsx)
+import Text.Blaze.Html (Html)
 
 import Helpers.Utils
 

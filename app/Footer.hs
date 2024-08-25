@@ -1,7 +1,7 @@
 module Footer where
 
-import IHP.HSX.QQ
-import Text.Blaze.Html
+import IHP.HSX.QQ (hsx)
+import Text.Blaze.Html (Html)
 
 footer :: Html
 footer = [hsx|
