@@ -11,8 +11,11 @@ executable homepage
         Layout,
         Helpers.CodeBlock,
         Helpers.Section,
+        Helpers.Tree,
+        Helpers.Utils,
         Pages.Contact.Contact
-        Pages.Projects.Projects
+        Pages.Projects.Projects,
+        Pages.Projects.Snake
 
     build-depends:
         base,
@@ -24,10 +27,14 @@ executable homepage
         http-types,
         blaze-builder,
         utf8-string,
-        bytestring
+        bytestring,
+        sqlite-simple
 
     hs-source-dirs:   app
     default-language: Haskell2010
     default-extensions:
         QuasiQuotes,
         OverloadedStrings
+
+    ghc-options:
+        -threaded

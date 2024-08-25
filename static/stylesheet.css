@@ -3,7 +3,6 @@
 }
 
 * {
-    color: white;
     font-family: sans-serif;
 }
 
@@ -25,14 +24,48 @@ hr {
     margin-left: 5%;
     margin-right: 5%;
     padding: 1%;
-    background-color: #111111;
+    background-color: #050505;
     color: white;
     text-align: left;
 }
 
 .mainmatter {
-    background-color: #222222;
+    background-color: #111111;
     color: white;
     margin-left: 10%;
     margin-right: 10%;
+}
+
+button {
+    border-radius: 5px;
+    width: 100px;
+    height: 40px;
+    margin: 5px;
+    padding: 1px;
+    background-color: #232323;
+    color: white;
+    border: 1px solid black;
+}
+  
+button:hover {
+    background-color: #151515;
+}
+button:active {
+    background-color: #111111;
+}
+
+.inline_container {
+    border:1px solid black;
+    border-radius:5px;
+    padding:1px;
+    margin:4px;
+    display: inline-grid;
+    background-color:#232323;
+}
+.inline_container:hover {
+  background-color:#111111;
+}
+
+.inline_container:active {
+  background-color:black;
 }

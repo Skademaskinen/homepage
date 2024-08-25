@@ -30,8 +30,28 @@ intro = section [hsx|
     Ignore the backslashes, they're required as the html is rendered at compile time by GHC itself, so writing this code block was a little challenge
 |]
 
+visitor_counter :: Html
+visitor_counter = [hsx|
+    Visitors: <p id="visitor_count"></p>
+    <script>
+        async function visit(){
+            await fetch("/api/visits/new", {
+
+            })
+            fetch("/api/visits/get", {}).then(response => {
+                response.text().then(text => {
+                    document.getElementById("visitor_count").innerHTML = text
+                })
+            })
+        }
+        visit()
+    </script>
+
+|]
+
 index :: Html
 index = [hsx|
     <h1>Skademaskinen</h1>
     {intro}
+    {visitor_counter}
 |]
