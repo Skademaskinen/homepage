@@ -13,5 +13,18 @@
                 ghcide
             ]))];
         };
+        packages.${system}.default = pkgs.haskellPackages.mkDerivation {
+            pname = "homepage";
+            version = "0.1.0.0";
+            src = ./.;
+            isLibrary = false;
+            isExecutable = true;
+            executableHaskellDepends = with pkgs.haskellPackages; [
+                base blaze-builder blaze-html bytestring http-types ihp-hsx
+                sqlite-simple text time utf8-string uuid wai warp
+            ];
+            license = "unknown";
+            mainProgram = "homepage";
+        };
     };
 }
