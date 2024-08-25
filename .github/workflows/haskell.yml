@@ -37,6 +37,8 @@ jobs:
       run: |
         cabal update
         cabal build --only-dependencies
+    - name: fix-source
+      run: sed -i 's/<!DOCTYPE html>// app/Layout.hs
     - name: Build
       run: cabal build
     #- name: Run tests
