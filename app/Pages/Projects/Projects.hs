@@ -3,82 +3,172 @@ module Pages.Projects.Projects where
 import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 
-import Data.List (replicate, intercalate)
+import Data.List (replicate, intercalate, find)
 
-import Helpers.Tree
-import Pages.Projects.Snake
+import Helpers.Tree ( Tree(..) )
+import Helpers.Utils (forEach)
+import Pages.Projects.Snake (snake)
 
-projects_tree :: Tree (String, Html)
-projects_tree = Tree ("", [hsx||]) [
-    Tree ("Semester Projects", [hsx||]) [
+import Helpers.Database (schema, prettyPrintSchema)
+import Helpers.CodeBlock (codeBlock)
+
+defaultProject :: (String, Html)
+defaultProject = ("", [hsx|
+    Use the sidebar to find a project :)<br><br>
+
+    This page is inspired by my friend Mohamad, his site is available below<br><br>
+    <a href="https://mohamaddalal.github.io/">Mohamad's site</a>
+|])
+
+projectsTree :: Tree (String, Html)
+projectsTree = Tree defaultProject [
+    Tree ("Semester Projects", [hsx|
+        Here's all the projects i've done at Aalborg University, they're defined as Pn where n is the semester they were done at. for example, P6 and P8 is my bachelor and master's projects respectively.
+    |]) [
         Tree ("P1", [hsx|
-            P1 was about Random Linear Network Coding
-            <br>
-            It was cool
+            <div class="section">
+                P1 was about Random Linear Network Coding
+                <br>
+                It was cool
+            </div>
         |]) [],
         Tree ("P2", [hsx|
-            A Project was about cruise control
+            <div class="section">
+                A Project about adaptive cruise control in cars
+            </div>
+        |]) [],
+        Tree ("P3", [hsx|
+            <div class="section">
+                We made a satellite ground station to be full duplex, as the previous implementation could only send data one way at a time, would be cool to use two channels.
+            </div>
+        |]) [],
+        Tree ("P4", [hsx|
+            <div class="section">
+                Detecting fires on a map, it wasn't particularly interesting.
+            </div>
+        |]) [],
+        Tree ("P5", [hsx|
+            <div class="section">
+            Testing TCP performance using NS3, we learned a bit of C++, it was nice.
+            </div>
+        |]) [],
+        Tree ("P6", [hsx|
+            <div class="section">
+                Modeling a testbed for edge nodes for measurement in real world scenarios<br><br>
+
+                It was a pretty interesting project, as we designed our own dataframe instead of using like HTTP, it made it very fast, but as could be read in our semester report, our system could be even faster if we optimized language and protocols. <br><br>
+                
+                It would probably be beyond our expectations if we went and implemented our own solution at the data-link layer of networking instead of at the routing layer (or whatever its called again in TCP/IP)
+            </div>
+        |]) [],
+        Tree ("P7", [hsx|
+            <div class="section">
+                The semester we learned haskell! Honestly i think i spent more time in my free time in total on haskell than i did thinking about this project. The project was about measuring the amount of people in a room using IoT devices and bluetooth.<br><br>
+                
+                The coolest part of this project was definitely with fidding with low-level promisquous mode on an IoT device.
+            </div>
+        |]) [],
+        Tree ("P8", [hsx|
+            <div class="section">
+                This was a project about conducting a user-study, measuring people's stress and questioning them through an app on a mobile phone.
+                <br>
+                (this project was very, very bad imo, but i learned more C++)
+            </div>
         |]) []
     ],
-    Tree ("Personal Projects", [hsx||]) [
-        Tree ("Snake", snake)[]]]
+    Tree ("Personal Projects", [hsx|
+        I find it fun coding in my free time, i do it a lot and as such this website was also born!
+    |]) [
+        Tree ("Snake", snake) [],
+        Tree ("Website", [hsx|
+            <div class="section" style="max-width: 100%">
+                Written in Haskell using IHP-HSX as the primary library, and sqlite-simple as the database implementation.<br>
 
-make_indent :: Int -> String
-make_indent n = intercalate "" $ replicate 3 " "
+                The database is actually pretty cool, its implemented as a list of table objects, and since i'm writing html directly inside my haskell code i can easily print the database structure inline here:<br><br>
+                {codeBlock "txt" $ show schema}
+                Its not particularly nice looking in this way, so i'll print it properly below :P
+                {codeBlock "txt" prettyPrintSchema}<br>
+                Still in haskell, but the beauty of haskell is that stuff like that is a short oneliner<br><br>
 
-build_sidebar_section :: [Tree (String, Html)] -> Int -> String -> Html
-build_sidebar_section (x:xs) indent path = [hsx|
-    {build_sidebar_item x indent path}
-    <br>
-    {build_sidebar_section xs indent path}
+                <span style="color: red">DISCLAIMER:</span> there might be extra tables in this list that shows up without a corresponding feature, i am actually generating it on the fly.
+
+                <br><br>
+                This page about projects is actually also pretty cool, its defined as a tree data structure, so i can also easily print it:
+                {codeBlock "haskell" $ show (Tree ("projects", "<html>") [Tree ("page2", "<html>") [], Tree ("page3", "<html>") [], Tree ("page4", "<html>") []])}
+            </div>
+        |]) [],
+        Tree ("Skademaskinen", [hsx|
+            <div class="section">
+                This is about my server, it hosts a lot of things, but the things accessible from HTTP is available at:
+                <br>
+                <div style="text-align:center;">
+                {services}
+                </div>
+            </div>
+        |]) []]]
+
+services :: Html
+services = mconcat $ map (\(name, d) -> [hsx|
+    <button id={d} onclick="go_to(this.id)">{name}</button>
+|]) srv
+    where
+        srv :: [(String, String)]
+        srv = [("Nextcloud", "nextcloud"), ("Jupyter", "jupyter"), ("Matrix", "matrix"), ("Website", "api"), ("Taoshi", "taoshi")]
+
+makeIndent :: Int -> Html
+makeIndent n = forEach [0..n] (\_ -> [hsx|&emsp;|])
+
+buildSidebarSection :: [Tree (String, Html)] -> Int -> String -> Html
+buildSidebarSection (x:xs) indent path = [hsx|
+    {buildSidebarItem x indent path}
+    {buildSidebarSection xs indent path}
 |]
-build_sidebar_section [] _ _ = [hsx||]
+buildSidebarSection [] _ _ = [hsx||]
 
-build_sidebar_item :: Tree (String, Html) -> Int -> String -> Html
-build_sidebar_item (Tree (name,_) children) indent path = [hsx|
-    {make_indent indent}<a href={"/projects/"++path++name}>{name}</a>
+buildSidebarItem :: Tree (String, Html) -> Int -> String -> Html
+buildSidebarItem (Tree (name,_) children) indent path = [hsx|
+    {makeIndent indent}<a href={"/projects/"++path++name}>{name}</a>
     <br>
-    {build_sidebar_section children (indent+1) (path++name++"/")}
+    {buildSidebarSection children (indent+1) (path++name++"/")}
 |]
 
 sidebar :: Html
 sidebar = [hsx|
-    <div style="background-color: #111111; border: 1px solid #ff5500; border-radius: 5px;">
-        <pre>
-            <code>
-                {build_sidebar_item projects_tree 0 ""}
-            </code>
-        </pre>
+    <div style="background-color: #111111; border: 1px solid #ff5500; border-radius: 5px;text-align: left;">
+        {buildSidebarItem projectsTree (-1) ""}
+        <br>
     </div>
 |]
 
-find_correct_section :: [String] -> [Tree (String, Html)] -> (String, Html)
-find_correct_section [x] ((Tree (name, html) children'):children) | name == x = (name, html)
-                                                                  | otherwise = find_correct_section [x] children
-find_correct_section [x] [] = default_project
-find_correct_section (x:xs) ((Tree (name, html) children'):children) | name == x = find_correct_section xs children'
-                                                                     | otherwise = find_correct_section (x:xs) children
-find_correct_section [] _ = default_project
+findItem_ :: [String] -> Tree (String, Html) -> Tree (String, Html)
+findItem_ [] _ = return defaultProject
+findItem_ [target] tree = do
+    (name, html) <- tree
+    if name == target then
+        return (name, html)
+    else
+        return defaultProject
+findItem_ (target:xs) (Tree value children) = do
+    (name, html) <- Tree value children
+    if name == target then
+        case find (\(x, _) -> x /= fst defaultProject) $ map (findItem xs) children of
+            Nothing -> return defaultProject
+            (Just result) -> return result
+    else
+        return defaultProject
 
-find_correct_path :: [String] -> Tree (String, Html) -> (String, Html)
-find_correct_path [x] (Tree (name, html) children) | name == x = (name, html)
-                                                   | otherwise = default_project
-find_correct_path (x:xs) (Tree (name, html) children) | name == x = find_correct_section xs children
-                                                      | otherwise = default_project
-find_correct_path [] _ = default_project
+findItem :: [String] -> Tree (String, Html) -> (String, Html)
+findItem target tree = result
+    where
+        (Tree result _) = findItem_ target tree
 
-
-default_project :: (String, Html)
-default_project = ("", [hsx|
-    Use the sidebar to find a project :)
-|])
 
 mainView :: [String] -> Html
 mainView target = [hsx|
     <table style="width: 100%;">
         <tr>
-            <th style="width:15%; text-align: left; vertical-align: top;">{sidebar}</th>
-            <th style="width:85%;">
+            <th style="width:15%; text-align: left; vertical-align: top;line-height:30px;">{sidebar}</th>
+            <th style="width:85%; max-width: 0px; vertical-align: top;">
                 <h1>{title}</h1>
                 {content}
             </th>
@@ -86,7 +176,7 @@ mainView target = [hsx|
     </table>
 |]
     where
-        (title, content) = find_correct_path target projects_tree
+        (title, content) = findItem target projectsTree
 
 projects :: [String] -> Html
 projects target = [hsx|

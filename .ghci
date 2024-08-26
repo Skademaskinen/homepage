@@ -1,0 +1,2 @@
+:set prompt "[\ESC[38;2;255;100;0mHomepage dev\ESC[0m] > "
+:seti -fdiagnostics-color=auto

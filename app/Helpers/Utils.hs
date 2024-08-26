@@ -14,8 +14,8 @@ forEach (x:xs) f = [hsx|
 |]
 forEach [] _ = [hsx||]
 
-link_image :: String -> String -> String -> Html 
-link_image label image url = [hsx|
+linkImage :: String -> String -> String -> Html
+linkImage label image url = [hsx|
     <div class="inline_container">
         <a href={url}>
             <img src={image} width="100" height="100" style="padding: 1px;">
@@ -38,4 +38,4 @@ row values = [hsx|
 |]
 
 unpackBS :: ByteString -> String
-unpackBS = (unpack . decodeUtf8)
+unpackBS = unpack . decodeUtf8

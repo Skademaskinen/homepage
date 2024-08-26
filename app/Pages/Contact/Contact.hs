@@ -3,7 +3,7 @@ module Pages.Contact.Contact where
 import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 
-import Helpers.Utils
+import Helpers.Utils ( linkImage, row )
 
 contact :: Html
 contact = [hsx|
@@ -21,5 +21,5 @@ contact = [hsx|
     <h2>Socials</h2>
     Links to my socials
     <br>
-    {link_image "LinkedIn" "/static/contact/LinkedIn.png" "https://www.linkedin.com/in/thomas-m%C3%B8ller-j-a76601a6/"}
+    {linkImage "LinkedIn" "/static/contact/LinkedIn.png" "https://www.linkedin.com/in/thomas-m%C3%B8ller-j-a76601a6/"}
 |]

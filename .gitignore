@@ -4,9 +4,13 @@ dist-newstyle
 # nix
 .envrc
 .direnv
+result
 
 # qemu
 *.qcow2
 
 # runtime files
 *.db3
+
+# editor
+.vscode

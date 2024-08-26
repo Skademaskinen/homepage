@@ -4,20 +4,20 @@ import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 
 
-make_links :: [(String, String)] -> Html
-make_links [] = [hsx||]
-make_links [(display,url)] = [hsx|
+makeLinks :: [(String, String)] -> Html
+makeLinks [] = [hsx||]
+makeLinks [(display,url)] = [hsx|
     <a href={url}>{display}</a>
 |]
-make_links ((display, url):xs) = [hsx|
+makeLinks ((display, url):xs) = [hsx|
     <a href={url}>{display}</a> |
-    {make_links xs}
+    {makeLinks xs}
 |]
 
 header :: [(String, String)] -> Html
 header links = [hsx|
     <div>
-        {make_links links}
+        {makeLinks links}
     </div>
 
 |]

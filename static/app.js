@@ -26,3 +26,8 @@ function deleteCookie(name){
 function setCookie(cookie) {
     document.cookie = cookie
 }
+
+function go_to(id){
+    console.log(id)
+    window.location.href = "https://"+id+"."+window.location.hostname
+}

@@ -14,6 +14,7 @@ executable homepage
         Helpers.Tree,
         Helpers.Utils,
         Helpers.Database,
+        Helpers.Globals,
         Api.Api,
         Pages.Contact.Contact,
         Pages.Projects.Projects,
@@ -33,7 +34,8 @@ executable homepage
         bytestring,
         sqlite-simple,
         time,
-        uuid
+        uuid,
+        directory
 
     hs-source-dirs:   app
     default-language: Haskell2010

@@ -3,8 +3,8 @@ module Index where
 import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 
-import Helpers.CodeBlock
-import Helpers.Section
+import Helpers.CodeBlock (hsxIntroCodeBlock)
+import Helpers.Section ( section )
 
 intro :: Html
 intro = section [hsx|
@@ -26,12 +26,12 @@ intro = section [hsx|
     <br><br>
     HSX is actually pretty cool, i just toss in html inline with haskell and it just works: 
     <br><br>
-    {codeBlock "haskell" "view :: Html\nview = [hsx\\|\n     <p>Hello World!</p>\n\\|\\]"}
-    Ignore the backslashes, they're required as the html is rendered at compile time by GHC itself, so writing this code block was a little challenge
+    {hsxIntroCodeBlock}
+    I had to do a little hack around the preprocessor to make it not compile that little snippet of code, and as such you won't see me show any more hsx code xD
 |]
 
-visitor_counter :: Html
-visitor_counter = [hsx|
+visitorCounter :: Html
+visitorCounter = [hsx|
     Visitors: <p id="visitor_count"></p>
     <script>
         async function visit(){
@@ -54,6 +54,9 @@ visitor_counter = [hsx|
 index :: Html
 index = [hsx|
     <h1>Skademaskinen</h1>
+    <img src="/static/icon.png" style="border-radius:50%">
+    <br>
+    <hr>
     {intro}
-    {visitor_counter}
+    {visitorCounter}
 |]
