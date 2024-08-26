@@ -6,6 +6,7 @@
     outputs = { self, nixpkgs }: let
         system = "x86_64-linux";
         pkgs = import nixpkgs { inherit system; };
+        lib = pkgs.lib;
     in rec {
         devShells.${system}.default = pkgs.mkShell {
             packages = with pkgs.haskellPackages; [(ghcWithPackages (hs: with hs; [
@@ -43,7 +44,7 @@
 
             vm = (nixpkgs.lib.nixosSystem {
                 inherit system;
-                modules = [{
+                modules = [nixosModules.${system}.default {
                     system.stateVersion = "24.05";
                     users.users.root.password = "1234";
                     virtualisation.vmVariant = {
@@ -63,19 +64,44 @@
                         sqlite-interactive  
                     ];
 
-                    systemd.services.homepage = {
-                        environment.HOMEPAGE_PORT = "8000";
-                        environment.HOMEPAGE_DB = "/var/db/homepage-test.db3";
-                        serviceConfig = {
-                            WorkingDirectory = "${packages.${system}.default}";
-                            ExecStart = "${packages.${system}.default}/bin/homepage";
-                            StandardOutput = "syslog";
-                            StandardError = "syslog";
-                        };
-                        wantedBy = ["default.target"];
+                    services.homepage = {
+                        enable = true;
+                        port = 8000;
                     };
                 }];
             }).config.system.build.vm;
+        };
+        nixosModules.${system}.default = {config, pkgs, lib, ...}: let
+            cfg = config.services.homepage;
+        in {
+            options.services.homepage = {
+                enable = lib.mkOption {
+                    type = lib.types.bool;
+                    default = false;
+                };
+                port = lib.mkOption {
+                    type = lib.types.int;
+                    default = 8000;
+                };
+                db.path = lib.mkOption {
+                    type = lib.types.str;
+                    default = "/var/db/homepage.db3";
+                };
+            };
+
+            config.systemd.services.website = {
+                enable = cfg.enable;
+                environment.HOMEPAGE_PORT = builtins.toString cfg.port;
+                environment.HOMEPAGE_DB = cfg.db.path;
+                serviceConfig = {
+                    WorkingDirectory = "${packages.${system}.default}";
+                    ExecStart = "${packages.${system}.default}/bin/homepage";
+                    StandardOutput = "syslog";
+                    StandardError = "syslog";
+                };
+                wantedBy = ["default.target"];
+
+            };
         };
     };
 }

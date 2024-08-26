@@ -3,8 +3,8 @@ module Layout where
 import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 
-import Header ( header )
-import Footer ( footer )
+import Header (header)
+import Footer (footer)
 
 layout :: Html -> Html
 layout content = [hsx|

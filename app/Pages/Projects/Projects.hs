@@ -77,7 +77,9 @@ projectsTree = Tree defaultProject [
         |]) []
     ],
     Tree ("Personal Projects", [hsx|
-        I find it fun coding in my free time, i do it a lot and as such this website was also born!
+        <div class="section">
+            I find it fun coding in my free time, i do it a lot and as such this website was also born!
+        </div>
     |]) [
         Tree ("Snake", snake) [],
         Tree ("Website", [hsx|
@@ -96,7 +98,33 @@ projectsTree = Tree defaultProject [
                 This page about projects is actually also pretty cool, its defined as a tree data structure, so i can also easily print it:
                 {codeBlock "haskell" $ show (Tree ("projects", "<html>") [Tree ("page2", "<html>") [], Tree ("page3", "<html>") [], Tree ("page4", "<html>") []])}
             </div>
-        |]) [],
+        |]) [
+            Tree ("Version 1", [hsx|
+                <div class="section">
+                    Was written on github pages using markdown<br>
+                    barely had any content.
+                </div>
+            |]) [],
+            Tree ("Version 2", [hsx|
+                <div class="section">
+                    Was written in html, css and javascript, had a lot of client side javascript and is still available at <a href="https://about.skademaskinen.win">https://about.skademaskinen.win</a><br>
+                    The guestbook and the interests page was my main goal and i finished both of them.<br>
+                    Source code is available at <a href="https://github.com/Skademaskinen/Frontend">https://github.com/Skademaskinen/Frontend</a><br>
+                </div>
+            |]) [],
+            Tree ("Version 3", [hsx|
+                <div class="section">
+                    This was written in haskell using the full IHP framework, it was a lot of framework to code around compared to the older sites, ofc this made it possible to write more functionality with less code, but with such a feature also comes a lot of restrictions, such as the database being very hard to implement, and dependencies being less easily managed and coding an API using raw HTTP was very restrictive. hence version 4.<br>
+                    Source code is available at <a href="https://github.com/Skademaskinen/F3">https://github.com/Skademaskinen/F3</a>
+                </div>
+            |]) [],
+            Tree ("Version 4", [hsx|
+                <div class="section">
+                    This version is also written in haskell, but this time also using Warp directly to translate HSX to blaze and parse blaze to a bytestring. Its this current site and doesn't require a link :P<br>
+                    Source code is available at <a href="https://github.com/Mast3rwaf1z/homepage">https://github.com/Mast3rwaf1z/homepage</a>
+                </div>
+            |]) []
+        ],
         Tree ("Skademaskinen", [hsx|
             <div class="section">
                 This is about my server, it hosts a lot of things, but the things accessible from HTTP is available at:

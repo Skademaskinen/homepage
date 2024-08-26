@@ -2,7 +2,7 @@
 
 module Helpers.Database where
 
-import Database.SQLite.Simple ( close, execute, open, query, Only(Only), ToRow, Query (Query), Connection )
+import Database.SQLite.Simple (close, execute, open, query, Only(Only), ToRow, Query (Query), Connection)
 
 import Helpers.Globals (getDbPath)
 

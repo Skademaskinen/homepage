@@ -1,6 +1,6 @@
 module Helpers.Globals where
 
-import System.Environment ( lookupEnv )
+import System.Environment (lookupEnv)
 
 
 getDbPath :: IO String
