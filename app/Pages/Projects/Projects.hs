@@ -7,83 +7,66 @@ import Data.List (replicate, intercalate, find)
 
 import Helpers.Tree ( Tree(..) )
 import Helpers.Utils (forEach)
+import Helpers.Section (section)
 import Pages.Projects.Snake (snake)
 
 import Helpers.Database (schema, prettyPrintSchema)
 import Helpers.CodeBlock (codeBlock)
 
 defaultProject :: (String, Html)
-defaultProject = ("", [hsx|
+defaultProject = ("", (section [hsx|
     Use the sidebar to find a project :)<br><br>
 
     This page is inspired by my friend Mohamad, his site is available below<br><br>
     <a href="https://mohamaddalal.github.io/">Mohamad's site</a>
-|])
+|]))
 
 projectsTree :: Tree (String, Html)
 projectsTree = Tree defaultProject [
-    Tree ("Semester Projects", [hsx|
+    Tree ("Semester Projects", (section [hsx|
         Here's all the projects i've done at Aalborg University, they're defined as Pn where n is the semester they were done at. for example, P6 and P8 is my bachelor and master's projects respectively.
-    |]) [
-        Tree ("P1", [hsx|
-            <div class="section">
-                P1 was about Random Linear Network Coding
-                <br>
-                It was cool
-            </div>
-        |]) [],
-        Tree ("P2", [hsx|
-            <div class="section">
-                A Project about adaptive cruise control in cars
-            </div>
-        |]) [],
-        Tree ("P3", [hsx|
-            <div class="section">
-                We made a satellite ground station to be full duplex, as the previous implementation could only send data one way at a time, would be cool to use two channels.
-            </div>
-        |]) [],
-        Tree ("P4", [hsx|
-            <div class="section">
-                Detecting fires on a map, it wasn't particularly interesting.
-            </div>
-        |]) [],
-        Tree ("P5", [hsx|
-            <div class="section">
+    |])) [
+        Tree ("P1", (section [hsx|
+            P1 was about Random Linear Network Coding
+            <br>
+            It was cool
+        |])) [],
+        Tree ("P2", (section [hsx|
+            A Project about adaptive cruise control in cars
+        |])) [],
+        Tree ("P3", (section [hsx|
+            We made a satellite ground station to be full duplex, as the previous implementation could only send data one way at a time, would be cool to use two channels.
+        |])) [],
+        Tree ("P4", (section [hsx|
+            Detecting fires on a map, it wasn't particularly interesting.
+        |])) [],
+        Tree ("P5", (section [hsx|
             Testing TCP performance using NS3, we learned a bit of C++, it was nice.
-            </div>
-        |]) [],
-        Tree ("P6", [hsx|
-            <div class="section">
-                Modeling a testbed for edge nodes for measurement in real world scenarios<br><br>
+        |])) [],
+        Tree ("P6", (section [hsx|
+            Modeling a testbed for edge nodes for measurement in real world scenarios<br><br>
 
-                It was a pretty interesting project, as we designed our own dataframe instead of using like HTTP, it made it very fast, but as could be read in our semester report, our system could be even faster if we optimized language and protocols. <br><br>
+            It was a pretty interesting project, as we designed our own dataframe instead of using like HTTP, it made it very fast, but as could be read in our semester report, our system could be even faster if we optimized language and protocols. <br><br>
                 
-                It would probably be beyond our expectations if we went and implemented our own solution at the data-link layer of networking instead of at the routing layer (or whatever its called again in TCP/IP)
-            </div>
-        |]) [],
-        Tree ("P7", [hsx|
-            <div class="section">
-                The semester we learned haskell! Honestly i think i spent more time in my free time in total on haskell than i did thinking about this project. The project was about measuring the amount of people in a room using IoT devices and bluetooth.<br><br>
+            It would probably be beyond our expectations if we went and implemented our own solution at the data-link layer of networking instead of at the routing layer (or whatever its called again in TCP/IP)
+        |])) [],
+        Tree ("P7", (section [hsx|
+            The semester we learned haskell! Honestly i think i spent more time in my free time in total on haskell than i did thinking about this project. The project was about measuring the amount of people in a room using IoT devices and bluetooth.<br><br>
                 
-                The coolest part of this project was definitely with fidding with low-level promisquous mode on an IoT device.
-            </div>
-        |]) [],
-        Tree ("P8", [hsx|
-            <div class="section">
-                This was a project about conducting a user-study, measuring people's stress and questioning them through an app on a mobile phone.
-                <br>
-                (this project was very, very bad imo, but i learned more C++)
-            </div>
-        |]) []
+            The coolest part of this project was definitely with fidding with low-level promisquous mode on an IoT device.
+        |])) [],
+        Tree ("P8", (section [hsx|
+            This was a project about conducting a user-study, measuring people's stress and questioning them through an app on a mobile phone.
+            <br>
+            (this project was very, very bad imo, but i learned more C++)
+        |])) []
     ],
-    Tree ("Personal Projects", [hsx|
-        <div class="section">
-            I find it fun coding in my free time, i do it a lot and as such this website was also born!
-        </div>
-    |]) [
+    Tree ("Personal Projects", (section [hsx|
+        I find it fun coding in my free time, i do it a lot and as such this website was also born!
+    |])) [
         Tree ("Snake", snake) [],
-        Tree ("Website", [hsx|
-            <div class="section" style="max-width: 100%">
+        Tree ("Website", (mconcat [section [hsx|
+            <div style="max-width: 100%">
                 Written in Haskell using IHP-HSX as the primary library, and sqlite-simple as the database implementation.<br>
 
                 The database is actually pretty cool, its implemented as a list of table objects, and since i'm writing html directly inside my haskell code i can easily print the database structure inline here:<br><br>
@@ -97,43 +80,43 @@ projectsTree = Tree defaultProject [
                 <br><br>
                 This page about projects is actually also pretty cool, its defined as a tree data structure, so i can also easily print it:
                 {codeBlock "haskell" $ show (Tree ("projects", "<html>") [Tree ("page2", "<html>") [], Tree ("page3", "<html>") [], Tree ("page4", "<html>") []])}
+                <h2>Versions</h2>
+                In the sidebar, or below you can choose to read about each version of this website.
             </div>
-        |]) [
-            Tree ("Version 1", [hsx|
-                <div class="section">
-                    Was written on github pages using markdown<br>
-                    barely had any content.
-                </div>
-            |]) [],
-            Tree ("Version 2", [hsx|
-                <div class="section">
-                    Was written in html, css and javascript, had a lot of client side javascript and is still available at <a href="https://about.skademaskinen.win">https://about.skademaskinen.win</a><br>
-                    The guestbook and the interests page was my main goal and i finished both of them.<br>
-                    Source code is available at <a href="https://github.com/Skademaskinen/Frontend">https://github.com/Skademaskinen/Frontend</a><br>
-                </div>
-            |]) [],
-            Tree ("Version 3", [hsx|
-                <div class="section">
-                    This was written in haskell using the full IHP framework, it was a lot of framework to code around compared to the older sites, ofc this made it possible to write more functionality with less code, but with such a feature also comes a lot of restrictions, such as the database being very hard to implement, and dependencies being less easily managed and coding an API using raw HTTP was very restrictive. hence version 4.<br>
-                    Source code is available at <a href="https://github.com/Skademaskinen/F3">https://github.com/Skademaskinen/F3</a>
-                </div>
-            |]) [],
-            Tree ("Version 4", [hsx|
-                <div class="section">
-                    This version is also written in haskell, but this time also using Warp directly to translate HSX to blaze and parse blaze to a bytestring. Its this current site and doesn't require a link :P<br>
-                    Source code is available at <a href="https://github.com/Mast3rwaf1z/homepage">https://github.com/Mast3rwaf1z/homepage</a>
-                </div>
-            |]) []
+        |],
+        [hsx|<h3>Version 1</h3>|],
+        snd (findItem ["", "Personal Projects", "Website", "Version 1"] projectsTree),
+        [hsx|<h3>Version 2</h3>|],
+        snd (findItem ["", "Personal Projects", "Website", "Version 2"] projectsTree),
+        [hsx|<h3>Version 3</h3>|],
+        snd (findItem ["", "Personal Projects", "Website", "Version 3"] projectsTree),
+        [hsx|<h3>Version 4</h3>|],
+        snd (findItem ["", "Personal Projects", "Website", "Version 4"] projectsTree)])) [
+            Tree ("Version 1", (section [hsx|
+                Was written on github pages using markdown<br>
+                barely had any content.
+            |])) [],
+            Tree ("Version 2", (section [hsx|
+                Was written in html, css and javascript, had a lot of client side javascript and is still available at <a href="https://about.skademaskinen.win">https://about.skademaskinen.win</a><br>
+                The guestbook and the interests page was my main goal and i finished both of them.<br>
+                Source code is available at <a href="https://github.com/Skademaskinen/Frontend">https://github.com/Skademaskinen/Frontend</a><br>
+            |])) [],
+            Tree ("Version 3", (section [hsx|
+                This was written in haskell using the full IHP framework, it was a lot of framework to code around compared to the older sites, ofc this made it possible to write more functionality with less code, but with such a feature also comes a lot of restrictions, such as the database being very hard to implement, and dependencies being less easily managed and coding an API using raw HTTP was very restrictive. hence version 4.<br>
+                Source code is available at <a href="https://github.com/Skademaskinen/F3">https://github.com/Skademaskinen/F3</a>
+            |])) [],
+            Tree ("Version 4", (section [hsx|
+                This version is also written in haskell, but this time also using Warp directly to translate HSX to blaze and parse blaze to a bytestring. Its this current site and doesn't require a link :P<br>
+                Source code is available at <a href="https://github.com/Mast3rwaf1z/homepage">https://github.com/Mast3rwaf1z/homepage</a>
+            |])) []
         ],
-        Tree ("Skademaskinen", [hsx|
-            <div class="section">
-                This is about my server, it hosts a lot of things, but the things accessible from HTTP is available at:
-                <br>
-                <div style="text-align:center;">
+        Tree ("Skademaskinen", (section [hsx|
+            This is about my server, it hosts a lot of things, but the things accessible from HTTP is available at:
+            <br>
+            <div style="text-align:center;">
                 {services}
-                </div>
             </div>
-        |]) []]]
+        |])) []]]
 
 services :: Html
 services = mconcat $ map (\(name, d) -> [hsx|

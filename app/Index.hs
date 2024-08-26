@@ -27,7 +27,12 @@ intro = section [hsx|
     HSX is actually pretty cool, i just toss in html inline with haskell and it just works: 
     <br><br>
     {hsxIntroCodeBlock}
-    I had to do a little hack around the preprocessor to make it not compile that little snippet of code, and as such you won't see me show any more hsx code xD
+    I had to do a little hack around the preprocessor to make it not compile that little snippet of code, and as such you won't see me show any more hsx code xD<br>
+    Running the above code:
+    <br>
+    <div style="background-color: #222222">
+        {introCodeIndex}
+    </div>
 |]
 
 visitorCounter :: Html

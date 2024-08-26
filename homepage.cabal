@@ -15,10 +15,12 @@ executable homepage
         Helpers.Utils,
         Helpers.Database,
         Helpers.Globals,
+        Helpers.Tables,
         Api.Api,
         Pages.Contact.Contact,
         Pages.Projects.Projects,
         Pages.Projects.Snake,
+        Pages.Guestbook.Guestbook,
         Pages.Sources.Sources
 
     build-depends:
@@ -35,7 +37,8 @@ executable homepage
         sqlite-simple,
         time,
         uuid,
-        directory
+        directory,
+        aeson
 
     hs-source-dirs:   app
     default-language: Haskell2010

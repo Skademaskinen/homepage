@@ -17,6 +17,7 @@ layout content = [hsx|
             ("Contact", "/contact"),
             ("Projects", "/projects"),
             ("Sources", "/sources"),
+            ("Guestbook", "/guestbook"),
             ("Old Site", "https://about.skademaskinen.win")
         ]}
         <title>Skademaskinen</title>

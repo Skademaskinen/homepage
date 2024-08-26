@@ -69,3 +69,34 @@ button:active {
 .inline_container:active {
   background-color:black;
 }
+
+.guestbook-text {
+    all:unset;
+    min-width: 50%;
+    min-height: 200px;
+    text-align: left;
+    background-color: #222222;
+    border: 1px solid #ff5500;
+    border-radius: 5px;
+    padding: 5px;
+    display: inline;
+    white-space:pre-wrap;
+}
+
+.guestbook-text:focus {
+    background-color: #262626;
+}
+
+.guestbook-name {
+    all:unset;
+    text-align:left;
+    background-color: #222222;
+    border: 1px solid #ff5500;
+    border-radius: 5px;
+    min-height: 24px;
+    padding: 5px;
+    display: inline;
+}
+.guestbook-name:focus {
+    background-color: #262626;
+}

@@ -13,7 +13,9 @@ tile id = [hsx|
 
 tileRow :: Int -> Html
 tileRow offset = [hsx|
-    {forEach [(offset*20)..19+(offset*20)] tile}
+    <div>
+        {forEach [(offset*20)..19+(offset*20)] tile}
+    </div>
     <br>
 |]
 

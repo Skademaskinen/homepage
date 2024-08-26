@@ -39,3 +39,8 @@ row values = [hsx|
 
 unpackBS :: ByteString -> String
 unpackBS = unpack . decodeUtf8
+
+getDefault :: a -> Maybe a -> a
+getDefault def a = case a of
+    (Just v) -> v
+    Nothing -> def

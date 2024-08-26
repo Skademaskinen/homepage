@@ -5,6 +5,7 @@ module Helpers.Database where
 import Database.SQLite.Simple (close, execute, open, query, Only(Only), ToRow, Query (Query), Connection)
 
 import Helpers.Globals (getDbPath)
+import Helpers.Tables
 
 import Data.List (intercalate, inits)
 import Data.Text (pack, Text)
@@ -27,6 +28,13 @@ getVisits = do
     close conn
     return visits
 
+getGuestbook :: IO [(Int, Int, String, String, Int)]
+getGuestbook = do
+    conn <- getConn
+    entries <- query conn "SELECT * FROM guestbook" () :: IO [(Int, Int, String, String, Int)]
+    close conn
+    return entries
+
 uuidExists :: String -> IO Bool
 uuidExists uuid = do
     conn <- getConn
@@ -48,7 +56,8 @@ schema = [
         Column "id" "INTEGER PRIMARY KEY",
         Column "timestamp" "INTEGER NOT NULL",
         Column "name" "VARCHAR NOT NULL",
-        Column "message" "VARCHAR NOT NULL"
+        Column "content" "VARCHAR NOT NULL",
+        Column "parentId" "INTEGER NOT NULL"
     ],
     Table "snake" [
         Column "id" "INTEGER PRIMARY KEY",

@@ -24,6 +24,7 @@ import Index (index)
 import Pages.Contact.Contact (contact)
 import Pages.Projects.Projects (projects)
 import Pages.Sources.Sources (sources)
+import Pages.Guestbook.Guestbook (guestbook)
 
 import Helpers.Database (initDb)
 import Helpers.Utils (unpackBS)
@@ -49,16 +50,19 @@ serveFile path = do
 
 
 handleRequest :: [String] -> Request ->  IO Response
-handleRequest ("static":xs) request = do serveFile $ intercalate "/" ("static":xs)
+handleRequest ("static":xs) request = serveFile $ intercalate "/" ("static":xs)
 handleRequest ("api":args) request = do
     (status, value) <- api args request
     return $ responseBuilder status [("Content-Type", "text/plain")] $ copyByteString (fromString value)
-handleRequest ["contact"] request = do return $ serve (layout contact)
-handleRequest ["sources"] request = do return $ serve (layout sources)
-handleRequest ("projects":project) request = do return $ serve (layout (projects project))
+handleRequest ["contact"] request = return $ serve (layout contact)
+handleRequest ["sources"] request = return $ serve (layout sources)
+handleRequest ["guestbook"] request = do
+    page <- guestbook
+    return $ serve (layout page)
+handleRequest ("projects":project) request = return $ serve (layout (projects project))
 handleRequest ["favicon.ico"] request = do serveFile "static/favicon.ico"
-handleRequest [] request = do return $ serve (layout index)
-handleRequest x request = do return $ page404 x
+handleRequest [] request = return $ serve (layout index)
+handleRequest x request = return $ page404 x
 
 colorStatus :: Int -> String
 colorStatus code | code < 300 = "\ESC[38;2;0;255;0m"++show code++"\ESC[0m"
