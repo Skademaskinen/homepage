@@ -18,17 +18,17 @@ import Network.HTTP.Types (statusCode, status200, status404, Status)
 import Blaze.ByteString.Builder (copyByteString)
 import Data.ByteString.UTF8 (fromString)
 
-import Layout ( layout )
+import Layout (layout)
 
-import Index ( index )
-import Pages.Contact.Contact ( contact )
-import Pages.Projects.Projects ( projects )
-import Pages.Sources.Sources ( sources )
+import Index (index)
+import Pages.Contact.Contact (contact)
+import Pages.Projects.Projects (projects)
+import Pages.Sources.Sources (sources)
 
-import Helpers.Database ( initDb )
-import Helpers.Utils ( unpackBS )
+import Helpers.Database (initDb)
+import Helpers.Utils (unpackBS)
 import Helpers.Globals (getPort)
-import Api.Api ( api )
+import Api.Api (api)
 
 page404 :: [String] -> Response
 page404 args = responseBuilder status404 [("Content-Type", "text/html")] $ copyByteString (fromString (renderHtml (layout [hsx|

@@ -4,7 +4,7 @@ import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 
 import Helpers.CodeBlock (hsxIntroCodeBlock)
-import Helpers.Section ( section )
+import Helpers.Section (section)
 
 intro :: Html
 intro = section [hsx|
