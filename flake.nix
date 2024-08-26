@@ -91,8 +91,8 @@
 
             config.systemd.services.website = {
                 enable = cfg.enable;
-                environment.HOMEPAGE_PORT = "8000";
-                environment.HOMEPAGE_DB = "/var/db/homepage-test.db3";
+                environment.HOMEPAGE_PORT = builtins.toString cfg.port;
+                environment.HOMEPAGE_DB = cfg.db.path;
                 serviceConfig = {
                     WorkingDirectory = "${packages.${system}.default}";
                     ExecStart = "${packages.${system}.default}/bin/homepage";
