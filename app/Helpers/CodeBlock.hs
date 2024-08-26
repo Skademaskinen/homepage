@@ -17,14 +17,25 @@ hsxIntroCodeBlock :: Html
 hsxIntroCodeBlock = codeBlock "haskell" $ mconcat [
     "view :: Html\n",
     "view = ",rB, "hsx", vl, "\n",
-    "\t<p>Hello,</p>\n",
+    "\t<span>Hello, </span>\n",
     vl, lB,
     "\n\n",
     "index :: Html\n",
     "index = ", rB, "hsx", vl, "\n",
     "\t{view}\n",
-    "\t<p>World!</p>\n",
+    "\t<span>World!</span>\n",
     vl, lB]
+
+introCodeView :: Html
+introCodeView = [hsx|
+    <span>Hello, </span>
+|]
+introCodeIndex :: Html
+introCodeIndex = [hsx|
+    {introCodeView}
+    <span>World!</span>
+
+|]
 
 
 rB :: String

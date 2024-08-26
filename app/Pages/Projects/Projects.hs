@@ -113,7 +113,7 @@ services = mconcat $ map (\(name, d) -> [hsx|
 |]) srv
     where
         srv :: [(String, String)]
-        srv = [("Nextcloud", "nextcloud"), ("Jupyter", "jupyter"), ("Matrix", "matrix"), ("Website", "api"), ("Taoshi", "taoshi")]
+        srv = [("Nextcloud", "cloud"), ("Jupyter", "jupyter"), ("Matrix", "matrix"), ("Website", "api"), ("Taoshi", "taoshi")]
 
 makeIndent :: Int -> Html
 makeIndent n = forEach [0..n] (\_ -> [hsx|&emsp;|])
