@@ -7,8 +7,7 @@ import Helpers.Utils ( forEach )
 
 tile :: Int -> Html
 tile id = [hsx|
-    <div class="tile" id={"tile-" ++ (show id)}>
-    </div>
+    <span class="tile" id={"tile-" ++ (show id)}></span>
 |]
 
 tileRow :: Int -> Html
@@ -33,7 +32,6 @@ snake :: Html
 snake = [hsx|
     <link rel="stylesheet" href="/static/projects/snake.css">
     <div style="text-align:center;">
-        The CSS is a little bugged atm, i'll fix it eventually...<br>
         <div class="snake">
             <h3>Danger Noodle!</h3><br>
             <p>... Some client-side jank, a mix of haskell and javascript</p><br><br>

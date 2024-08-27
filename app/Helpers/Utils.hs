@@ -8,10 +8,7 @@ import Data.Text (unpack)
 import Data.Text.Encoding (decodeUtf8)
 
 forEach :: [Int] -> (Int -> Html) -> Html
-forEach (x:xs) f = [hsx|
-    {f x}
-    {forEach xs f}
-|]
+forEach (x:xs) f = mconcat [f x, forEach xs f]
 forEach [] _ = [hsx||]
 
 linkImage :: String -> String -> String -> Html

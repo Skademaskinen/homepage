@@ -56,9 +56,7 @@ handleRequest ("api":args) request = do
     return $ responseBuilder status [("Content-Type", "text/plain")] $ copyByteString (fromString value)
 handleRequest ["contact"] request = return $ serve (layout contact)
 handleRequest ["sources"] request = return $ serve (layout sources)
-handleRequest ["guestbook"] request = do
-    page <- guestbook
-    return $ serve (layout page)
+handleRequest ["guestbook"] request = serve . layout <$> guestbook
 handleRequest ("projects":project) request = return $ serve (layout (projects project))
 handleRequest ["favicon.ico"] request = do serveFile "static/favicon.ico"
 handleRequest [] request = return $ serve (layout index)
