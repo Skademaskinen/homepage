@@ -5,7 +5,6 @@ module Helpers.Database where
 import Database.SQLite.Simple (close, execute, open, query, Only(Only), ToRow, Query (Query), Connection)
 
 import Helpers.Globals (getDbPath)
-import Helpers.Tables
 
 import Data.List (intercalate, inits)
 import Data.Text (pack, Text)
@@ -32,6 +31,13 @@ getGuestbook :: IO [(Int, Int, String, String, Int)]
 getGuestbook = do
     conn <- getConn
     entries <- query conn "SELECT * FROM guestbook" () :: IO [(Int, Int, String, String, Int)]
+    close conn
+    return entries
+
+getLeaderboard :: IO [(Int, Int, String, Int, Int, Int)]
+getLeaderboard = do
+    conn <- getConn
+    entries <- query conn "SELECT * FROM snake" () :: IO [(Int, Int, String, Int, Int, Int)]
     close conn
     return entries
 

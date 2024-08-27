@@ -23,6 +23,7 @@ import Layout (layout)
 import Index (index)
 import Pages.Contact.Contact (contact)
 import Pages.Projects.Projects (projects)
+import Pages.Projects.Snake (leaderboard)
 import Pages.Sources.Sources (sources)
 import Pages.Guestbook.Guestbook (guestbook)
 
@@ -58,6 +59,7 @@ handleRequest ["contact"] request = return $ serve (layout contact)
 handleRequest ["sources"] request = return $ serve (layout sources)
 handleRequest ["guestbook"] request = serve . layout <$> guestbook
 handleRequest ("projects":project) request = return $ serve (layout (projects project))
+handleRequest ["snake-leaderboard"] request = serve . layout <$> leaderboard
 handleRequest ["favicon.ico"] request = do serveFile "static/favicon.ico"
 handleRequest [] request = return $ serve (layout index)
 handleRequest x request = return $ page404 x

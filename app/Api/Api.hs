@@ -3,7 +3,7 @@
 module Api.Api where
 
 
-import Helpers.Tables
+import Helpers.Tables (GuestbookEntry(GuestbookEntry, EmptyGuestbook), LeaderboardEntry (EmptyLeaderboard, LeaderboardEntry))
 import Helpers.Database (getVisits, uuidExists, insert, getGuestbook)
 import Helpers.Utils (unpackBS, getDefault)
 
@@ -17,9 +17,8 @@ import Data.UUID (toString)
 import Network.Wai (getRequestBodyChunk, Request)
 import Network.HTTP.Types.Status (Status, status404, status200, status400)
 
-import Data.Aeson
+import Data.Aeson (encode, decode)
 import Data.ByteString.Lazy (fromStrict, toStrict)
-import Control.Applicative
 
 
 handleGuestbookEntry :: GuestbookEntry -> IO (Status, String)
@@ -29,6 +28,13 @@ handleGuestbookEntry (GuestbookEntry name content parentId) = do
     return (status200, "Success")
 handleGuestbookEntry EmptyGuestbook = do
     return (status400, "Error")
+
+handleLeaderboardEntry :: LeaderboardEntry -> IO (Status, String)
+handleLeaderboardEntry (LeaderboardEntry name score speed fruits) = do
+    time <- fmap round getPOSIXTime :: IO Int
+    insert "INSERT INTO snake (name, timestamp, score, speed, fruits) values (?, ?, ?, ?, ?)" (name :: String, time :: Int, score :: Int, speed :: Int, fruits :: Int)
+    return (status200, "Success")
+handleLeaderboardEntry EmptyLeaderboard = return (status400, "Error")
 
 api :: [String] -> Request -> IO (Status, String)
 api ["visits", "new"] request = do
@@ -53,5 +59,9 @@ api ["guestbook", "get"] request = do
     body <- getRequestBodyChunk request
     entries <- getGuestbook
     return (status200, unpackBS $ toStrict $ encode entries)
+api ["snake", "add"] request = do
+    body <- getRequestBodyChunk request
+    let entry = getDefault EmptyLeaderboard (decode (fromStrict body) :: Maybe LeaderboardEntry)
+    handleLeaderboardEntry entry
 api xs request = do
     return (status404, "{\"error\":\"Endpoint does not exist\"}")

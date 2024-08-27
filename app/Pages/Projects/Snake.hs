@@ -4,6 +4,7 @@ import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 
 import Helpers.Utils ( forEach )
+import Helpers.Database (getLeaderboard)
 
 tile :: Int -> Html
 tile id = [hsx|
@@ -44,6 +45,7 @@ snake = [hsx|
                 Right: D or right<br>
                 <input style="width:100px" placeholder="Speed" id="speed">
                 <input style="width:100px" placeholder="Fruit count" id="fruits">
+                <input style="width:100px" placeholder="Player name" id="player-name">
             </div>
             <div style="display:block ruby;">
                 Score: <p id="snake-score">0</p>
@@ -73,5 +75,36 @@ snake = [hsx|
         <div id="snakefire" style="position:fixed; width:100%; left:0; top:100%">
             {forEach [0..1] fire}
         </div>
+        <br>
+        The online leaderboard is too compilicated atm so it has to be on its own page... <br>
+        <a href="/snake-leaderboard">snake leaderboard (WIP)</a>
     </div>
 |]
+
+leaderboardField :: String -> Html
+leaderboardField value = [hsx|
+    <th style="width:100px">{value}</th>
+|]
+
+leaderboardEntry :: (Int, Int, String, Int, Int, Int) -> Html
+leaderboardEntry (id, timestamp, name, score, speed, fruits) = [hsx|
+    <tr>
+        {mconcat $ map leaderboardField [name, show timestamp, show score, show speed, show fruits]}
+    </tr>
+|]
+
+leaderboard :: IO Html
+leaderboard = do
+    l <- getLeaderboard
+    return [hsx|
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Time</th>
+                <th>Score</th>
+                <th>Speed</th>
+                <th>Fruits</th>
+            </tr>
+            {mconcat $ map leaderboardEntry l}
+        </table>
+    |]

@@ -85,6 +85,21 @@ async function launchGame() {
         tr.appendChild(speedtd)
         tr.appendChild(fruitstd)
         scoreboard.appendChild(tr)
+        
+        var name = document.getElementById("player-name").value
+
+        if(name != "") {
+            fetch("/api/snake/add", {
+                method: "post",
+                body: JSON.stringify({
+                    name: document.getElementById("player-name").value,
+                    timestamp: time,
+                    score: score,
+                    speed: speed,
+                    fruits: fruit_count
+                })
+            })
+        }
     }
 }
 

@@ -26,3 +26,19 @@ instance ToJSON GuestbookEntry where
 
 instance FromRow GuestbookEntry where
     fromRow = GuestbookEntry <$> field <*> field <*> field
+
+data LeaderboardEntry = LeaderboardEntry {
+    lname :: String,
+    score :: Int,
+    speed :: Int,
+    fruits :: Int
+} | EmptyLeaderboard
+    deriving Show
+
+instance FromJSON LeaderboardEntry where
+    parseJSON (Object v) = LeaderboardEntry <$>
+                           v .: "name" <*>
+                           v .: "score" <*>
+                           v .: "speed" <*>
+                           v .: "fruits"
+    parseJSON _          = empty 
