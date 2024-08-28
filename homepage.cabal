@@ -17,6 +17,7 @@ executable homepage
         Helpers.Globals,
         Helpers.Tables,
         Helpers.Logger,
+        Helpers.Cli
         Api.Api,
         Pages.Contact.Contact,
         Pages.Projects.Projects,

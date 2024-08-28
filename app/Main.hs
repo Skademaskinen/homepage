@@ -29,9 +29,11 @@ import Pages.Guestbook.Guestbook (guestbook)
 
 import Helpers.Database (initDb)
 import Helpers.Utils (unpackBS)
-import Helpers.Globals (getPort)
+import Helpers.Globals (getPort, getCliState)
 import Helpers.Logger (logger, tableify, info, warning)
 import Api.Api (api)
+import Control.Concurrent (forkIO)
+import Helpers.Cli (cli)
 
 page404 :: [String] -> Response
 page404 args = responseBuilder status404 [("Content-Type", "text/html")] $ copyByteString (fromString (renderHtml (layout [hsx|
@@ -65,7 +67,7 @@ handleRequest ["guestbook"] request = serve . layout <$> guestbook
 handleRequest ("projects":project) request = return $ serve (layout (projects project))
 handleRequest ["snake-leaderboard"] request = serve . layout <$> leaderboard
 handleRequest ["favicon.ico"] request = do serveFile "static/favicon.ico"
-handleRequest [] request = return $ serve (layout index)
+handleRequest [] request = serve . layout <$> index
 handleRequest x request = return $ page404 x
 
 app :: Request -> (Response -> IO b)  -> IO b
@@ -82,4 +84,8 @@ main = do
     putStrLn $ "+" ++ mconcat (replicate 65 "-") ++ "+"
     putStrLn $ tableify ["METHOD", "STATUS", "PATH"]
     putStrLn $ "+" ++ mconcat (replicate 65 "-") ++ "+"
+    cliState <- getCliState
+    if cliState then
+        forkIO cli
+    else forkIO (do putStr "") -- ???
     run port app

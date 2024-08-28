@@ -32,6 +32,9 @@ right :: Int -> String
 right 0 = ""
 right n = "\ESC[" ++ show n ++ "C"
 
+clearLine :: String
+clearLine = "\ESC[0J"
+
 tableify :: [String] -> String
 tableify (x:xs) = "| " ++ x ++ left l ++ right 20 ++ tableify xs
     where
@@ -53,6 +56,7 @@ warning input = do
         Warning -> putStrLn $ "\ESC[38;2;255;255;0m" ++ input ++ "\ESC[0m"
         Info -> putStrLn $ "\ESC[38;2;255;255;0m" ++ input ++ "\ESC[0m"
         _ -> return ()
+
 
 error :: String -> IO ()
 error input = putStrLn $ "\ESC[38;2;255;0;0m" ++ input ++ "\ESC[0m"

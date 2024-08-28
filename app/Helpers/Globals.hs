@@ -26,4 +26,11 @@ getLogLevel = do
         (Just "info") -> Info
         (Just "warning") -> Warning
         (Just "error") -> Error
-        Nothing -> Error
+        _ -> Error
+
+getCliState :: IO Bool
+getCliState = do
+    result <- lookupEnv "HOMEPAGE_CLI"
+    case result of
+        (Just "1") -> return True
+        _ -> return False

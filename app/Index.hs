@@ -5,6 +5,7 @@ import Text.Blaze.Html (Html)
 
 import Helpers.CodeBlock (hsxIntroCodeBlock, introCodeIndex)
 import Helpers.Section (section)
+import Helpers.Database (getVisits)
 
 intro :: Html
 intro = section [hsx|
@@ -35,33 +36,20 @@ intro = section [hsx|
     </div>
 |]
 
-visitorCounter :: Html
-visitorCounter = [hsx|
-    Visitors: <p id="visitor_count"></p>
-    <script>
-        async function visit(){
-            await fetch("/api/visits/new", {
-                method: "post",
-                body: getCookie("visitId")
-
-            }).then(res => res.text().then(uuid => setCookie("visitId="+uuid)))
-            fetch("/api/visits/get", {}).then(response => {
-                response.text().then(text => {
-                    document.getElementById("visitor_count").innerHTML = text
-                })
-            })
-        }
-        visit()
-    </script>
-
-|]
-
-index :: Html
-index = [hsx|
+index :: IO Html
+index = do 
+    visits <- show . length <$> getVisits
+    return [hsx|
     <h1>Skademaskinen</h1>
     <img src="/static/icon.png" style="border-radius:50%">
     <br>
     <hr>
     {intro}
-    {visitorCounter}
+    Visitors: <p id="visits">{visits}</p>
+    <script>
+        fetch("/api/visits/new", {
+            method: "post",
+            body: getCookie("visitId")
+        }).then(res => res.text().then(uuid => setCookie("visitId="+uuid)))
+    </script>
 |]
