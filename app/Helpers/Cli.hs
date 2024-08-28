@@ -4,7 +4,7 @@ import System.Exit (exitSuccess)
 import Helpers.Logger (up, right, clearLine)
 import Data.List (intercalate)
 import Database.SQLite.Simple (Only (Only), execute)
-import Helpers.Database (getConn)
+import Helpers.Database (getConn, initDb)
 import Database.SQLite.Simple.Types (Query(Query))
 import Data.Text (pack)
 
@@ -30,6 +30,7 @@ doCommand ["drop", table] = do
     execute conn (Query $ pack ("DROP TABLE "++table)) ()
     putStrLn "Successfully dropped table"
     resetCursor 2
+    initDb
     cli
 doCommand x = do
     putStrLn $ "Error, no such command: ["++ unwords x ++"]"
