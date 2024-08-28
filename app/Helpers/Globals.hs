@@ -16,3 +16,14 @@ getPort = do
     return $ case result of
         (Just a) -> read a :: Int
         Nothing -> 8000
+
+data LogLevel = Error | Warning | Info
+
+getLogLevel :: IO LogLevel
+getLogLevel = do
+    result <- lookupEnv "HOMEPAGE_LOGLEVEL"
+    return $ case result of
+        (Just "info") -> Info
+        (Just "warning") -> Warning
+        (Just "error") -> Error
+        Nothing -> Error

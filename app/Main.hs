@@ -30,6 +30,7 @@ import Pages.Guestbook.Guestbook (guestbook)
 import Helpers.Database (initDb)
 import Helpers.Utils (unpackBS)
 import Helpers.Globals (getPort)
+import Helpers.Logger (logger, tableify, info, warning)
 import Api.Api (api)
 
 page404 :: [String] -> Response
@@ -43,10 +44,13 @@ serve content = responseBuilder status200 [("Content-Type", "text/html")] $ copy
 
 serveFile :: String -> IO Response
 serveFile path = do
+    info "Serving file"
     exists <- doesFileExist path
-    if exists then
+    if exists then do
+        info "File exists"
         return $ responseFile status200 [] path Nothing
-    else
+    else do
+        warning "No file found!"
         return $ responseBuilder status404 [("Content-Type", "text/json")] $ copyByteString "{\"error\":\"Error: file not found!\"}"
 
 
@@ -64,26 +68,6 @@ handleRequest ["favicon.ico"] request = do serveFile "static/favicon.ico"
 handleRequest [] request = return $ serve (layout index)
 handleRequest x request = return $ page404 x
 
-colorStatus :: Int -> String
-colorStatus code | code < 300 = "\ESC[38;2;0;255;0m"++show code++"\ESC[0m"
-                 | code < 400 = "\ESC[38;2;255;255;0m"++show code++"\ESC[0m"
-                 | otherwise  = "\ESC[38;2;255;0;0m"++show code++"\ESC[0m"
-
-logger :: Request -> Response -> IO ()
-logger request (ResponseBuilder status _ _) = do
-    let method = unpackBS (requestMethod request)
-    let path = intercalate "/" (map unpack (pathInfo request))
-    putStrLn $ method ++ "\r\t| " ++ path ++ "\r\t\t\t\t\t\t| " ++ colorStatus (statusCode status)
-logger request (ResponseFile status _ _ _) = do
-    let method = unpackBS (requestMethod request)
-    let path = intercalate "/" (map unpack (pathInfo request))
-    putStrLn $ method ++ "\r\t| " ++ path ++ "\r\t\t\t\t\t\t| " ++ colorStatus (statusCode status)
-logger request x = do
-    let method = unpackBS (requestMethod request)
-    let path = intercalate "/" (map unpack (pathInfo request))
-    putStrLn $ method ++ "\r\t| " ++ path
-
-
 app :: Request -> (Response -> IO b)  -> IO b
 app request respond = do
     response <- handleRequest (map unpack (pathInfo request)) request
@@ -94,5 +78,8 @@ main :: IO ()
 main = do
     port <- getPort
     initDb
-    putStrLn $ "Listening on " ++ show port
+    info $ "Listening on " ++ show port
+    putStrLn $ "+" ++ mconcat (replicate 65 "-") ++ "+"
+    putStrLn $ tableify ["METHOD", "STATUS", "PATH"]
+    putStrLn $ "+" ++ mconcat (replicate 65 "-") ++ "+"
     run port app

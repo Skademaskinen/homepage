@@ -16,6 +16,7 @@ executable homepage
         Helpers.Database,
         Helpers.Globals,
         Helpers.Tables,
+        Helpers.Logger,
         Api.Api,
         Pages.Contact.Contact,
         Pages.Projects.Projects,

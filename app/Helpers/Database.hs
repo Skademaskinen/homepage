@@ -8,6 +8,7 @@ import Helpers.Globals (getDbPath)
 
 import Data.List (intercalate, inits)
 import Data.Text (pack, Text)
+import Helpers.Logger (info)
 
 getConn :: IO Connection
 getConn = do
@@ -85,13 +86,13 @@ initSchema ((Table name columns):tables) = do
     conn <- getConn
     execute conn (Query (pack $ "CREATE TABLE IF NOT EXISTS "++name++"("++columnText columns++")")) ()
     close conn
-    putStrLn $ "Initialized table " ++ name
+    info $ "Initialized table " ++ name
     initSchema tables
-initSchema [] = putStrLn "Finished initializing DB"
+initSchema [] = info "Finished initializing DB"
 
 initDb :: IO ()
 initDb = do
-    putStrLn "Initializing DB"
+    info "Initializing DB"
     initSchema schema
 
 test_db :: IO ()
