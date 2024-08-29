@@ -100,6 +100,8 @@ projectsTree = Tree defaultProject [
                 Was written in html, css and javascript, had a lot of client side javascript and is still available at <a href="https://about.skademaskinen.win">https://about.skademaskinen.win</a><br>
                 The guestbook and the interests page was my main goal and i finished both of them.<br>
                 Source code is available at <a href="https://github.com/Skademaskinen/Frontend">https://github.com/Skademaskinen/Frontend</a><br>
+                <br>
+                Additionally as there was non-static elements on this website, i needed an external backend that took http requests as well, this worked pretty well, and it circumvented that the server it was hosted on didn't have full port access. (it took HTTP on port 11034) with the actual website being served from github pages. The backend was written in python and the source code is available at <a href="https://github.com/Skademaskinen/Backend">https://github.com/Skademaskinen/Backend</a>
             |]) [],
             Tree ("Version 3", section [hsx|
                 This was written in haskell using the full IHP framework, it was a lot of framework to code around compared to the older sites, ofc this made it possible to write more functionality with less code, but with such a feature also comes a lot of restrictions, such as the database being very hard to implement, and dependencies being less easily managed and coding an API using raw HTTP was very restrictive. hence version 4.<br>
@@ -108,6 +110,8 @@ projectsTree = Tree defaultProject [
             Tree ("Version 4", section [hsx|
                 This version is also written in haskell, but this time also using Warp directly to translate HSX to blaze and parse blaze to a bytestring. Its this current site and doesn't require a link :P<br>
                 Source code is available at <a href="https://github.com/Mast3rwaf1z/homepage">https://github.com/Mast3rwaf1z/homepage</a>
+                <br>
+                The best feature of this rewrite is that i've combined the backend and the frontend into one, and since HSX allows me to put IO code directly inline with my html, i can access the database directly instead of the frontend sending a million HTTP requests. This means that the website is A LOT faster than the first few iterations, and instead of a lot of content loading at different times, its all loaded at once at the server side, with as little javascript as possible.
             |]) []
         ],
         Tree ("Skademaskinen", section [hsx|
