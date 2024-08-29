@@ -9,6 +9,7 @@ import Helpers.Globals (getDbPath)
 import Data.List (intercalate, inits)
 import Data.Text (pack, Text)
 import Helpers.Logger (info)
+import Helpers.Tree (Tree (Tree))
 
 getConn :: IO Connection
 getConn = do
@@ -21,6 +22,11 @@ insert query args = do
     execute conn query args
     close conn
 
+type GuestbookEntry = (Int, Int, String, String, Int)
+
+guestbookToTree :: [GuestbookEntry] -> Int -> [Tree GuestbookEntry]
+guestbookToTree entries targetParent = [Tree (id, timestamp, name, content, parent) $ guestbookToTree entries id | (id, timestamp, name, content, parent) <- entries, parent == targetParent]
+
 getVisits :: IO [(Int, Int, String)]
 getVisits = do
     conn <- getConn
@@ -28,12 +34,12 @@ getVisits = do
     close conn
     return visits
 
-getGuestbook :: IO [(Int, Int, String, String, Int)]
+getGuestbook :: IO [Tree GuestbookEntry]
 getGuestbook = do
     conn <- getConn
     entries <- query conn "SELECT * FROM guestbook" () :: IO [(Int, Int, String, String, Int)]
     close conn
-    return entries
+    return $ guestbookToTree entries (-1)
 
 getLeaderboard :: IO [(Int, Int, String, Int, Int, Int)]
 getLeaderboard = do

@@ -1,12 +1,13 @@
 module Helpers.Cli where
 import System.Exit (exitSuccess)
 
-import Helpers.Logger (up, right, clearLine)
+import Helpers.Logger (up, right, clearLine, clearEnd)
 import Data.List (intercalate)
 import Database.SQLite.Simple (Only (Only), execute)
 import Helpers.Database (getConn, initDb)
 import Database.SQLite.Simple.Types (Query(Query))
 import Data.Text (pack)
+import System.IO (hFlush, stdout)
 
 resetCursor :: Int ->  IO ()
 resetCursor n = do
@@ -32,6 +33,9 @@ doCommand ["drop", table] = do
     resetCursor 2
     initDb
     cli
+doCommand ("exit":_) = do 
+    putStrLn "Exiting"
+    exitSuccess
 doCommand x = do
     putStrLn $ "Error, no such command: ["++ unwords x ++"]"
     resetCursor 2
@@ -39,10 +43,9 @@ doCommand x = do
 
 cli :: IO ()
 cli = do
-    putStr "> "
+    putStr $ "> " ++ clearLine
+    hFlush stdout
     line <- getLine
-    if line /= "exit" then
-        doCommand $ words line
-    else do
-        putStrLn "Exiting... press ^C now!"
-        exitSuccess
+    putStr clearEnd
+    hFlush stdout
+    doCommand $ words line

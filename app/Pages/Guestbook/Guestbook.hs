@@ -3,53 +3,55 @@ module Pages.Guestbook.Guestbook where
 import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 
-import Helpers.Database (getGuestbook)
+import Helpers.Database (getGuestbook, GuestbookEntry)
 import Helpers.Section (section)
 
 import Data.List (filter)
 
-import Data.Time.Format.ISO8601
-import Data.Time.Format
-import Data.Time.Clock.POSIX
+import Data.Time.Format ( defaultTimeLocale, formatTime )
+import Data.Time.Clock.POSIX ( POSIXTime, posixSecondsToUTCTime )
+import Helpers.Tree (Tree(Tree))
 
 type Guestbook = [(Int, Int, String, String, Int)]
 
 toPosix :: Int -> POSIXTime
-toPosix n = read ((show n) ++ "s") :: POSIXTime
+toPosix n = read (show n ++ "s") :: POSIXTime
 
-prettify_guestbook :: Guestbook -> Html
-prettify_guestbook ((id, timestamp, name, content, parent):xs) = mconcat [section [hsx|
+prettifyGuestbook :: [Tree GuestbookEntry] -> Html
+prettifyGuestbook ((Tree (id, timestamp, name, content, parent) children):xs) = mconcat [section [hsx|
     <h3>{name} said: </h3>
-    <div style="background-color: #111111; border: 1px solid #111111; border-radius: 5px;">
-        id: <span style="color: #ff0000">{id}</span> 
-        parent: <span style="color: #ff0000">{parent}</span> 
-        timestamp: <span style="color: #ff0000">{formatTime defaultTimeLocale "%c" $ posixSecondsToUTCTime (toPosix timestamp)}</span>
-        <br><br>
-        {content}
+    Posted: <span style="color: #ff0000">{formatTime defaultTimeLocale "%c" $ posixSecondsToUTCTime (toPosix timestamp)}</span>
+    <br>
+    <div style="background-color: #111111; border: 1px solid #111111; border-radius: 5px; padding: 10px;">
+        <table>
+            <tr>
+                <th style="background-color: #303030; width: 2px;"></th>
+                <th>
+                    <div style="white-space: pre;">
+                    {content}
+                    </div>
+                </th>
+            </tr>
+        </table>
     </div>
-    {prettify_guestbook $ children} 
-    {guestbook_input id True}
+    {prettifyGuestbook $ children} 
+    {guestbookInput id True}
     <br><br>
-|], prettify_guestbook rest]
-    where
-        children :: Guestbook
-        children = filter (\(_, _, _, _, childParent) -> childParent == id) xs
-        rest :: Guestbook
-        rest = filter (\(_, _, _, _, childParent) -> childParent /= id) xs
-prettify_guestbook [] = [hsx||]
+|], prettifyGuestbook xs]
+prettifyGuestbook [] = [hsx||]
 
-guestbook_input :: Int -> Bool -> Html
-guestbook_input parent False = [hsx|
+guestbookInput :: Int -> Bool -> Html
+guestbookInput parent False = [hsx|
     <textarea class="guestbook-text" id={"guestbook-text::"++show parent} type="text"></textarea>
     <br>
     Name: <input id={"guestbook-name::"++show parent} class="guestbook-name" type="text">
     <button id={show parent} onclick="post(this.id)">Post</button>
 |]
-guestbook_input parent True = [hsx|
+guestbookInput parent True = [hsx|
     <button id={show parent} onclick="guestbookToggleInput(this.id)">New reply</button>
     <br>
     <div style="display:none;" id={"guestbook-reply::"++show parent}>
-        {guestbook_input parent False}
+        {guestbookInput parent False}
     </div>
 |]
 
@@ -87,9 +89,8 @@ guestbook = do
         </script>
         <h1>Guestbook</h1>
         Write a message for me :)<br>
-        {guestbook_input (-1) False}
+        {guestbookInput (-1) False}
         <hr>
         <h2>History</h2>
-        {prettify_guestbook guestbook}
+        {prettifyGuestbook guestbook}
     |]
-    

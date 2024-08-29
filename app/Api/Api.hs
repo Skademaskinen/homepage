@@ -58,7 +58,7 @@ api ["guestbook", "add"] request = do
 api ["guestbook", "get"] request = do
     body <- getRequestBodyChunk request
     entries <- getGuestbook
-    return (status200, unpackBS $ toStrict $ encode entries)
+    return (status200, unpackBS $ toStrict $ encode $ show entries)
 api ["snake", "add"] request = do
     body <- getRequestBodyChunk request
     let entry = getDefault EmptyLeaderboard (decode (fromStrict body) :: Maybe LeaderboardEntry)

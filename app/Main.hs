@@ -32,7 +32,7 @@ import Helpers.Utils (unpackBS)
 import Helpers.Globals (getPort, getCliState)
 import Helpers.Logger (logger, tableify, info, warning)
 import Api.Api (api)
-import Control.Concurrent (forkIO)
+import Control.Concurrent (forkIO, ThreadId)
 import Helpers.Cli (cli)
 
 page404 :: [String] -> Response
@@ -85,7 +85,8 @@ main = do
     putStrLn $ tableify ["METHOD", "STATUS", "PATH"]
     putStrLn $ "+" ++ mconcat (replicate 65 "-") ++ "+"
     cliState <- getCliState
-    if cliState then
-        forkIO cli
-    else forkIO (do putStr "") -- ???
-    run port app
+    if cliState then do
+        forkIO $ run port app
+        cli
+    else run port app
+

@@ -6,7 +6,9 @@ import Data.Text (unpack)
 import Network.HTTP.Types (Status(statusCode))
 
 import Helpers.Utils (unpackBS)
-import Helpers.Globals (LogLevel (..), getLogLevel)
+import Helpers.Globals (LogLevel (..), getLogLevel, getCliState)
+import System.IO (hFlush, stdout)
+import Control.Monad (when)
 
 colorStatus :: Int -> String
 colorStatus code | code < 300 = "\ESC[38;2;0;255;0m"++show code++"\ESC[0m"
@@ -32,8 +34,11 @@ right :: Int -> String
 right 0 = ""
 right n = "\ESC[" ++ show n ++ "C"
 
+clearEnd :: String
+clearEnd = "\ESC[0J"
+
 clearLine :: String
-clearLine = "\ESC[0J"
+clearLine = "\ESC[0K"
 
 tableify :: [String] -> String
 tableify (x:xs) = "| " ++ x ++ left l ++ right 20 ++ tableify xs
@@ -43,7 +48,7 @@ tableify [] = "|"
 
 
 info :: String -> IO ()
-info input = do 
+info input = do
     loglevel <- getLogLevel
     case loglevel of
         Info -> putStrLn $ "\ESC[38;2;100;100;100m" ++ input ++ "\ESC[0m"
@@ -65,12 +70,27 @@ logger :: Request -> Response -> IO ()
 logger request (ResponseBuilder status _ _) = do
     let method = unpackBS (requestMethod request)
     let path = getPath request
+    putStr $ "\r" ++ clearEnd
     putStrLn $ tableify [method, show $ statusCode status, path]
+    cliState <- getCliState
+    when cliState $ do
+        putStr "> "
+        hFlush stdout
 logger request (ResponseFile status _ _ _) = do
     let method = unpackBS (requestMethod request)
     let path = getPath request
+    putStr $ "\r" ++ clearEnd
     putStrLn $ tableify [method, show $ statusCode status, path]
+    cliState <- getCliState
+    when cliState $ do
+        putStr "> "
+        hFlush stdout
 logger request x = do
     let method = unpackBS (requestMethod request)
     let path = getPath request
+    putStr $ "\r" ++ clearEnd
     putStrLn $ tableify [method, path]
+    cliState <- getCliState
+    when cliState $ do
+        putStr "> "
+        hFlush stdout
