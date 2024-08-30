@@ -29,11 +29,12 @@ import Pages.Guestbook.Guestbook (guestbook)
 
 import Helpers.Database (initDb)
 import Helpers.Utils (unpackBS)
-import Helpers.Globals (getPort, getCliState)
+import Helpers.Settings (getPort, getCliState)
 import Helpers.Logger (logger, tableify, info, warning)
 import Api.Api (api)
 import Control.Concurrent (forkIO, ThreadId)
 import Helpers.Cli (cli)
+import System.Environment (getArgs)
 
 page404 :: [String] -> Response
 page404 args = responseBuilder status404 [("Content-Type", "text/html")] $ copyByteString (fromString (renderHtml (layout [hsx|

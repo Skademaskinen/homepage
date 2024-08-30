@@ -4,7 +4,7 @@ module Helpers.Database where
 
 import Database.SQLite.Simple (close, execute, open, query, Only(Only), ToRow, Query (Query), Connection)
 
-import Helpers.Globals (getDbPath)
+import Helpers.Settings (getDbPath)
 
 import Data.List (intercalate, inits)
 import Data.Text (pack, Text)

@@ -22,12 +22,12 @@ linkImage label image url = [hsx|
     </div>
 |]
 
-items :: [String] -> Html
-items values = forEach [1..length values] (\i -> [hsx|
-    <th style="width:100px">{values !! (i-1)}</th>
-|])
+items :: [Html] -> Html
+items values = mconcat $ map (\value -> [hsx|
+    <th style="width:100px">{value}</th>
+|]) values
 
-row :: [String] -> Html
+row :: [Html] -> Html
 row values = [hsx|
     <tr>
         {items values}

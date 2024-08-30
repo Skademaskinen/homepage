@@ -1,0 +1,53 @@
+{-# LANGUAGE OverloadedStrings #-}
+
+module Helpers.Settings where
+
+import System.Environment (lookupEnv, getArgs)
+import Data.List (find)
+import Data.Text (isInfixOf, pack, unpack)
+import Data.List.Split (splitOn)
+
+argOrEnvOrDefault :: String -> String -> String -> IO String
+argOrEnvOrDefault arg env def = do
+    args <- getArgs
+    case find (isInfixOf (pack arg)) [pack arg | arg <- args] of
+        (Just x) -> return $ splitOn "=" (unpack x) !! 1
+        _ -> do
+            var <- lookupEnv env
+            return $ case var of
+                (Just a) -> a
+                _ -> def
+
+argOrEnvOrBool :: String -> String -> IO Bool
+argOrEnvOrBool arg env = do
+    args <- getArgs
+    case find (== arg) args of
+        (Just _) -> return True
+        _ -> do
+            var <- lookupEnv env
+            return $ case var of
+                (Just "1") -> True
+                _ -> False
+
+
+getDbPath :: IO String
+getDbPath = argOrEnvOrDefault "--db" "HOMEPAGE_DB" "./homrpage.db3"
+
+getPort :: IO Int
+getPort = do
+    var <- argOrEnvOrDefault "--port" "HOMEPAGE_PORT" "8000"
+    return $ read var
+
+data LogLevel = Error | Warning | Info
+
+getLogLevel :: IO LogLevel
+getLogLevel = do
+    var <- argOrEnvOrDefault "--loglevel" "HOMEPAGE_LOGLEVEL" "error"
+    return $ case var of
+        "info" -> Info
+        "warning" -> Warning
+        "error" -> Error
+        _ -> Error
+
+getCliState :: IO Bool
+getCliState = argOrEnvOrBool "--cli" "HOMEPAGE_CLI"

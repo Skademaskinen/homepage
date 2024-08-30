@@ -6,7 +6,7 @@ import Data.Text (unpack)
 import Network.HTTP.Types (Status(statusCode))
 
 import Helpers.Utils (unpackBS)
-import Helpers.Globals (LogLevel (..), getLogLevel, getCliState)
+import Helpers.Settings (LogLevel (..), getLogLevel, getCliState)
 import System.IO (hFlush, stdout)
 import Control.Monad (when)
 
