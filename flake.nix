@@ -39,6 +39,7 @@
                 installPhase = ''
                     mkdir -p $out/bin
                     ln -s ${packages.${system}.homepage}/bin/homepage $out/bin/homepage
+                    ln -s ${packages.${system}.homepage}/bin/cli $out/bin/cli
                     cp -r $src/static $out
                 '';
             };
