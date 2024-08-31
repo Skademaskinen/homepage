@@ -23,9 +23,11 @@ doCommand ("help":_) = do
         help = [
             "Homepage CLI command list:",
             "",
-            "exit:"++ right 10 ++ "Exits the program",
-            "help:"++ right 10 ++ "Shows help about the CLI",
-            "drop:"++ right 10 ++ "Deletes a table and reruns init schema"
+            "exit:" ++ right 10 ++ "Exits the program",
+            "help:" ++ right 10 ++ "Shows help about the CLI",
+            "drop:" ++ right 10 ++ "Deletes a table and reruns init schema",
+            "adduser:" ++ right 7 ++ "Adds a user to the users table",
+            "removeuser:" ++ right 4 ++ "removes a user from the users table"
             ]
 doCommand ["drop", table] = do
     conn <- getConn

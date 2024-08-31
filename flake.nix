@@ -25,7 +25,7 @@
                 executableHaskellDepends = with pkgs.haskellPackages; [
                     base blaze-builder blaze-html bytestring http-types ihp-hsx
                     sqlite-simple text time utf8-string uuid wai warp directory
-                    aeson split password cryptonie string-random
+                    aeson split password cryptonite string-random
                 ];
                 license = "unknown";
                 mainProgram = "homepage";

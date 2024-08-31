@@ -55,3 +55,39 @@ executable homepage
 
     ghc-options:
         -threaded
+
+executable cli
+    main-is: Interactive.hs
+    other-modules:
+        Helpers.Logger,
+        Helpers.Database,
+        Helpers.Cli,
+        Helpers.Settings,
+        Helpers.Tree,
+        Helpers.Utils
+
+    build-depends:
+        base,
+        ihp-hsx,
+        blaze-html,
+        text,
+        warp,
+        wai,
+        http-types,
+        blaze-builder,
+        utf8-string,
+        bytestring,
+        sqlite-simple,
+        time,
+        uuid,
+        directory,
+        aeson,
+        split,
+        password,
+        cryptonite,
+        string-random
+
+    hs-source-dirs: app
+    default-extensions:
+        QuasiQuotes,
+        OverloadedStrings
