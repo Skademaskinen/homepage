@@ -79,6 +79,16 @@ schema = [
         Column "score" "INTEGER NOT NULL",
         Column "speed" "INTEGER NOT NULL",
         Column "fruits" "INTEGER NOT NULL"
+    ],
+    Table "users" [
+        Column "id" "INTEGER PRIMARY KEY",
+        Column "username" "VARCHAR NOT NULL",
+        Column "password" "VARCHAR NOT NULL"
+    ],
+    Table "valid_tokens" [
+        Column "id" "INTEGER PRIMARY KEY",
+        Column "token" "VARCHAR NOT NULL",
+        Column "username" "VARCHAR NOT NULL"
     ]]
 
 prettyPrintSchema :: String

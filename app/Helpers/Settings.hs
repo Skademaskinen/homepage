@@ -31,7 +31,7 @@ argOrEnvOrBool arg env = do
 
 
 getDbPath :: IO String
-getDbPath = argOrEnvOrDefault "--db" "HOMEPAGE_DB" "./homrpage.db3"
+getDbPath = argOrEnvOrDefault "--db" "HOMEPAGE_DB" "./homepage.db3"
 
 getPort :: IO Int
 getPort = do

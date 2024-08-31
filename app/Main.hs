@@ -11,10 +11,10 @@ import Data.List (intercalate)
 
 import System.Directory (doesFileExist)
 
-import Network.Wai (responseBuilder, responseFile)
+import Network.Wai (responseBuilder, responseFile, Request (queryString))
 import Network.Wai.Handler.Warp (run)
 import Network.Wai.Internal (Response(ResponseBuilder, ResponseFile), Request, pathInfo, requestMethod)
-import Network.HTTP.Types (statusCode, status200, status404, Status)
+import Network.HTTP.Types (statusCode, status200, status404, Status, Query)
 import Blaze.ByteString.Builder (copyByteString)
 import Data.ByteString.UTF8 (fromString)
 
@@ -35,6 +35,7 @@ import Api.Api (api)
 import Control.Concurrent (forkIO, ThreadId)
 import Helpers.Cli (cli)
 import System.Environment (getArgs)
+import Pages.Admin.Admin (admin)
 
 page404 :: [String] -> Response
 page404 args = responseBuilder status404 [("Content-Type", "text/html")] $ copyByteString (fromString (renderHtml (layout [hsx|
@@ -68,6 +69,7 @@ handleRequest ["guestbook"] request = serve . layout <$> guestbook
 handleRequest ("projects":project) request = return $ serve (layout (projects project))
 handleRequest ["snake-leaderboard"] request = serve . layout <$> leaderboard
 handleRequest ["favicon.ico"] request = do serveFile "static/favicon.ico"
+handleRequest ("admin":xs) request = serve . layout <$> admin xs
 handleRequest [] request = serve . layout <$> index
 handleRequest x request = return $ page404 x
 

@@ -23,7 +23,8 @@ executable homepage
         Pages.Projects.Projects,
         Pages.Projects.Snake,
         Pages.Guestbook.Guestbook,
-        Pages.Sources.Sources
+        Pages.Sources.Sources,
+        Pages.Admin.Admin
 
     build-depends:
         base,
@@ -41,7 +42,10 @@ executable homepage
         uuid,
         directory,
         aeson,
-        split
+        split,
+        password,
+        cryptonite,
+        string-random
 
     hs-source-dirs:   app
     default-language: Haskell2010

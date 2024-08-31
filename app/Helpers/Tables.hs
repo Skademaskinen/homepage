@@ -42,3 +42,11 @@ instance FromJSON LeaderboardEntry where
                            v .: "speed" <*>
                            v .: "fruits"
     parseJSON _          = empty 
+
+data Credentials = EmptyCredentials | Credentials String String
+
+instance FromJSON Credentials where
+    parseJSON (Object v) = Credentials <$>
+                           v .: "username" <*>
+                           v .: "password"
+    parseJSON _          = empty

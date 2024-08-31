@@ -4,10 +4,11 @@ import System.Exit (exitSuccess)
 import Helpers.Logger (up, right, clearLine, clearEnd)
 import Data.List (intercalate)
 import Database.SQLite.Simple (Only (Only), execute)
-import Helpers.Database (getConn, initDb)
+import Helpers.Database (getConn, initDb, insert)
 import Database.SQLite.Simple.Types (Query(Query))
-import Data.Text (pack)
+import Data.Text (pack, unpack)
 import System.IO (hFlush, stdout)
+import Data.Password.Bcrypt (mkPassword, hashPassword, PasswordHash (PasswordHash))
 
 resetCursor :: Int ->  IO ()
 resetCursor n = do
@@ -36,6 +37,19 @@ doCommand ["drop", table] = do
 doCommand ("exit":_) = do 
     putStrLn "Exiting"
     exitSuccess
+doCommand ["adduser", username, password] = do
+    let pass = mkPassword $ pack password
+    (PasswordHash hash) <- hashPassword pass
+    insert "INSERT INTO users(username, password) VALUES (?, ?)" (username :: String, unpack hash :: String)
+    putStrLn "Successfully added user"
+    resetCursor 2
+    cli
+doCommand ["removeuser", username] = do
+    conn <- getConn
+    execute conn "DELETE FROM users WHERE username = ?" (Only username)
+    putStrLn "Successfully removed user"
+    resetCursor 2
+    cli
 doCommand x = do
     putStrLn $ "Error, no such command: ["++ unwords x ++"]"
     resetCursor 2

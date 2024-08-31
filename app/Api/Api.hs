@@ -3,8 +3,8 @@
 module Api.Api where
 
 
-import Helpers.Tables (GuestbookEntry(GuestbookEntry, EmptyGuestbook), LeaderboardEntry (EmptyLeaderboard, LeaderboardEntry))
-import Helpers.Database (getVisits, uuidExists, insert, getGuestbook)
+import Helpers.Tables (GuestbookEntry(GuestbookEntry, EmptyGuestbook), LeaderboardEntry (EmptyLeaderboard, LeaderboardEntry), Credentials (EmptyCredentials, Credentials))
+import Helpers.Database (getVisits, uuidExists, insert, getGuestbook, getConn)
 import Helpers.Utils (unpackBS, getDefault)
 
 import IHP.HSX.QQ (hsx)
@@ -17,8 +17,16 @@ import Data.UUID (toString)
 import Network.Wai (getRequestBodyChunk, Request)
 import Network.HTTP.Types.Status (Status, status404, status200, status400)
 
-import Data.Aeson (encode, decode)
+import Data.Aeson (encode, decode, Value (String))
 import Data.ByteString.Lazy (fromStrict, toStrict)
+import Database.SQLite.Simple (query, Only (Only))
+import Data.Password.Bcrypt (PasswordCheck(PasswordCheckSuccess, PasswordCheckFail), mkPassword, checkPassword, PasswordHash (PasswordHash))
+import Data.Text (pack)
+import Crypto.Random (getRandomBytes)
+import Data.Text.Array (Array(ByteArray))
+import Text.StringRandom (stringRandomIO)
+import Data.Text (unpack)
+
 
 
 handleGuestbookEntry :: GuestbookEntry -> IO (Status, String)
@@ -35,6 +43,27 @@ handleLeaderboardEntry (LeaderboardEntry name score speed fruits) = do
     insert "INSERT INTO snake (name, timestamp, score, speed, fruits) values (?, ?, ?, ?, ?)" (name :: String, time :: Int, score :: Int, speed :: Int, fruits :: Int)
     return (status200, "Success")
 handleLeaderboardEntry EmptyLeaderboard = return (status400, "Error")
+
+handleLogin :: Credentials -> IO (Status, String)
+handleLogin (Credentials username password) = do
+    let pass = mkPassword $ pack password
+    conn <- getConn
+    xs <- query conn "SELECT password FROM users WHERE username = ?" (Only username)
+    case xs of
+        [Only hash] -> case checkPassword pass (PasswordHash $ pack hash) of
+            PasswordCheckSuccess -> do
+                xs <- query conn "SELECT token FROM valid_tokens where username = ?" (Only username) :: IO [Only String]
+                if null xs then do
+                    token <- stringRandomIO "[0-9a-zA-Z]{4}-[0-9a-ZA-Z]{10}-[0-9a-zA-Z]{15}"
+                    insert "INSERT INTO valid_tokens (token, username) values (?, ?)" (unpack token :: String, username :: String)
+                    return (status200, unpack token)
+                else do
+                    let (Only x) = head xs
+                    return (status200, x)
+                    where
+            PasswordCheckFail -> return (status400, "Wrong username or password")
+        _ -> return (status400, "Error, no user exists")
+handleLogin _ = return (status400, "Invalid request")
 
 api :: [String] -> Request -> IO (Status, String)
 api ["visits", "new"] request = do
@@ -63,5 +92,9 @@ api ["snake", "add"] request = do
     body <- getRequestBodyChunk request
     let entry = getDefault EmptyLeaderboard (decode (fromStrict body) :: Maybe LeaderboardEntry)
     handleLeaderboardEntry entry
+api ["admin", "login"] request = do
+    body <- getRequestBodyChunk request
+    let credentials = getDefault EmptyCredentials (decode (fromStrict body) :: Maybe Credentials)
+    handleLogin credentials
 api xs request = do
     return (status404, "{\"error\":\"Endpoint does not exist\"}")
