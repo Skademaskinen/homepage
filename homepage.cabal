@@ -19,6 +19,8 @@ executable homepage
         Helpers.Logger,
         Helpers.Cli
         Api.Api,
+        Pages.Pages,
+        Pages.Search.Search,
         Pages.Contact.Contact,
         Pages.Projects.Projects,
         Pages.Projects.Snake,
@@ -45,7 +47,8 @@ executable homepage
         split,
         password,
         cryptonite,
-        string-random
+        string-random,
+        regex-compat
 
     hs-source-dirs:   app
     default-language: Haskell2010
