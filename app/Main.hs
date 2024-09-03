@@ -56,16 +56,17 @@ serveFile path = do
 
 app :: Request -> (Response -> IO b)  -> IO b
 app request respond = do
-    let (x:xs) = map unpack $ pathInfo request
-    let args = "/" ++ intercalate "/" (x:xs)
+    let xs = map unpack $ pathInfo request
+    let x = if null xs then "" else head xs
+    let args = "/" ++ intercalate "/" xs
     response <- if x == "static" then do -- If the requested content is a file
-        serveFile $ intercalate "/" (x:xs)
+        serveFile $ intercalate "/" xs
 
     else if x == "favicon.ico" then do -- If the requested file is the icon file
         serveFile "static/favicon.ico"
 
     else if x == "api" then do -- If the request is to the API
-        (status, value) <- api (x:xs) request
+        (status, value) <- api xs request
         return $ responseBuilder status [("Content-Type", "text/plain")] $ copyByteString (fromString value)
 
     else do -- If the content is to the HTML Frontend
