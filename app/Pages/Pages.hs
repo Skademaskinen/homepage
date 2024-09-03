@@ -20,66 +20,42 @@ import Pages.Projects.Snake (leaderboard)
 import Pages.Admin.Admin (admin)
 import Index (index)
 import Data.Text (unpack)
-import Pages.Search.Search (search)
+import Pages.Search.Search (search, Page)
 
-page404 :: [String] -> Response
-page404 args = responseBuilder status404 [("Content-Type", "text/html")] $ copyByteString (fromString (renderHtml (layout [hsx|
+page404 :: [String] -> Html
+page404 args = layout [hsx|
     <h1>404 - Page not found</h1><br>
     params: {args}
-|])))
+|]
 
-serve :: Html -> Response
-serve content = responseBuilder status200 [("Content-Type", "text/html")] $ copyByteString (fromString (renderHtml content))
-
-serveFile :: String -> IO Response
-serveFile path = do
-    info "Serving file"
-    exists <- doesFileExist path
-    if exists then do
-        info "File exists"
-        return $ responseFile status200 [] path Nothing
-    else do
-        warning "No file found!"
-        return $ responseBuilder status404 [("Content-Type", "text/json")] $ copyByteString "{\"error\":\"Error: file not found!\"}"
-
-pages :: [(String, Request -> IO Response)]
+pages :: [Page]
 pages = [
-            ("/static", \req -> do
-                let (_:xs) = getArgs req
-                serveFile $ intercalate "/" ("static":xs)
-            ),
-            ("/api", \req -> do
-                let (_:args) = getArgs req
-                (status, value) <- api args req
-                return $ responseBuilder status [("Content-Type", "text/plain")] $ copyByteString (fromString value)
-            ),
-            ("/search", \req -> do
+            ("/search", "Search for pages", \req -> do
                 let [_, query] = getArgs req
-                return $ serve $ layout $ search pages $ mkRegex query
+                return $ layout $ search pages $ mkRegex query
             ),
-            ("/contact", \_ -> return $ serve $ layout contact),
-            ("/sources", \_ -> return $ serve $ layout sources),
-            ("/guestbook", \_ -> serve . layout <$> guestbook),
-            ("/projects", \req -> do
+            ("/contact", "My Contact Information", \_ -> return $ layout contact),
+            ("/sources", "Sources for this website and my source code", \_ -> return $ layout sources),
+            ("/guestbook", "A Guestbook where you can send me a message", \_ -> layout <$> guestbook),
+            ("/projects", "List of all projects i have done", \req -> do
                 let (_:project) = getArgs req
-                return $ serve $ layout $ projects project
+                return $ layout $ projects project
             ),
-            ("/snake-leaderboard", \_ -> serve . layout <$> leaderboard),
-            ("/favicon.ico", \_ -> serveFile "static/favicon.ico"),
-            ("/admin", \req -> do
+            ("/snake-leaderboard", "Leaderboard of my snake project", \_ -> layout <$> leaderboard),
+            ("/admin", "Database Admin panel", \req -> do
                 let (_:xs) = getArgs req
-                serve . layout <$> admin xs
+                layout <$> admin xs
             ),
-            ("/", \_ -> serve . layout <$> index)
+            ("/", "Main page", \_ -> layout <$> index)
         ]
     where
         getArgs request = map unpack $ pathInfo request
 
-findPage :: String -> (Request -> IO Response)
-findPage addr = case find (\(regex, _) -> case matchRegex (mkRegex regex) addr of
+findPage :: String -> (Request -> IO Html)
+findPage addr = case find (\(regex, _, _) -> case matchRegex (mkRegex regex) addr of
     Nothing -> False
     _ -> True) pages of -- TODO: make regex
-    (Just x) -> snd x
+    (Just (_, _, x)) -> x
     Nothing -> \req -> do
         let x = map unpack $ pathInfo req
         return $ page404 x

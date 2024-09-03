@@ -5,22 +5,25 @@ import Text.Regex (Regex, matchRegex)
 import Network.Wai (Request, Response)
 import Helpers.Section (section)
 
-findPage :: [(String, Request -> IO Response)] -> Regex -> [String]
-findPage ((target, _):xs) regex = case matchRegex regex target of
+type Page = (String, String, Request -> IO Html)
+
+findPage :: [Page] -> Regex -> [(String, String)]
+findPage ((target, description, _):xs) regex = case matchRegex regex target of
     Nothing -> findPage xs regex
-    _ -> target : findPage xs regex
+    _ -> (target, description) : findPage xs regex
 findPage [] _ = []
 
-search :: [(String, Request -> IO Response)] -> Regex -> Html
+search :: [Page] -> Regex -> Html
 search pages query = [hsx|
     <h1>Search Results:</h1>
-    {section $ makeResults 0 $ findPage pages query}
+    {section $ makeResults 1 $ findPage pages query}
 |]
     where
-        makeResults :: Int -> [String] -> Html
-        makeResults index (x:xs) = [hsx|
+        makeResults :: Int -> [(String, String)] -> Html
+        makeResults index ((x, description):xs) = [hsx|
             <h2>{index} - {title}</h2>
             <a href={x}>{x}</a>
+            <p>{description}</p>
             <br>
             {makeResults (index+1) xs}
         |]

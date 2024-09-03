@@ -39,11 +39,39 @@ import Pages.Admin.Admin (admin)
 import Text.Regex (mkRegex, Regex, matchRegex)
 import Pages.Pages (findPage)
 
+
+serve :: Html -> Response
+serve content = responseBuilder status200 [("Content-Type", "text/html")] $ copyByteString (fromString (renderHtml content))
+
+serveFile :: String -> IO Response
+serveFile path = do
+    info "Serving file"
+    exists <- doesFileExist path
+    if exists then do
+        info "File exists"
+        return $ responseFile status200 [] path Nothing
+    else do
+        warning "No file found!"
+        return $ responseBuilder status404 [("Content-Type", "text/json")] $ copyByteString "{\"error\":\"Error: file not found!\"}"
+
 app :: Request -> (Response -> IO b)  -> IO b
 app request respond = do
-    let args = "/" ++ intercalate "/" (map unpack $ pathInfo request)
-    let page = findPage args
-    response <- page request
+    let (x:xs) = map unpack $ pathInfo request
+    let args = "/" ++ intercalate "/" (x:xs)
+    response <- if x == "static" then do -- If the requested content is a file
+        serveFile $ intercalate "/" (x:xs)
+
+    else if x == "favicon.ico" then do -- If the requested file is the icon file
+        serveFile "static/favicon.ico"
+
+    else if x == "api" then do -- If the request is to the API
+        (status, value) <- api (x:xs) request
+        return $ responseBuilder status [("Content-Type", "text/plain")] $ copyByteString (fromString value)
+
+    else do -- If the content is to the HTML Frontend
+        let page = findPage args
+        serve <$> page request
+
     logger request response
     respond response
 
