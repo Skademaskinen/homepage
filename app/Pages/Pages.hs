@@ -32,7 +32,7 @@ pages :: [Page]
 pages = [
             ("/search", "Search for pages", \req -> do
                 let [_, query] = getArgs req
-                return $ layout $ search pages $ mkRegex query
+                return $ layout $ search pages query
             ),
             ("/contact", "My Contact Information", \_ -> return $ layout contact),
             ("/sources", "Sources for this website and my source code", \_ -> return $ layout sources),

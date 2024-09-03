@@ -1,7 +1,7 @@
 module Pages.Search.Search where
 import Text.Blaze.Html (Html)
 import IHP.HSX.QQ (hsx)
-import Text.Regex (Regex, matchRegex)
+import Text.Regex (Regex, matchRegex, mkRegex)
 import Network.Wai (Request, Response)
 import Helpers.Section (section)
 
@@ -13,10 +13,10 @@ findPage ((target, description, _):xs) regex = case matchRegex regex target of
     _ -> (target, description) : findPage xs regex
 findPage [] _ = []
 
-search :: [Page] -> Regex -> Html
+search :: [Page] -> String -> Html
 search pages query = [hsx|
-    <h1>Search Results:</h1>
-    {section $ makeResults 1 $ findPage pages query}
+    <h1>Search Results: [query={query}]</h1>
+    {section $ makeResults 1 $ findPage pages $ mkRegex query}
 |]
     where
         makeResults :: Int -> [(String, String)] -> Html
