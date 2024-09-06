@@ -66,7 +66,7 @@ app request respond = do
         serveFile "static/favicon.ico"
 
     else if x == "api" then do -- If the request is to the API
-        (status, value) <- api xs request
+        (status, value) <- api (drop 1 xs) request
         return $ responseBuilder status [("Content-Type", "text/plain")] $ copyByteString (fromString value)
 
     else do -- If the content is to the HTML Frontend
