@@ -120,6 +120,21 @@ projectsTree = Tree defaultProject [
             <div style="text-align:center;">
                 {services}
             </div>
+        |]) [],
+        Tree ("Discord bots", section [hsx|
+            I have written a few bots for discord, all of them were in Java using the dv8tion JDA (java bindings for the discord API). The first version was Mør Bot. It provided commands before slash commands that could play music from youtube and soundcloud, attached an emote to random messages, and showed a leaderboard for these emotes. It also allowed for setting roles.
+            <br>
+            <a href="https://github.com/Mast3rwaf1z/Moer-bot">https://github.com/Mast3rwaf1z/Moer-bot</a>
+            <br><br>
+            Next i rewrote it into a discord bot to manage my guild in World of Warcraft's raiding team, and manage roles for the discord server. It was fun but i also realized that releasing solo software for a bigger group of people (up to 100 people) could cause problems. This bot also reuses a lot of the code from Mør bot, while also used a lot more OOP patterns. It also employs a better role assigning system and uses a module loader to load command execution patterns on the fly, which was fun to code.
+            <br>
+            <a href="https://github.com/Skademaskinen/Putricide">https://github.com/Skademaskinen/Putricide</a>
+            <br><br>
+            The final bot was written as a side project to parse discord text channels to LaTeX files, compiling them to PDF and making them available for download.
+            <br>
+            Additionally it was written with a lot more tests and proper CI, to make sure it computes word counts and stuff correctly.
+            <br>
+            <a href="https://github.com/Skademaskinen/rp-utils">https://github.com/Skademaskinen/rp-utils</a>
         |]) []]]
 
 services :: Html
