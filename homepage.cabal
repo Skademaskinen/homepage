@@ -26,6 +26,7 @@ executable homepage
         Pages.Projects.Snake,
         Pages.Guestbook.Guestbook,
         Pages.Sources.Sources,
+        Pages.Sources.Repo,
         Pages.Admin.Admin
 
     build-depends:
@@ -48,7 +49,9 @@ executable homepage
         password,
         cryptonite,
         string-random,
-        regex-compat
+        regex-compat,
+        http-conduit,
+        yaml
 
     hs-source-dirs:   app
     default-language: Haskell2010

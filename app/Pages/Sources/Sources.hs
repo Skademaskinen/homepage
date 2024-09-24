@@ -4,9 +4,12 @@ import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 
 import Helpers.Utils (linkImage)
+import Pages.Sources.Repo (repo)
 
-sources :: Html
-sources = [hsx|
+sources :: IO Html
+sources = do 
+    commitHistory <- repo
+    return [hsx|
     <h2 style="text-align:center;">Sources</h2>
     <div class="section" style="text-align:center;">
         This website is written using the following software:<br>
@@ -17,6 +20,8 @@ sources = [hsx|
         Source code: <a href="https://github.com/Mast3rwaf1z/homepage">
             <img src="/static/github.svg" height="20">
         </a>
+        <br>
+        {commitHistory}
     </div>
 |]
 

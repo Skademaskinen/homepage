@@ -35,7 +35,7 @@ pages = [
                 return $ layout $ search pages query
             ),
             ("/contact", "My Contact Information", \_ -> return $ layout contact),
-            ("/sources", "Sources for this website and my source code", \_ -> return $ layout sources),
+            ("/sources", "Sources for this website and my source code", \_ -> layout <$> sources),
             ("/guestbook", "A Guestbook where you can send me a message", \_ -> layout <$> guestbook),
             ("/projects", "List of all projects i have done", \req -> do
                 let (_:project) = getArgs req
