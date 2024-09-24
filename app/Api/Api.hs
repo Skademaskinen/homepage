@@ -25,6 +25,7 @@ import Data.Text (pack, unpack)
 import Crypto.Random (getRandomBytes)
 import Data.Text.Array (Array(ByteArray))
 import Text.StringRandom (stringRandomIO)
+import Helpers.Logger (info)
 
 
 
@@ -74,7 +75,7 @@ api ["visits", "new"] request = do
         time <- fmap round getPOSIXTime :: IO Int
         uuid <- nextRandom
         insert "INSERT INTO visits (timestamp, uuid) values (?, ?)" (time :: Int, toString uuid :: String)
-        putStrLn "Inserted into db"
+        info "Inserted into db"
         return (status200, toString uuid)
     else
         return (status200, unpackBS body)

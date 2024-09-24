@@ -51,3 +51,6 @@ getLogLevel = do
 
 getCliState :: IO Bool
 getCliState = argOrEnvOrBool "--cli" "HOMEPAGE_CLI"
+
+getColor :: IO Bool
+getColor = argOrEnvOrBool "--color" "HOMEPAGE_COLOR"

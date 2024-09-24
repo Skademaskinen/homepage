@@ -41,7 +41,7 @@ clearLine :: String
 clearLine = "\ESC[0K"
 
 tableify :: [String] -> String
-tableify (x:xs) = "| " ++ x ++ left l ++ right 20 ++ tableify xs
+tableify (x:xs) = "| " ++ x ++ replicate (20-l) ' ' ++ tableify xs
     where
         l = length x
 tableify [] = "|"
@@ -51,46 +51,47 @@ info :: String -> IO ()
 info input = do
     loglevel <- getLogLevel
     case loglevel of
-        Info -> putStrLn $ "\ESC[38;2;100;100;100m" ++ input ++ "\ESC[0m"
+        Info -> putStrLn input
         _ -> return ()
+    hFlush stdout
 
 warning :: String -> IO ()
 warning input = do
     loglevel <- getLogLevel
     case loglevel of
-        Warning -> putStrLn $ "\ESC[38;2;255;255;0m" ++ input ++ "\ESC[0m"
-        Info -> putStrLn $ "\ESC[38;2;255;255;0m" ++ input ++ "\ESC[0m"
+        Warning -> putStrLn input
+        Info -> putStrLn input
         _ -> return ()
+    hFlush stdout
 
 
 error :: String -> IO ()
-error input = putStrLn $ "\ESC[38;2;255;0;0m" ++ input ++ "\ESC[0m"
+error msg = do 
+    putStrLn msg
+    hFlush stdout
 
 logger :: Request -> Response -> IO ()
 logger request (ResponseBuilder status _ _) = do
     let method = unpackBS (requestMethod request)
     let path = getPath request
-    putStr $ "\r" ++ clearEnd
-    putStrLn $ tableify [method, show $ statusCode status, path]
     cliState <- getCliState
-    when cliState $ do
-        putStr "> "
-        hFlush stdout
+    when cliState $ putStr $ "\r" ++ clearEnd
+    putStrLn $ tableify [method, show $ statusCode status, path]
+    when cliState $ putStr "> "
+    hFlush stdout
 logger request (ResponseFile status _ _ _) = do
     let method = unpackBS (requestMethod request)
     let path = getPath request
-    putStr $ "\r" ++ clearEnd
-    putStrLn $ tableify [method, show $ statusCode status, path]
     cliState <- getCliState
-    when cliState $ do
-        putStr "> "
-        hFlush stdout
+    when cliState $ putStr $ "\r" ++ clearEnd
+    putStrLn $ tableify [method, show $ statusCode status, path]
+    when cliState $ putStr "> "
+    hFlush stdout
 logger request x = do
     let method = unpackBS (requestMethod request)
     let path = getPath request
-    putStr $ "\r" ++ clearEnd
-    putStrLn $ tableify [method, path]
     cliState <- getCliState
-    when cliState $ do
-        putStr "> "
-        hFlush stdout
+    when cliState $ putStr $ "\r" ++ clearEnd
+    putStrLn $ tableify [method, path]
+    when cliState $ putStr "> "
+    hFlush stdout

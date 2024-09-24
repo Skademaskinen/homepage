@@ -97,6 +97,7 @@
                 environment.HOMEPAGE_DB = cfg.db.path;
                 serviceConfig = {
                     WorkingDirectory = "${packages.${system}.default}";
+                    #ExecStart = "/usr/bin/env echo test";
                     ExecStart = "${packages.${system}.default}/bin/homepage";
                     StandardOutput = "syslog";
                     StandardError = "syslog";
