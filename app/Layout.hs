@@ -8,6 +8,7 @@ import Footer (footer)
 
 layout :: Html -> Html
 layout content = [hsx|
+    <!DOCTYPE html>
     <html>
         <head>
             <link rel="stylesheet" href="/static/stylesheet.css">

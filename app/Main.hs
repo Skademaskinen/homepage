@@ -14,9 +14,9 @@ import System.Directory (doesFileExist)
 import Network.Wai (responseBuilder, responseFile, Request (queryString))
 import Network.Wai.Handler.Warp (run)
 import Network.Wai.Internal (Response(ResponseBuilder, ResponseFile), Request, pathInfo, requestMethod)
-import Network.HTTP.Types (statusCode, status200, status404, Status, Query)
+import Network.HTTP.Types (statusCode, status200, status404, Status, Query, HeaderName)
 import Blaze.ByteString.Builder (copyByteString)
-import Data.ByteString.UTF8 (fromString)
+import Data.ByteString.UTF8 (fromString, ByteString)
 
 import Layout (layout)
 
@@ -38,10 +38,21 @@ import System.Environment (getArgs)
 import Pages.Admin.Admin (admin)
 import Text.Regex (mkRegex, Regex, matchRegex)
 import Pages.Pages (findPage)
+import Data.List.Split (splitOn)
 
 
 serve :: Html -> Response
 serve content = responseBuilder status200 [("Content-Type", "text/html")] $ copyByteString (fromString (renderHtml content))
+
+autoContentType :: String -> (HeaderName, ByteString)
+autoContentType path = ("Content-Type", mime extension)
+    where
+        extension = last (splitOn "." path)
+        mime "js" = "application/javascript"
+        mime "png" = "image/png"
+        mime "svg" = "image/svg+xml"
+        mime "css" = "text/css"
+        mime _ = "text/plain"
 
 serveFile :: String -> IO Response
 serveFile path = do
@@ -49,7 +60,8 @@ serveFile path = do
     exists <- doesFileExist path
     if exists then do
         info "File exists"
-        return $ responseFile status200 [] path Nothing
+
+        return $ responseFile status200 [autoContentType path] path Nothing
     else do
         warning "No file found!"
         return $ responseBuilder status404 [("Content-Type", "text/json")] $ copyByteString "{\"error\":\"Error: file not found!\"}"

@@ -24,7 +24,7 @@ function deleteCookie(name){
 }
 
 function setCookie(cookie) {
-    document.cookie = cookie
+    document.cookie = cookie+";SameSite=None;Secure;"
 }
 
 function go_to(id){
