@@ -8,9 +8,12 @@ import Footer (footer)
 
 layout :: Html -> Html
 layout content = [hsx|
-    <link rel="stylesheet" href="/static/stylesheet.css">
-    <link rel="stylesheet" href="/static/prism/prism.css">
     <html>
+        <head>
+            <link rel="stylesheet" href="/static/stylesheet.css">
+            <link rel="stylesheet" href="/static/prism/prism.css">
+            <meta charset="UTF-8">
+        </head>
         <script src="/static/app.js"></script>
         {header [
             ("Home", "/"),
