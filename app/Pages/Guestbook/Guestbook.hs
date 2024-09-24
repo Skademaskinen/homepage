@@ -84,6 +84,9 @@ guestbook = do
                     if(response.status == 200){
                         window.location.reload()
                     }
+                    else response.text().then(text => {
+                        alert(response.status + "\n" + text)
+                    })
                 })
             }
         </script>

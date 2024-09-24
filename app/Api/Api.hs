@@ -21,15 +21,16 @@ import Data.Aeson (encode, decode, Value (String))
 import Data.ByteString.Lazy (fromStrict, toStrict)
 import Database.SQLite.Simple (query, Only (Only))
 import Data.Password.Bcrypt (PasswordCheck(PasswordCheckSuccess, PasswordCheckFail), mkPassword, checkPassword, PasswordHash (PasswordHash))
-import Data.Text (pack)
+import Data.Text (pack, unpack)
 import Crypto.Random (getRandomBytes)
 import Data.Text.Array (Array(ByteArray))
 import Text.StringRandom (stringRandomIO)
-import Data.Text (unpack)
 
 
 
 handleGuestbookEntry :: GuestbookEntry -> IO (Status, String)
+handleGuestbookEntry (GuestbookEntry "" _ _) = return (status400, "Error, name cannot be empty")
+handleGuestbookEntry (GuestbookEntry _ "" _) = return (status400, "Error, content cannot be empty")
 handleGuestbookEntry (GuestbookEntry name content parentId) = do
     time <- fmap round getPOSIXTime :: IO Int
     insert "INSERT INTO guestbook (name, timestamp, content, parentId) values (?, ?, ?, ?)" (name :: String, time :: Int, content :: String, parentId :: Int)
