@@ -95,6 +95,7 @@ leaderboardEntry (id, timestamp, name, score, speed, fruits) = [hsx|
     </tr>
 |]
 
+page :: IO Html
 page = do
     l <- getLeaderboard
     return [hsx|
@@ -118,4 +119,3 @@ settings = [
 
 leaderboard :: Page
 leaderboard = (settings, const $ layout <$> page)
-    where
