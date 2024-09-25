@@ -7,7 +7,7 @@ import Helpers.CodeBlock (hsxIntroCodeBlock, introCodeIndex)
 import Helpers.Section (section)
 import Helpers.Database (getVisits)
 import Layout (layout)
-import Helpers.Page (PageSetting(Description, Route), Page)
+import Helpers.Page (PageSetting(Description, Route, EmbedImage, EmbedText), Page)
 
 intro :: Html
 intro = section [hsx|
@@ -60,7 +60,9 @@ page = do
 settings :: [PageSetting]
 settings = [
     Route "/",
-    Description "Main page"
+    Description "This is the front page for Skademaskinen, a server built as a passion project.",
+    EmbedImage "/static/icon.png",
+    EmbedText "Skademaskinen - Index"
     ]
 
 
