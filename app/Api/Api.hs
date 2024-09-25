@@ -98,5 +98,7 @@ api ["admin", "login"] request = do
     body <- getRequestBodyChunk request
     let credentials = getDefault EmptyCredentials (decode (fromStrict body) :: Maybe Credentials)
     handleLogin credentials
+api ["hello"] _ = do
+    return (status200, "Hello World!")
 api xs request = do
     return (status404, "{\"error\":\"Endpoint does not exist\"}")

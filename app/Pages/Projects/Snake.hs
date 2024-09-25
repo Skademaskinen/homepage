@@ -5,6 +5,8 @@ import Text.Blaze.Html (Html)
 
 import Helpers.Utils ( forEach )
 import Helpers.Database (getLeaderboard)
+import Helpers.Page (Page, PageSetting (Description, Route))
+import Layout (layout)
 
 tile :: Int -> Html
 tile id = [hsx|
@@ -93,8 +95,7 @@ leaderboardEntry (id, timestamp, name, score, speed, fruits) = [hsx|
     </tr>
 |]
 
-leaderboard :: IO Html
-leaderboard = do
+page = do
     l <- getLeaderboard
     return [hsx|
         <table>
@@ -108,3 +109,13 @@ leaderboard = do
             {mconcat $ map leaderboardEntry l}
         </table>
     |]
+
+settings :: [PageSetting]
+settings = [
+    Route "/snake-leaderboard", 
+    Description "Leaderboard of my snake project"
+    ]
+
+leaderboard :: Page
+leaderboard = (settings, const $ layout <$> page)
+    where

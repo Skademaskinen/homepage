@@ -6,6 +6,8 @@ import Text.Blaze.Html (Html)
 import Helpers.CodeBlock (hsxIntroCodeBlock, introCodeIndex)
 import Helpers.Section (section)
 import Helpers.Database (getVisits)
+import Layout (layout)
+import Helpers.Page (PageSetting(Description, Route), Page)
 
 intro :: Html
 intro = section [hsx|
@@ -36,8 +38,9 @@ intro = section [hsx|
     </div>
 |]
 
-index :: IO Html
-index = do 
+
+page :: IO Html
+page = do 
     visits <- show . length <$> getVisits
     return [hsx|
     <h1>Skademaskinen</h1>
@@ -53,3 +56,13 @@ index = do
         }).then(res => res.text().then(uuid => setCookie("visitId="+uuid)))
     </script>
 |]
+
+settings :: [PageSetting]
+settings = [
+    Route "/",
+    Description "Main page"
+    ]
+
+
+index :: Page
+index = (settings, const $ layout <$> page)

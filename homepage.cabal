@@ -17,7 +17,9 @@ executable homepage
         Helpers.Settings,
         Helpers.Tables,
         Helpers.Logger,
-        Helpers.Cli
+        Helpers.Cli,
+        Helpers.Scripts,
+        Helpers.Page,
         Api.Api,
         Pages.Pages,
         Pages.Search.Search,

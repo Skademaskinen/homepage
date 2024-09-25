@@ -39,6 +39,8 @@ import Pages.Admin.Admin (admin)
 import Text.Regex (mkRegex, Regex, matchRegex)
 import Pages.Pages (findPage)
 import Data.List.Split (splitOn)
+import Control.Monad (when)
+import Helpers.Page (embedText, embedImage, description)
 
 
 serve :: Html -> Response
@@ -82,8 +84,19 @@ app request respond = do
         return $ responseBuilder status [("Content-Type", "text/plain")] $ copyByteString (fromString value)
 
     else do -- If the content is to the HTML Frontend
-        let page = findPage args
-        serve <$> page request
+        let (settings, page) = findPage args
+        result <- page request
+        let image = if embedImage settings /= "" then [hsx|
+            <meta content={embedImage settings} property="og:image">
+        |] else [hsx||]
+        let text = if embedText settings /= "" then [hsx|
+            <meta content={embedText settings} property="og:title">
+        |] else [hsx||]
+        let desc = if description settings /= "" then [hsx|
+            <meta content={description settings} property="og:description">
+        |] else [hsx||]
+
+        return $ serve (mconcat [result, image, text, desc])
 
     logger request response
     respond response

@@ -4,6 +4,8 @@ import Text.Blaze.Html (Html)
 import Database.SQLite.Simple (query, Only (Only))
 import Helpers.Database (getConn, prettyPrintSchema)
 import Helpers.CodeBlock (codeBlock)
+import Helpers.Page (Page, PageSetting (Route, Description), getArgs)
+import Layout (layout)
 
 validateToken :: String -> IO Bool
 validateToken token = do
@@ -13,8 +15,8 @@ validateToken token = do
         [] -> return False
         _ -> return True
 
-admin :: [String] -> IO Html
-admin ["summary", token] = do
+page :: [String] -> IO Html
+page ["summary", token] = do
     validity <- validateToken token
     if validity then do
         conn <- getConn
@@ -25,8 +27,8 @@ admin ["summary", token] = do
             {codeBlock "txt" prettyPrintSchema}
         |]
     else
-        admin []
-admin x = do
+        page []
+page x = do
     print x
     return [hsx|
         <script>
@@ -63,3 +65,14 @@ admin x = do
 
         <p id="error_display"></p>
     |]
+
+settings :: [PageSetting]
+settings = [
+    Route "/admin", 
+    Description "Database Admin panel"
+    ]
+
+admin :: Page
+admin = (settings, \req -> do
+    let (_:xs) = getArgs req
+    layout <$> page xs)

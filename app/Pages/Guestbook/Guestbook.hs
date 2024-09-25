@@ -11,6 +11,8 @@ import Data.List (filter)
 import Data.Time.Format ( defaultTimeLocale, formatTime )
 import Data.Time.Clock.POSIX ( POSIXTime, posixSecondsToUTCTime )
 import Helpers.Tree (Tree(Tree))
+import Helpers.Page (Page, PageSetting (Route, Description))
+import Layout (layout)
 
 type Guestbook = [(Int, Int, String, String, Int)]
 
@@ -55,8 +57,7 @@ guestbookInput parent True = [hsx|
     </div>
 |]
 
-guestbook :: IO Html
-guestbook = do
+page = do
     guestbook <- getGuestbook
     return [hsx|
         <script>
@@ -97,3 +98,13 @@ guestbook = do
         <h2>History</h2>
         {prettifyGuestbook guestbook}
     |]
+
+
+settings :: [PageSetting]
+settings = [
+    Route "/guestbook", 
+    Description "A Guestbook where you can send me a message"
+    ]
+
+guestbook :: Page
+guestbook = (settings, const $ layout <$> page)

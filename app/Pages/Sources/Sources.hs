@@ -5,9 +5,11 @@ import Text.Blaze.Html (Html)
 
 import Helpers.Utils (linkImage)
 import Pages.Sources.Repo (repo)
+import Helpers.Page (Page, PageSetting (Description, Route))
+import Layout (layout)
 
-sources :: IO Html
-sources = do 
+page :: IO Html
+page = do
     commitHistory <- repo
     return [hsx|
     <h2 style="text-align:center;">Sources</h2>
@@ -25,4 +27,12 @@ sources = do
     </div>
 |]
 
+settings :: [PageSetting]
+settings = [
+    Route "/sources", 
+    Description "Sources for this website and my source code"
+    ]
+
+sources :: Page
+sources = (settings, const $ layout <$> page)
 

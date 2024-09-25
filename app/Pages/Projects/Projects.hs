@@ -12,6 +12,8 @@ import Pages.Projects.Snake (snake)
 
 import Helpers.Database (schema, prettyPrintSchema)
 import Helpers.CodeBlock (codeBlock)
+import Helpers.Page (Page, PageSetting (Route, Description), getArgs)
+import Layout (layout)
 
 defaultProject :: (String, Html)
 defaultProject = ("", section [hsx|
@@ -208,9 +210,20 @@ mainView target = [hsx|
     where
         (title, content) = findItem target projectsTree
 
-projects :: [String] -> Html
-projects target = [hsx|
+
+page target = [hsx|
     <div style="width=100%;">
         {mainView target}
     </div>
 |]
+
+settings :: [PageSetting]
+settings = [
+    Route "/projects", 
+    Description "List of all projects i have done"
+    ]
+
+projects :: Page
+projects = (settings, \req -> do 
+    let (_:project) = getArgs req
+    return $ layout $ page project)
