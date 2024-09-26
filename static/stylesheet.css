@@ -100,3 +100,22 @@ button:active {
 .guestbook-name:focus {
     background-color: #262626;
 }
+
+
+.common-table {
+    display:inline-block;
+    border:1px solid white; 
+    padding:5px;
+    border-collapse: collapse;
+}
+
+.common-table-row {
+    border-top: 1px solid white;
+}
+
+.common-table-element {
+    padding: 4px;
+    width: 100px;
+    text-align: left;
+    overflow-x:scroll
+}

@@ -4,7 +4,7 @@ import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 
 import Helpers.Utils ( linkImage, row )
-import Helpers.Page (Page, PageSetting (Description, Route))
+import Helpers.Page (Page, PageSetting (Description, Route, EmbedText, EmbedImage))
 import Layout (layout)
 
 rows :: [Html]
@@ -41,7 +41,9 @@ page = [hsx|
 settings :: [PageSetting]
 settings = [
     Route "/contact", 
-    Description "My Contact Information"
+    EmbedText "Skademaskinen - Contact me",
+    EmbedImage "/static/icon.png",
+    Description "My contact information, and where to find me"
     ]
 
 contact :: Page

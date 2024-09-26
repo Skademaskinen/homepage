@@ -66,12 +66,12 @@ snake = [hsx|
     <hr>
     <h2 style="text-align:center;">Scores</h2>
     <div style="text-align:center;">
-        <table id="scoreboard" style="display:inline-block;border:1px solid white; padding:5px;">
+        <table id="scoreboard" class="common-table">
             <tr>
-                <th style="width:100px">Timestamp</th>
-                <th style="width:100px">Score</th>
-                <th style="width:100px">Speed</th>
-                <th style="width:100px">Fruits</th>
+                <th class="common-table-element">Timestamp</th>
+                <th class="common-table-element">Score</th>
+                <th class="common-table-element">Speed</th>
+                <th class="common-table-element">Fruits</th>
             </tr>
         </table>
         <div id="snakefire" style="position:fixed; width:100%; left:0; top:100%">
