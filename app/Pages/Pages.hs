@@ -44,8 +44,10 @@ pages = [
         ]
 
 findPage :: String -> Page
-findPage addr = case find (\(settings, _) -> case matchRegex (mkRegex (route settings)) addr of
-    Nothing -> False
-    _ -> True) pages of
-    (Just page) -> page
-    Nothing -> ([], \req -> return $ page404 (map unpack $ pathInfo req))
+findPage addr = case find (\(settings, _) -> case do 
+    if route settings == "/" && addr /= "/" then Nothing 
+    else matchRegex (mkRegex (route settings)) addr of
+        Nothing -> False
+        _ -> True) pages of
+        (Just page) -> page
+        Nothing -> ([], \req -> return $ page404 (map unpack $ pathInfo req))
