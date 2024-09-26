@@ -117,5 +117,5 @@ button:active {
     padding: 4px;
     width: 100px;
     text-align: left;
-    overflow-x:scroll
+    overflow-x:scroll;
 }
