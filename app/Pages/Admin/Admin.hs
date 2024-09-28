@@ -188,9 +188,9 @@ page x = do
         <h1>Admin panel login</h1>
         Manages DB and other stuff...
 
-        <input placeholder="Username" class="admin-input" id="username">
+        <input placeholder="Username" class="admin-input" id="username" type="text">
 
-        <input placeholder="Password" class="admin-input" id="password">
+        <input placeholder="Password" class="admin-input" id="password" type="password">
 
         <button onclick="login()">Login</button>
 

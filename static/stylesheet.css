@@ -107,6 +107,8 @@ button:active {
     border:1px solid white; 
     padding:5px;
     border-collapse: collapse;
+    overflow:scroll;
+    max-height:300px;
 }
 
 .common-table-row {
