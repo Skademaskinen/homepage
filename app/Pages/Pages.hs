@@ -33,12 +33,12 @@ page404 args = layout [hsx|
 pages :: [Page]
 pages = [
             search pages,
+            admin,
             contact,
             sources,
             guestbook,
             projects,
             leaderboard,
-            admin,
             testPage,
             index
         ]
