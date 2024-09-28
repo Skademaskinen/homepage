@@ -141,24 +141,34 @@ page ["summary", token] = do
     if validity then do
         conn <- getConn
         [Only username] <- query conn "SELECT username FROM valid_tokens WHERE token = ?" (Only token) :: IO [Only String]
-        table1 <- visitsTable
-        table2 <- guestbookTable
-        table3 <- snakeTable
-        table4 <- usersTable
-        table5 <- validTokensTable
         return [hsx|
             <h1>Welcome {username}!</h1>
             Schema:
             {codeBlock "txt" prettyPrintSchema}
             <h2>Database tables</h2>
-            {table1}
-            {table2}
-            {table3}
-            {table4}
-            {table5}
+            <a href={"/admin/dump/visits/"++token}>Visits</a><br>
+            <a href={"/admin/dump/guestbook/"++token}>Guestbook</a><br>
+            <a href={"/admin/dump/snake/"++token}>Snake</a><br>
+            <a href={"/admin/dump/users/"++token}>Users</a><br>
+            <a href={"/admin/dump/tokens/"++token}>Valid tokens</a><br>
+            <a href={"/admin/dump/all/"++token}>All</a>
         |]
     else
         page []
+page ["dump", table, token] = do
+    validity <- validateToken token
+    if validity then showTable table
+    else
+        page []
+    where
+        showTable "visits" = visitsTable
+        showTable "guestbook" = guestbookTable
+        showTable "snake" = snakeTable
+        showTable "users" = usersTable
+        showTable "tokens" = validTokensTable
+        showTable "all" = mconcat [visitsTable, guestbookTable, snakeTable, usersTable, validTokensTable]
+        showTable _ = [hsx||]
+
 page x = do
     print x
     return [hsx|
