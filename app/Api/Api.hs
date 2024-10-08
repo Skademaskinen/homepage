@@ -25,8 +25,8 @@ import Crypto.Random (getRandomBytes)
 import Data.Text.Array (Array(ByteArray))
 import Text.StringRandom (stringRandomIO)
 import Helpers.Logger (info)
-import Helpers.Database.Schema (GuestbookEntry(guestbookEntryGuestbookTimestamp, guestbookEntryGuestbookName, guestbookEntryGuestbookParentId, guestbookEntryGuestbookContent, GuestbookEntry, guestbookEntryGuestbookId), Snake (Snake), User (User, userUserPassword), Token (Token, tokenTokenToken), Visit (Visit))
-import Database.Persist (selectList, Entity (Entity), insertEntity)
+import Helpers.Database.Schema (GuestbookEntry(guestbookEntryGuestbookTimestamp, guestbookEntryGuestbookName, guestbookEntryGuestbookParentId, guestbookEntryGuestbookContent, GuestbookEntry, guestbookEntryGuestbookId), Snake (Snake), User (User, userUserPassword, userUserName), Token (Token, tokenTokenToken), Visit (Visit), EntityField (UserUserName, TokenTokenName))
+import Database.Persist (selectList, Entity (Entity), insertEntity, Filter (Filter), FilterValue (FilterValue), PersistFilter (BackendSpecificFilter))
 
 
 
@@ -48,11 +48,11 @@ handleLeaderboardEntry T.EmptyLeaderboard = return (status400, "Error")
 handleLogin :: T.Credentials -> IO (Status, String)
 handleLogin (T.Credentials username password) = do
     let pass = mkPassword $ pack password
-    rows <- map (\(Entity _ e) -> e) <$> (runDb $ selectList [] [] :: IO [Entity User])
+    rows <- map (\(Entity _ e) -> e) <$> (runDb $ selectList [Filter UserUserName (FilterValue username) (BackendSpecificFilter "LIKE")] [] :: IO [Entity User])
     case rows of
         [user] -> case checkPassword pass (PasswordHash $ pack (userUserPassword user)) of
             PasswordCheckSuccess -> do
-                rows <- map (\(Entity _ e) -> e) <$> (runDb $ selectList [] [] :: IO [Entity Token])
+                rows <- map (\(Entity _ e) -> e) <$> (runDb $ selectList [Filter TokenTokenName (FilterValue username) (BackendSpecificFilter "LIKE")] [] :: IO [Entity Token])
                 if null rows then do
                     token <- stringRandomIO "[0-9a-zA-Z]{4}-[0-9a-ZA-Z]{10}-[0-9a-zA-Z]{15}"
                     runDb $ insertEntity $ Token 0 (unpack token) username
