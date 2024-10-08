@@ -13,7 +13,8 @@ executable homepage
         Helpers.Section,
         Helpers.Tree,
         Helpers.Utils,
-        Helpers.Database,
+        Helpers.Database.Database,
+        Helpers.Database.Schema,
         Helpers.Settings,
         Helpers.Tables,
         Helpers.Logger,
@@ -42,7 +43,6 @@ executable homepage
         blaze-builder,
         utf8-string,
         bytestring,
-        sqlite-simple,
         time,
         uuid,
         directory,
@@ -53,7 +53,10 @@ executable homepage
         string-random,
         regex-compat,
         http-conduit,
-        yaml
+        yaml,
+        persistent,
+        persistent-mysql,
+        monad-logger
 
     hs-source-dirs:   app
     default-language: Haskell2010
@@ -68,7 +71,8 @@ executable cli
     main-is: Interactive.hs
     other-modules:
         Helpers.Logger,
-        Helpers.Database,
+        Helpers.Database.Database,
+        Helpers.Database.Schema,
         Helpers.Cli,
         Helpers.Settings,
         Helpers.Tree,
@@ -85,7 +89,6 @@ executable cli
         blaze-builder,
         utf8-string,
         bytestring,
-        sqlite-simple,
         time,
         uuid,
         directory,
@@ -93,7 +96,10 @@ executable cli
         split,
         password,
         cryptonite,
-        string-random
+        string-random,
+        persistent,
+        persistent-mysql,
+        monad-logger
 
     hs-source-dirs: app
     default-extensions:

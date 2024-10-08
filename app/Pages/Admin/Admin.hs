@@ -1,21 +1,12 @@
 module Pages.Admin.Admin where
 import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
-import Database.SQLite.Simple (query, Only (Only), FromRow (fromRow), field)
-import Helpers.Database (getConn, prettyPrintSchema)
+import Helpers.Database.Database (prettyPrintSchema, getVisits, getGuestbookEntries, getLeaderboard, getUsers, getTokens, validateToken, tokenToUsername)
 import Helpers.CodeBlock (codeBlock)
 import Helpers.Page (Page, PageSetting (Route, Description), getArgs)
 import Layout (layout)
-import Helpers.Tables (GuestbookEntry(GuestbookEntry))
 import Data.Text (Text)
-
-validateToken :: String -> IO Bool
-validateToken token = do
-    conn <- getConn
-    result <- query conn "SELECT token FROM valid_tokens" () :: IO [Only String]
-    case result of
-        [] -> return False
-        _ -> return True
+import Helpers.Database.Schema (Visit(Visit), GuestbookEntry (GuestbookEntry), Snake (Snake), User (User), Token (Token))
 
 nameRow :: [String] -> Html
 nameRow names = [hsx|
@@ -32,8 +23,7 @@ nameRow names = [hsx|
 
 visitsTable :: IO Html
 visitsTable = do
-    conn <- getConn
-    rows <- query conn "SELECT * FROM visits" () :: IO [(Int, Int, Text)]
+    rows <- getVisits
     return [hsx|
         <h2>Visits</h2>
         <table class="common-table">
@@ -42,7 +32,7 @@ visitsTable = do
         </table>
     |] 
     where
-        makeRow (id, timestamp, uuid) = [hsx|
+        makeRow (Visit id timestamp uuid) = [hsx|
             <tr class="common-table-row">
                 <th class="common-table-element">{id}</th>
                 <th class="common-table-element">{timestamp}</th>
@@ -52,8 +42,7 @@ visitsTable = do
 
 guestbookTable :: IO Html
 guestbookTable = do
-    conn <- getConn
-    rows <- query conn "SELECT * FROM guestbook" () :: IO [(Int, Int, Text, Text, Int)]
+    rows <- getGuestbookEntries
     return [hsx|
         <h2>Guestbook</h2>
         <table class="common-table">
@@ -62,7 +51,7 @@ guestbookTable = do
         </table>
     |]
     where
-        makeRow (id, timestamp, name, content, parent) = [hsx|
+        makeRow (GuestbookEntry id timestamp name content parent) = [hsx|
             <tr class="common-table-row">
                 <th class="common-table-element">{id}</th>
                 <th class="common-table-element">{timestamp}</th>
@@ -74,8 +63,7 @@ guestbookTable = do
 
 snakeTable :: IO Html
 snakeTable = do
-    conn <- getConn
-    rows <- query conn "SELECT * FROM snake" () :: IO [(Int, Int, Text, Int, Int, Int)]
+    rows <- getLeaderboard
     return [hsx|
         <h2>Snake Leaderboard</h2>
         <table class="common-table">
@@ -84,7 +72,7 @@ snakeTable = do
         </table>
     |]
     where
-        makeRow (id, timestamp, name, score, speed, fruits) = [hsx|
+        makeRow (Snake id timestamp name score speed fruits) = [hsx|
             <tr class="common-table-row">
                 <th class="common-table-element">{id}</th>
                 <th class="common-table-element">{timestamp}</th>
@@ -97,8 +85,7 @@ snakeTable = do
 
 usersTable :: IO Html
 usersTable = do
-    conn <- getConn
-    rows <- query conn "SELECT * FROM users" () :: IO [(Int, Text, Text)]
+    rows <- getUsers
     return [hsx|
         <h2>Users</h2>
         <table class="common-table">
@@ -107,7 +94,7 @@ usersTable = do
         </table>
     |]
     where
-        makeRow (id, username, password) = [hsx|
+        makeRow (User id username password) = [hsx|
             <tr class="common-table-row">
                 <th class="common-table-element">{id}</th>
                 <th class="common-table-element">{username}</th>
@@ -117,8 +104,7 @@ usersTable = do
 
 validTokensTable :: IO Html
 validTokensTable = do
-    conn <- getConn
-    rows <- query conn "SELECT * FROM valid_tokens" () :: IO [(Int, Text, Text)]
+    rows <- getTokens
     return [hsx|
         <h2>Valid Tokens</h2>
         <table class="common-table">
@@ -127,7 +113,7 @@ validTokensTable = do
         </table>
     |]
     where
-        makeRow (id, token, username) = [hsx|
+        makeRow (Token id token username) = [hsx|
             <tr class="common-table-row">
                 <th class="common-table-element">{id}</th>
                 <th class="common-table-element">{token}</th>
@@ -139,8 +125,7 @@ page :: [String] -> IO Html
 page ["summary", token] = do
     validity <- validateToken token
     if validity then do
-        conn <- getConn
-        [Only username] <- query conn "SELECT username FROM valid_tokens WHERE token = ?" (Only token) :: IO [Only String]
+        username <- tokenToUsername token
         return [hsx|
             <h1>Welcome {username}!</h1>
             Schema:

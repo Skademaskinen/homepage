@@ -10,10 +10,11 @@ import Helpers.Utils (forEach)
 import Helpers.Section (section)
 import Pages.Projects.Snake (snake)
 
-import Helpers.Database (schema, prettyPrintSchema)
+import Helpers.Database.Database (prettyPrintSchema)
 import Helpers.CodeBlock (codeBlock)
 import Helpers.Page (Page, PageSetting (Route, Description), getArgs)
 import Layout (layout)
+import Helpers.Database.Schema (defs)
 
 defaultProject :: (String, Html)
 defaultProject = ("", section [hsx|
@@ -72,7 +73,7 @@ projectsTree = Tree defaultProject [
                 Written in Haskell using IHP-HSX as the primary library, and sqlite-simple as the database implementation.<br>
 
                 The database is actually pretty cool, its implemented as a list of table objects, and since i'm writing html directly inside my haskell code i can easily print the database structure inline here:<br><br>
-                {codeBlock "txt" $ show schema}
+                {codeBlock "txt" $ show defs}
                 Its not particularly nice looking in this way, so i'll print it properly below :P
                 {codeBlock "txt" prettyPrintSchema}<br>
                 Still in haskell, but the beauty of haskell is that stuff like that is a short oneliner<br><br>

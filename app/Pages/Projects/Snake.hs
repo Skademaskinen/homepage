@@ -4,9 +4,10 @@ import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 
 import Helpers.Utils ( forEach )
-import Helpers.Database (getLeaderboard)
+import Helpers.Database.Database (getLeaderboard)
 import Helpers.Page (Page, PageSetting (Description, Route))
 import Layout (layout)
+import Helpers.Database.Schema (Snake (Snake))
 
 tile :: Int -> Html
 tile id = [hsx|
@@ -88,8 +89,8 @@ leaderboardField value = [hsx|
     <th style="width:100px">{value}</th>
 |]
 
-leaderboardEntry :: (Int, Int, String, Int, Int, Int) -> Html
-leaderboardEntry (id, timestamp, name, score, speed, fruits) = [hsx|
+leaderboardEntry :: Snake -> Html
+leaderboardEntry (Snake id timestamp name score speed fruits) = [hsx|
     <tr>
         {mconcat $ map leaderboardField [name, show timestamp, show score, show speed, show fruits]}
     </tr>
