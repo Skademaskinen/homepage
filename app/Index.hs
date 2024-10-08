@@ -5,7 +5,7 @@ import Text.Blaze.Html (Html)
 
 import Helpers.CodeBlock (hsxIntroCodeBlock, introCodeIndex)
 import Helpers.Section (section)
-import Helpers.Database (getVisits)
+import Helpers.Database.Database (getVisits)
 import Layout (layout)
 import Helpers.Page (PageSetting(Description, Route, EmbedImage, EmbedText), Page)
 

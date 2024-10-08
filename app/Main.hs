@@ -27,9 +27,9 @@ import Pages.Projects.Snake (leaderboard)
 import Pages.Sources.Sources (sources)
 import Pages.Guestbook.Guestbook (guestbook)
 
-import Helpers.Database (initDb)
+import Helpers.Database.Database (doMigration)
 import Helpers.Utils (unpackBS)
-import Helpers.Settings (getPort, getCliState)
+import Helpers.Settings (getPort, getCliState, getMigrate)
 import Helpers.Logger (logger, tableify, info, warning)
 import Api.Api (api)
 import Control.Concurrent (forkIO, ThreadId)
@@ -104,14 +104,17 @@ app request respond = do
 main :: IO ()
 main = do
     port <- getPort
-    initDb
     info $ "Listening on " ++ show port
     putStrLn $ "+" ++ mconcat (replicate 65 "-") ++ "+"
     putStrLn $ tableify ["METHOD", "STATUS", "PATH"]
     putStrLn $ "+" ++ mconcat (replicate 65 "-") ++ "+"
-    cliState <- getCliState
-    if cliState then do
-        forkIO $ run port app
-        cli
-    else run port app
+    migrate <- getMigrate
+    if migrate then
+        doMigration
+    else do
+        cliState <- getCliState
+        if cliState then do
+            forkIO $ run port app
+            cli
+        else run port app
 

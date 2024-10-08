@@ -30,8 +30,11 @@ argOrEnvOrBool arg env = do
                 _ -> False
 
 
-getDbPath :: IO String
-getDbPath = argOrEnvOrDefault "--db" "HOMEPAGE_DB" "./homepage.db3"
+getDatabaseName :: IO String
+getDatabaseName = argOrEnvOrDefault "--db" "HOMEPAGE_DB" "homepage"
+
+getDatabaseUser :: IO String
+getDatabaseUser = argOrEnvOrDefault "--dbuser" "HOMEPAGE_DB_USER" "homepage"
 
 getPort :: IO Int
 getPort = do
@@ -54,3 +57,6 @@ getCliState = argOrEnvOrBool "--cli" "HOMEPAGE_CLI"
 
 getColor :: IO Bool
 getColor = argOrEnvOrBool "--color" "HOMEPAGE_COLOR"
+
+getMigrate :: IO Bool
+getMigrate = argOrEnvOrBool "--migrate" "HOMEPAGE_MIGRATE"

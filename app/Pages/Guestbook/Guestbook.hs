@@ -3,7 +3,7 @@ module Pages.Guestbook.Guestbook where
 import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 
-import Helpers.Database (getGuestbook, GuestbookEntry)
+import Helpers.Database.Database (getGuestbook)
 import Helpers.Section (section)
 
 import Data.List (filter)
@@ -13,6 +13,7 @@ import Data.Time.Clock.POSIX ( POSIXTime, posixSecondsToUTCTime )
 import Helpers.Tree (Tree(Tree))
 import Helpers.Page (Page, PageSetting (Route, Description))
 import Layout (layout)
+import Helpers.Database.Schema (GuestbookEntry (GuestbookEntry))
 
 type Guestbook = [(Int, Int, String, String, Int)]
 
@@ -20,7 +21,7 @@ toPosix :: Int -> POSIXTime
 toPosix n = read (show n ++ "s") :: POSIXTime
 
 prettifyGuestbook :: [Tree GuestbookEntry] -> Html
-prettifyGuestbook ((Tree (id, timestamp, name, content, parent) children):xs) = mconcat [section [hsx|
+prettifyGuestbook ((Tree (GuestbookEntry id timestamp name content parent) children):xs) = mconcat [section [hsx|
     <h3>{name} said: </h3>
     Posted: <span style="color: #ff0000">{formatTime defaultTimeLocale "%c" $ posixSecondsToUTCTime (toPosix timestamp)}</span>
     <br>

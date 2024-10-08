@@ -3,12 +3,13 @@ import System.Exit (exitSuccess)
 
 import Helpers.Logger (up, right, clearLine, clearEnd)
 import Data.List (intercalate)
-import Database.SQLite.Simple (Only (Only), execute)
-import Helpers.Database (getConn, initDb, insert)
-import Database.SQLite.Simple.Types (Query(Query))
 import Data.Text (pack, unpack)
 import System.IO (hFlush, stdout)
 import Data.Password.Bcrypt (mkPassword, hashPassword, PasswordHash (PasswordHash))
+import Helpers.Database.Database (runDb)
+import Database.Persist (insertEntity, PersistQueryWrite (deleteWhere))
+import Helpers.Database.Schema (User(User), EntityField (UserUserName))
+import Database.Persist.MySQL ((==.))
 
 resetCursor :: Int ->  IO ()
 resetCursor n = do
@@ -25,30 +26,22 @@ doCommand ("help":_) = do
             "",
             "exit:" ++ right 10 ++ "Exits the program",
             "help:" ++ right 10 ++ "Shows help about the CLI",
-            "drop:" ++ right 10 ++ "Deletes a table and reruns init schema",
+            "drop:" ++ right 10 ++ "Deletes a table and reruns init schema :: REMOVED",
             "adduser:" ++ right 7 ++ "Adds a user to the users table",
             "removeuser:" ++ right 4 ++ "removes a user from the users table"
             ]
-doCommand ["drop", table] = do
-    conn <- getConn
-    execute conn (Query $ pack ("DROP TABLE "++table)) ()
-    putStrLn "Successfully dropped table"
-    resetCursor 2
-    initDb
-    cli
 doCommand ("exit":_) = do 
     putStrLn "Exiting"
     exitSuccess
 doCommand ["adduser", username, password] = do
     let pass = mkPassword $ pack password
     (PasswordHash hash) <- hashPassword pass
-    insert "INSERT INTO users(username, password) VALUES (?, ?)" (username :: String, unpack hash :: String)
+    runDb $ insertEntity $ User 0 username $ unpack hash
     putStrLn "Successfully added user"
     resetCursor 2
     cli
 doCommand ["removeuser", username] = do
-    conn <- getConn
-    execute conn "DELETE FROM users WHERE username = ?" (Only username)
+    runDb $ deleteWhere [UserUserName ==. username]
     putStrLn "Successfully removed user"
     resetCursor 2
     cli
