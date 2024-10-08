@@ -56,7 +56,7 @@
 
             vm = (nixpkgs.lib.nixosSystem {
                 inherit system;
-                modules = [nixosModules.${system}.default {
+                modules = [nixosModules.${system}.default ({config, ...}: {
                     system.stateVersion = "24.05";
                     users.users.root.password = "1234";
                     virtualisation.vmVariant = {
@@ -81,7 +81,26 @@
                         enable = true;
                         port = 8000;
                     };
-                }];
+                    services.mysql = let
+                      cfg = config.services.homepage;
+                    in {
+                        enable = true;
+                        package = pkgs.mariadb;
+                        ensureUsers = [
+                            {
+                                name = cfg.db.user;
+                                ensurePermissions."${cfg.db.name}.*" = "ALL PRIVILEGES";
+                            }
+                            {
+                                name = "${cfg.db.user}@localhost";
+                                ensurePermissions."${cfg.db.name}.*" = "ALL PRIVILEGES";
+                            }
+                        ];
+                        ensureDatabases = [cfg.db.name];
+                    };
+
+
+                })];
             }).config.system.build.vm;
         };
         nixosModules.${system}.default = {config, pkgs, lib, ...}: let
@@ -129,21 +148,6 @@
                     group = "homepage";
                 };
                 groups.homepage = {};
-            } else {};
-            config.services.mysql = if cfg.enable then {
-                enable = true;
-                package = pkgs.mariadb;
-                ensureUsers = [
-                    {
-                        name = cfg.db.user;
-                        ensurePermissions."${cfg.db.name}.*" = "ALL PRIVILEGES";
-                    }
-                    {
-                        name = "${cfg.db.user}@localhost";
-                        ensurePermissions."${cfg.db.name}.*" = "ALL PRIVILEGES";
-                    }
-                ];
-                ensureDatabases = [cfg.db.name];
             } else {};
 
         };
