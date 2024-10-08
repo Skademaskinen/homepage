@@ -30,7 +30,7 @@ share [mkPersist sqlSettings, mkMigrate "migrateAll", mkEntityDefList "defs"] [p
         guestbookContent        String      sql=content
         guestbookParentId       Int         sql=parentId
         deriving Eq Show
-    Snake                                   sql=snake_leaderboard
+    Snake                                   sql=snake
         snakeId                 Int         sql=id
         snakeTimestamp          Int         sql=timestamp
         snakeName               String      sql=name
