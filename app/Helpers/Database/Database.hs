@@ -72,7 +72,7 @@ uuidExists :: String -> IO Bool
 uuidExists uuid = do
     visits <- runDb $ selectList [Filter VisitVisitUuid (FilterValue uuid) (BackendSpecificFilter "LIKE")] [] :: IO [Entity Visit]
     print visits
-    return (visits /= [])
+    return (null visits)
 
 tokenToUsername :: String -> IO String
 tokenToUsername token = do
