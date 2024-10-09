@@ -1,5 +1,3 @@
-{-# LANGUAGE ScopedTypeVariables        #-}
-{-# LANGUAGE OverloadedStrings          #-}
 module Helpers.Database.Database where
 
 import Helpers.Settings (getDatabaseName, getDatabaseUser, getDatabaseName, getDatabaseUser)

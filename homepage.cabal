@@ -62,7 +62,21 @@ executable homepage
     default-language: Haskell2010
     default-extensions:
         QuasiQuotes,
-        OverloadedStrings
+        OverloadedStrings,
+        DerivingStrategies        
+        UndecidableInstances,
+        DataKinds,     
+        EmptyDataDecls,
+        FlexibleContexts,
+        FlexibleInstances,
+        GADTs,
+        GeneralizedNewtypeDeriving,
+        MultiParamTypeClasses,
+        StandaloneDeriving,
+        TemplateHaskell,
+        TypeFamilies,
+        TypeOperators,
+        ScopedTypeVariables
 
     ghc-options:
         -threaded
@@ -104,4 +118,18 @@ executable cli
     hs-source-dirs: app
     default-extensions:
         QuasiQuotes,
-        OverloadedStrings
+        OverloadedStrings,
+        DerivingStrategies        
+        UndecidableInstances,
+        DataKinds,     
+        EmptyDataDecls,
+        FlexibleContexts,
+        FlexibleInstances,
+        GADTs,
+        GeneralizedNewtypeDeriving,
+        MultiParamTypeClasses,
+        StandaloneDeriving,
+        TemplateHaskell,
+        TypeFamilies,
+        TypeOperators,
+        ScopedTypeVariables

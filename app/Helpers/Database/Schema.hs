@@ -1,19 +1,3 @@
-{-# LANGUAGE DerivingStrategies         #-}
-{-# LANGUAGE UndecidableInstances       #-}
-{-# LANGUAGE DataKinds                  #-}
-{-# LANGUAGE EmptyDataDecls             #-}
-{-# LANGUAGE FlexibleContexts           #-}
-{-# LANGUAGE FlexibleInstances          #-}
-{-# LANGUAGE GADTs                      #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE MultiParamTypeClasses      #-}
-{-# LANGUAGE OverloadedStrings          #-}
-{-# LANGUAGE QuasiQuotes                #-}
-{-# LANGUAGE StandaloneDeriving         #-}
-{-# LANGUAGE TemplateHaskell            #-}
-{-# LANGUAGE TypeFamilies               #-}
-{-# LANGUAGE TypeOperators              #-}
-
 module Helpers.Database.Schema where
 import Database.Persist.TH (persistLowerCase, share, mkPersist, sqlSettings, mkMigrate, mkEntityDefList)
     
