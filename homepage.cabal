@@ -27,6 +27,7 @@ executable homepage
         Pages.Contact.Contact,
         Pages.Projects.Projects,
         Pages.Projects.Snake,
+        Pages.Projects.Brainfuck,
         Pages.Guestbook.Guestbook,
         Pages.Sources.Sources,
         Pages.Sources.Repo,

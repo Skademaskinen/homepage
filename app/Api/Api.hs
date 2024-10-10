@@ -6,6 +6,7 @@ module Api.Api where
 import qualified Helpers.Tables as T (GuestbookEntry (GuestbookEntry, EmptyGuestbook), LeaderboardEntry (EmptyLeaderboard, LeaderboardEntry), Credentials (EmptyCredentials, Credentials))
 import Helpers.Database.Database (getVisits, uuidExists, getGuestbook, runDb)
 import Helpers.Utils (unpackBS, getDefault)
+import Pages.Projects.Brainfuck (code)
 
 import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
@@ -28,24 +29,31 @@ import Helpers.Logger (info)
 import Helpers.Database.Schema (GuestbookEntry(guestbookEntryGuestbookTimestamp, guestbookEntryGuestbookName, guestbookEntryGuestbookParentId, guestbookEntryGuestbookContent, GuestbookEntry, guestbookEntryGuestbookId), Snake (Snake), User (User, userUserPassword, userUserName), Token (Token, tokenTokenToken), Visit (Visit), EntityField (UserUserName, TokenTokenName))
 import Database.Persist (selectList, Entity (Entity), insertEntity, Filter (Filter), FilterValue (FilterValue), PersistFilter (BackendSpecificFilter))
 
+import Network.HTTP.Types (HeaderName)
+import Data.ByteString.UTF8 (ByteString)
 
+type Header = (HeaderName, ByteString)
+type APIResponse = IO (Status, String, [Header])
 
-handleGuestbookEntry :: T.GuestbookEntry -> IO (Status, String)
-handleGuestbookEntry (T.GuestbookEntry "" _ _) = return (status400, "Error, name cannot be empty")
-handleGuestbookEntry (T.GuestbookEntry _ "" _) = return (status400, "Error, content cannot be empty")
+defaultHeaders :: [Header]
+defaultHeaders = [("Content-Type", "text/plain")]
+
+handleGuestbookEntry :: T.GuestbookEntry -> APIResponse
+handleGuestbookEntry (T.GuestbookEntry "" _ _) = return (status400, "Error, name cannot be empty", defaultHeaders)
+handleGuestbookEntry (T.GuestbookEntry _ "" _) = return (status400, "Error, content cannot be empty", defaultHeaders)
 handleGuestbookEntry (T.GuestbookEntry name content parentId) = do
     time <- fmap round getPOSIXTime :: IO Int
     runDb $ insertEntity $ GuestbookEntry 0 time name content parentId
-    return (status200, "Success")
+    return (status200, "Success", defaultHeaders)
 
-handleLeaderboardEntry :: T.LeaderboardEntry -> IO (Status, String)
+handleLeaderboardEntry :: T.LeaderboardEntry -> APIResponse
 handleLeaderboardEntry (T.LeaderboardEntry name score speed fruits) = do
     time <- fmap round getPOSIXTime :: IO Int
     runDb $ insertEntity $ Snake 0 time name score speed fruits
-    return (status200, "Success")
-handleLeaderboardEntry T.EmptyLeaderboard = return (status400, "Error")
+    return (status200, "Success", defaultHeaders)
+handleLeaderboardEntry T.EmptyLeaderboard = return (status400, "Error", defaultHeaders)
 
-handleLogin :: T.Credentials -> IO (Status, String)
+handleLogin :: T.Credentials -> APIResponse
 handleLogin (T.Credentials username password) = do
     let pass = mkPassword $ pack password
     rows <- map (\(Entity _ e) -> e) <$> (runDb $ selectList [Filter UserUserName (FilterValue username) (BackendSpecificFilter "LIKE")] [] :: IO [Entity User])
@@ -56,16 +64,16 @@ handleLogin (T.Credentials username password) = do
                 if null rows then do
                     token <- stringRandomIO "[0-9a-zA-Z]{4}-[0-9a-ZA-Z]{10}-[0-9a-zA-Z]{15}"
                     runDb $ insertEntity $ Token 0 (unpack token) username
-                    return (status200, unpack token)
+                    return (status200, unpack token, defaultHeaders)
                 else do
                     let row = head rows
-                    return (status200, tokenTokenToken row)
+                    return (status200, tokenTokenToken row, defaultHeaders)
                     where
-            PasswordCheckFail -> return (status400, "Wrong username or password")
-        _ -> return (status400, "Error, no user exists")
-handleLogin _ = return (status400, "Invalid request")
+            PasswordCheckFail -> return (status400, "Wrong username or password", defaultHeaders)
+        _ -> return (status400, "Error, no user exists", defaultHeaders)
+handleLogin _ = return (status400, "Invalid request", defaultHeaders)
 
-api :: [String] -> Request -> IO (Status, String)
+api :: [String] -> Request -> APIResponse
 api ["visits", "new"] request = do
     body <- getRequestBodyChunk request
     result <- uuidExists (unpackBS body)
@@ -74,12 +82,12 @@ api ["visits", "new"] request = do
         uuid <- nextRandom
         runDb $ insertEntity $ Visit 0 time $ toString uuid
         info "Inserted into db"
-        return (status200, toString uuid)
+        return (status200, toString uuid, defaultHeaders)
     else
-        return (status200, unpackBS body)
+        return (status200, unpackBS body, defaultHeaders)
 api ["visits", "get"] request = do
     visits <- show . length <$> getVisits
-    return (status200, visits)
+    return (status200, visits, [])
 api ["guestbook", "add"] request = do
     body <- getRequestBodyChunk request
     let entry = getDefault T.EmptyGuestbook (decode (fromStrict body) :: Maybe T.GuestbookEntry)
@@ -87,7 +95,7 @@ api ["guestbook", "add"] request = do
 api ["guestbook", "get"] request = do
     body <- getRequestBodyChunk request
     entries <- getGuestbook
-    return (status200, unpackBS $ toStrict $ encode $ show entries)
+    return (status200, unpackBS $ toStrict $ encode $ show entries, defaultHeaders)
 api ["snake", "add"] request = do
     body <- getRequestBodyChunk request
     let entry = getDefault T.EmptyLeaderboard (decode (fromStrict body) :: Maybe T.LeaderboardEntry)
@@ -97,6 +105,11 @@ api ["admin", "login"] request = do
     let credentials = getDefault T.EmptyCredentials (decode (fromStrict body) :: Maybe T.Credentials)
     handleLogin credentials
 api ["hello"] _ = do
-    return (status200, "Hello World!")
+    return (status200, "Hello World!", defaultHeaders)
+api ["brainfuck"] request = do
+    input <- getRequestBodyChunk request
+    let result = code $ unpackBS input
+    return (status200, result, [("Content-Disposition", "attachment; filename=\"brainfuck.c\"")])
+
 api xs request = do
-    return (status404, "{\"error\":\"Endpoint does not exist\"}")
+    return (status404, "{\"error\":\"Endpoint does not exist\"}", defaultHeaders)

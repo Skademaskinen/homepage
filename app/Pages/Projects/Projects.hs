@@ -9,6 +9,7 @@ import Helpers.Tree ( Tree(..) )
 import Helpers.Utils (forEach)
 import Helpers.Section (section)
 import Pages.Projects.Snake (snake)
+import Pages.Projects.Brainfuck (brainfuck)
 
 import Helpers.Database.Database (prettyPrintSchema)
 import Helpers.CodeBlock (codeBlock)
@@ -68,6 +69,7 @@ projectsTree = Tree defaultProject [
         I find it fun coding in my free time, i do it a lot and as such this website was also born!
     |]) [
         Tree ("Snake", snake) [],
+        Tree ("Brainfuck Transpiler", brainfuck) [],
         Tree ("Website", mconcat [section [hsx|
             <div style="max-width: 100%">
                 Written in Haskell using IHP-HSX as the primary library, and sqlite-simple as the database implementation.<br>
