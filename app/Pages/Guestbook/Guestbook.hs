@@ -3,17 +3,17 @@ module Pages.Guestbook.Guestbook where
 import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 
-import Helpers.Database.Database (getGuestbook)
-import Helpers.Section (section)
+import Database.Database (getGuestbook)
+import Section (section)
 
 import Data.List (filter)
 
 import Data.Time.Format ( defaultTimeLocale, formatTime )
 import Data.Time.Clock.POSIX ( POSIXTime, posixSecondsToUTCTime )
-import Helpers.Tree (Tree(Tree))
-import Helpers.Page (Page, PageSetting (Route, Description))
+import Tree (Tree(Tree))
+import Page (Page, PageSetting (Route, Description))
 import Layout (layout)
-import Helpers.Database.Schema (GuestbookEntry (GuestbookEntry))
+import Database.Schema (GuestbookEntry (GuestbookEntry))
 
 type Guestbook = [(Int, Int, String, String, Int)]
 

@@ -3,11 +3,11 @@ module Pages.Projects.Snake where
 import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 
-import Helpers.Utils ( forEach )
-import Helpers.Database.Database (getLeaderboard)
-import Helpers.Page (Page, PageSetting (Description, Route))
+import Utils ( forEach )
+import Database.Database (getLeaderboard)
+import Page (Page, PageSetting (Description, Route))
 import Layout (layout)
-import Helpers.Database.Schema (Snake (Snake))
+import Database.Schema (Snake (Snake))
 
 tile :: Int -> Html
 tile id = [hsx|

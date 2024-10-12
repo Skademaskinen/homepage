@@ -1,12 +1,12 @@
 module Pages.Admin.Admin where
 import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
-import Helpers.Database.Database (prettyPrintSchema, getVisits, getGuestbookEntries, getLeaderboard, getUsers, getTokens, validateToken, tokenToUsername)
-import Helpers.CodeBlock (codeBlock)
-import Helpers.Page (Page, PageSetting (Route, Description), getArgs)
+import Database.Database (prettyPrintSchema, getVisits, getGuestbookEntries, getLeaderboard, getUsers, getTokens, validateToken, tokenToUsername)
+import CodeBlock (codeBlock)
+import Page (Page, PageSetting (Route, Description), getArgs)
 import Layout (layout)
 import Data.Text (Text)
-import Helpers.Database.Schema (Visit(Visit), GuestbookEntry (GuestbookEntry), Snake (Snake), User (User), Token (Token))
+import Database.Schema (Visit(Visit), GuestbookEntry (GuestbookEntry), Snake (Snake), User (User), Token (Token))
 
 nameRow :: [String] -> Html
 nameRow names = [hsx|

@@ -1,4 +1,4 @@
-module Helpers.Page where
+module Page where
 import Network.Wai (Request (pathInfo))
 import Text.Blaze.Html (Html)
 import Data.Text (unpack)

@@ -3,9 +3,9 @@ module Pages.Sources.Sources where
 import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 
-import Helpers.Utils (linkImage)
+import Utils (linkImage)
 import Pages.Sources.Repo (repo)
-import Helpers.Page (Page, PageSetting (Description, Route))
+import Page (Page, PageSetting (Description, Route))
 import Layout (layout)
 
 page :: IO Html

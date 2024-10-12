@@ -3,8 +3,8 @@ module Pages.Contact.Contact where
 import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 
-import Helpers.Utils ( linkImage, row )
-import Helpers.Page (Page, PageSetting (Description, Route, EmbedText, EmbedImage))
+import Utils ( linkImage, row )
+import Page (Page, PageSetting (Description, Route, EmbedText, EmbedImage))
 import Layout (layout)
 
 rows :: [Html]

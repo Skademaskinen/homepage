@@ -1,4 +1,4 @@
-module Helpers.Utils where
+module Utils where
 
 import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)

@@ -3,9 +3,9 @@
 module Api.Api where
 
 
-import qualified Helpers.Tables as T (GuestbookEntry (GuestbookEntry, EmptyGuestbook), LeaderboardEntry (EmptyLeaderboard, LeaderboardEntry), Credentials (EmptyCredentials, Credentials))
-import Helpers.Database.Database (getVisits, uuidExists, getGuestbook, runDb)
-import Helpers.Utils (unpackBS, getDefault)
+import qualified Tables as T (GuestbookEntry (GuestbookEntry, EmptyGuestbook), LeaderboardEntry (EmptyLeaderboard, LeaderboardEntry), Credentials (EmptyCredentials, Credentials))
+import Database.Database (getVisits, uuidExists, getGuestbook, runDb)
+import Utils (unpackBS, getDefault)
 import Pages.Projects.Brainfuck (code)
 
 import IHP.HSX.QQ (hsx)
@@ -25,8 +25,8 @@ import Data.Text (pack, unpack)
 import Crypto.Random (getRandomBytes)
 import Data.Text.Array (Array(ByteArray))
 import Text.StringRandom (stringRandomIO)
-import Helpers.Logger (info)
-import Helpers.Database.Schema (GuestbookEntry(guestbookEntryGuestbookTimestamp, guestbookEntryGuestbookName, guestbookEntryGuestbookParentId, guestbookEntryGuestbookContent, GuestbookEntry, guestbookEntryGuestbookId), Snake (Snake), User (User, userUserPassword, userUserName), Token (Token, tokenTokenToken), Visit (Visit), EntityField (UserUserName, TokenTokenName))
+import Logger (info)
+import Database.Schema (GuestbookEntry(guestbookEntryGuestbookTimestamp, guestbookEntryGuestbookName, guestbookEntryGuestbookParentId, guestbookEntryGuestbookContent, GuestbookEntry, guestbookEntryGuestbookId), Snake (Snake), User (User, userUserPassword, userUserName), Token (Token, tokenTokenToken), Visit (Visit), EntityField (UserUserName, TokenTokenName))
 import Database.Persist (selectList, Entity (Entity), insertEntity, Filter (Filter), FilterValue (FilterValue), PersistFilter (BackendSpecificFilter))
 
 import Network.HTTP.Types (HeaderName)

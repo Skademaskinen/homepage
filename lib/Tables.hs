@@ -1,4 +1,4 @@
-module Helpers.Tables where
+module Tables where
 
 import Data.Aeson
 import Data.ByteString.Lazy (fromStrict)

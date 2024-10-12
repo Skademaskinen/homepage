@@ -1,4 +1,4 @@
-module Helpers.CodeBlock where
+module CodeBlock where
 
 import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)

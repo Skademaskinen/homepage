@@ -14,7 +14,7 @@
 {-# LANGUAGE TypeFamilies               #-}
 {-# LANGUAGE TypeOperators              #-}
 
-module Helpers.Database.Schema where
+module Database.Schema where
 import Database.Persist.TH (persistLowerCase, share, mkPersist, sqlSettings, mkMigrate, mkEntityDefList)
     
 share [mkPersist sqlSettings, mkMigrate "migrateAll", mkEntityDefList "defs"] [persistLowerCase|

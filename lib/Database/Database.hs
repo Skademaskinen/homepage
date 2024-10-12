@@ -1,17 +1,17 @@
 {-# LANGUAGE ScopedTypeVariables        #-}
 {-# LANGUAGE OverloadedStrings          #-}
-module Helpers.Database.Database where
+module Database.Database where
 
-import Helpers.Settings (getDatabaseName, getDatabaseUser, getDatabaseName, getDatabaseUser)
+import Settings (getDatabaseName, getDatabaseUser, getDatabaseName, getDatabaseUser)
 
 import Data.List (intercalate, inits)
 import Data.Text (pack, Text, unpack)
-import Helpers.Logger (info)
-import Helpers.Tree (Tree (Tree))
+import Logger (info)
+import Tree (Tree (Tree))
 import Database.Persist.TH (share, mkPersist, sqlSettings, mkMigrate, persistLowerCase)
 import Database.Persist.MySQL (ConnectInfo(ConnectInfo, connectDatabase, connectUser), defaultConnectInfo, SqlPersistT, withMySQLConn, runSqlConn, runMigration, selectList, Entity (Entity), Filter (Filter), FilterValue (FilterValue), PersistFilter (BackendSpecificFilter), EntityNameDB (unEntityNameDB), getEntityDBName, getEntityFields, FieldDef (FieldDef), fieldDBName, FieldNameHS (unFieldNameHS), PersistStoreWrite (insert_))
 import Control.Monad.Logger (NoLoggingT (runNoLoggingT))
-import Helpers.Database.Schema (migrateAll, GuestbookEntry (GuestbookEntry), Visit, Snake, EntityField (VisitVisitUuid, TokenTokenToken), defs, Token (tokenTokenName), User (userUserName))
+import Database.Schema (migrateAll, GuestbookEntry (GuestbookEntry), Visit, Snake, EntityField (VisitVisitUuid, TokenTokenToken), defs, Token (tokenTokenName), User (userUserName))
 import Database.Persist.Types (EntityDef, FieldDef (fieldSqlType), fieldHaskell)
 
 -- Database boilerplate

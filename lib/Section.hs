@@ -1,4 +1,4 @@
-module Helpers.Section where
+module Section where
 
 import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)

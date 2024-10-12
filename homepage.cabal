@@ -2,37 +2,20 @@ cabal-version:      2.4
 name:               homepage
 version:            0.1.0.0
 
-executable homepage
-    main-is:          Main.hs
-    other-modules:
-        Footer,
-        Header,
-        Index,
-        Layout,
-        Helpers.CodeBlock,
-        Helpers.Section,
-        Helpers.Tree,
-        Helpers.Utils,
-        Helpers.Database.Database,
-        Helpers.Database.Schema,
-        Helpers.Settings,
-        Helpers.Tables,
-        Helpers.Logger,
-        Helpers.Cli,
-        Helpers.Scripts,
-        Helpers.Page,
-        Api.Api,
-        Pages.Pages,
-        Pages.Search.Search,
-        Pages.Contact.Contact,
-        Pages.Projects.Projects,
-        Pages.Projects.Snake,
-        Pages.Projects.Brainfuck,
-        Pages.Guestbook.Guestbook,
-        Pages.Sources.Sources,
-        Pages.Sources.Repo,
-        Pages.Admin.Admin
-
+library lib-homepage
+    exposed-modules:
+        Settings,
+        Database.Database,
+        Database.Schema
+        CodeBlock,
+        Section,
+        Tree,
+        Utils,
+        Tables,
+        Logger,
+        Repl,
+        Scripts,
+        Page
     build-depends:
         base,
         ihp-hsx,
@@ -58,26 +41,39 @@ executable homepage
         persistent,
         persistent-mysql,
         monad-logger
-
-    hs-source-dirs:   app
-    default-language: Haskell2010
+    hs-source-dirs:   lib
+    default-language: GHC2021
     default-extensions:
         QuasiQuotes,
         OverloadedStrings
 
-    ghc-options:
-        -threaded
+test-suite test-homepage
+    default-language: GHC2021
+    type: exitcode-stdio-1.0
+    hs-source-dirs: test
+    main-is: Main.hs
+    build-depends:
+        base,
+        lib-homepage
 
-executable cli
-    main-is: Interactive.hs
+executable homepage
+    main-is:          Main.hs
     other-modules:
-        Helpers.Logger,
-        Helpers.Database.Database,
-        Helpers.Database.Schema,
-        Helpers.Cli,
-        Helpers.Settings,
-        Helpers.Tree,
-        Helpers.Utils
+        Footer,
+        Header,
+        Index,
+        Layout,
+        Pages.Pages,
+        Pages.Search.Search,
+        Pages.Contact.Contact,
+        Pages.Projects.Projects,
+        Pages.Projects.Snake,
+        Pages.Projects.Brainfuck,
+        Pages.Guestbook.Guestbook,
+        Pages.Sources.Sources,
+        Pages.Sources.Repo,
+        Pages.Admin.Admin,
+        Api.Api
 
     build-depends:
         base,
@@ -98,9 +94,52 @@ executable cli
         password,
         cryptonite,
         string-random,
+        regex-compat,
+        http-conduit,
+        yaml,
         persistent,
         persistent-mysql,
-        monad-logger
+        monad-logger,
+        lib-homepage
+
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    default-extensions:
+        QuasiQuotes,
+        OverloadedStrings
+
+    ghc-options:
+        -threaded
+
+executable repl-homepage
+    main-is: Interactive.hs
+
+    build-depends:
+        base,
+        ihp-hsx,
+        blaze-html,
+        text,
+        warp,
+        wai,
+        http-types,
+        blaze-builder,
+        utf8-string,
+        bytestring,
+        time,
+        uuid,
+        directory,
+        aeson,
+        split,
+        password,
+        cryptonite,
+        string-random,
+        regex-compat,
+        http-conduit,
+        yaml,
+        persistent,
+        persistent-mysql,
+        monad-logger,
+        lib-homepage
 
     hs-source-dirs: app
     default-extensions:

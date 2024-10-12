@@ -4,7 +4,7 @@ import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 import Data.List (intercalate)
 
-import Helpers.CodeBlock (codeBlock)
+import CodeBlock (codeBlock)
 
 convertSymbols :: String -> String
 convertSymbols ('+':xs) = "(*ptr)++;\n"++convertSymbols xs

@@ -1,12 +1,12 @@
-module Helpers.Logger where
+module Logger where
 
 import Network.Wai.Internal (Response(ResponseBuilder, ResponseFile), Request, pathInfo, requestMethod)
 import Data.List (intercalate)
 import Data.Text (unpack)
 import Network.HTTP.Types (Status(statusCode))
 
-import Helpers.Utils (unpackBS)
-import Helpers.Settings (LogLevel (..), getLogLevel, getCliState)
+import Utils (unpackBS)
+import Settings (LogLevel (..), getLogLevel, getCliState)
 import System.IO (hFlush, stdout)
 import Control.Monad (when)
 

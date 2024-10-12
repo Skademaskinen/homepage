@@ -3,8 +3,8 @@ import Text.Blaze.Html (Html)
 import IHP.HSX.QQ (hsx)
 import Text.Regex (Regex, matchRegex, mkRegex)
 import Network.Wai (Request, Response)
-import Helpers.Section (section)
-import Helpers.Page (Page, description, route, getArgs, PageSetting (Route, Description))
+import Section (section)
+import Page (Page, description, route, getArgs, PageSetting (Route, Description))
 import Layout (layout)
 
 

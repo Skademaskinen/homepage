@@ -1,5 +1,5 @@
 module Main where
-import Helpers.Cli (cli)
+import Repl (repl)
 
 main :: IO ()
-main = cli
+main = repl

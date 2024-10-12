@@ -1,7 +1,7 @@
-module Helpers.Scripts where
+module Scripts where
 import Text.Blaze.Html (Html)
 import IHP.HSX.QQ (hsx)
-import Helpers.Page (PageSetting(Route), Page)
+import Page (PageSetting(Route), Page)
 
 createStorage :: Html
 createStorage = [hsx|
