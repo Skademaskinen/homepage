@@ -8,7 +8,7 @@ import Blaze.ByteString.Builder (copyByteString)
 import Data.ByteString.UTF8 (fromString)
 import Text.Blaze.Html.Renderer.String (renderHtml)
 import Layout (layout)
-import Helpers.Logger (info, warning)
+import Logger (info, warning)
 import System.Directory (doesFileExist)
 import Data.List (intercalate, find)
 import Api.Api (api)
@@ -21,8 +21,8 @@ import Pages.Admin.Admin (admin)
 import Index (index)
 import Data.Text (unpack)
 import Pages.Search.Search (search)
-import Helpers.Page
-import Helpers.Scripts (testPage)
+import Page
+import Scripts (testPage)
 
 page404 :: [String] -> Html
 page404 args = layout [hsx|

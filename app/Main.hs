@@ -27,20 +27,20 @@ import Pages.Projects.Snake (leaderboard)
 import Pages.Sources.Sources (sources)
 import Pages.Guestbook.Guestbook (guestbook)
 
-import Helpers.Database.Database (doMigration)
-import Helpers.Utils (unpackBS)
-import Helpers.Settings (getPort, getCliState, getMigrate)
-import Helpers.Logger (logger, tableify, info, warning)
+import Database.Database (doMigration)
+import Utils (unpackBS)
+import Settings (getPort, getCliState, getMigrate)
+import Logger (logger, tableify, info, warning)
 import Api.Api (api)
 import Control.Concurrent (forkIO, ThreadId)
-import Helpers.Cli (cli)
+import Repl (repl)
 import System.Environment (getArgs)
 import Pages.Admin.Admin (admin)
 import Text.Regex (mkRegex, Regex, matchRegex)
 import Pages.Pages (findPage)
 import Data.List.Split (splitOn)
 import Control.Monad (when)
-import Helpers.Page (embedText, embedImage, description)
+import Page (embedText, embedImage, description)
 
 
 serve :: Html -> Response
@@ -115,6 +115,6 @@ main = do
         cliState <- getCliState
         if cliState then do
             forkIO $ run port app
-            cli
+            repl
         else run port app
 

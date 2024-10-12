@@ -1,4 +1,4 @@
-module Helpers.Tree where
+module Tree where
 
 data Tree a = Tree a [Tree a]
     deriving Show

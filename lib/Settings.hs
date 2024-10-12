@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Helpers.Settings where
+module Settings where
 
 import System.Environment (lookupEnv, getArgs)
 import Data.List (find)

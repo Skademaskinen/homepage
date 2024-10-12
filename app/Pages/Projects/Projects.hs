@@ -5,17 +5,17 @@ import Text.Blaze.Html (Html)
 
 import Data.List (replicate, intercalate, find)
 
-import Helpers.Tree ( Tree(..) )
-import Helpers.Utils (forEach)
-import Helpers.Section (section)
+import Tree ( Tree(..) )
+import Utils (forEach)
+import Section (section)
 import Pages.Projects.Snake (snake)
 import Pages.Projects.Brainfuck (brainfuck)
 
-import Helpers.Database.Database (prettyPrintSchema)
-import Helpers.CodeBlock (codeBlock)
-import Helpers.Page (Page, PageSetting (Route, Description), getArgs)
+import Database.Database (prettyPrintSchema)
+import CodeBlock (codeBlock)
+import Page (Page, PageSetting (Route, Description), getArgs)
 import Layout (layout)
-import Helpers.Database.Schema (defs)
+import Database.Schema (defs)
 
 defaultProject :: (String, Html)
 defaultProject = ("", section [hsx|
