@@ -75,4 +75,7 @@ brainfuck = [hsx|
         "$out_file"
     ]}
     I think a really good example of brainfuck programs is: <a href="http://www.brainfuck.org/life.b">http://www.brainfuck.org/life.b</a>
+    <br>
+    Run it directly:
+    {codeBlock "bash" "curl https://skade.dev/api/brainfuck -d \"$(curl https://brainfuck.org/life.b 2> /dev/null)\" 2> /dev/null | gcc -xc - -o /tmp/life && /tmp/life"}
 |]
