@@ -59,4 +59,20 @@ brainfuck = [hsx|
     <br>
     Example:
     {codeBlock "txt" "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++."}
+    <br>
+    Use the script below to compile and run a file containing brainfuck code.
+    {codeBlock "bash" $ intercalate "\n" [
+        "#!/usr/bin/env bash",
+        "file=$1",
+        "if [[ \"$TMPDIR\" == \"\" ]]; then",
+        "\tout_file=\"/tmp/code_bf\"",
+        "else",
+        "\tout_file=\"$TMPDIR/code_bf\"",
+        "fi",
+        "b_source=\"$(cat $file)\"",
+        "c_source=\"$(curl -d \"$b_source\" -X \"POST\" https://skade.dev/api/brainfuck 2> /dev/null)\"",
+        "echo \"$c_source\" | gcc -xc - -o $out_file",
+        "$out_file"
+    ]}
+    I think a really good example of brainfuck programs is: <a href="http://www.brainfuck.org/life.b">http://www.brainfuck.org/life.b</a>
 |]
