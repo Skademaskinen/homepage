@@ -64,7 +64,7 @@ brainfuck = [hsx|
     {codeBlock "bash" $ intercalate "\n" [
         "#!/usr/bin/env bash",
         "file=$1",
-        "if [[ \"$TMPDIR\" == \"\" ]]; then",
+        "if [ -z $TMPDIR ]; then",
         "\tout_file=\"/tmp/code_bf\"",
         "else",
         "\tout_file=\"$TMPDIR/code_bf\"",
