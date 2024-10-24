@@ -90,6 +90,7 @@ executable homepage
         uuid,
         directory,
         aeson,
+        aeson-qq,
         split,
         password,
         cryptonite,

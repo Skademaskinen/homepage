@@ -35,7 +35,7 @@
                     base blaze-builder blaze-html bytestring http-types ihp-hsx
                     text time utf8-string uuid wai warp directory aeson split
                     password cryptonite string-random regex-compat http-conduit
-                    yaml persistent persistent-mysql monad-logger
+                    yaml persistent persistent-mysql monad-logger aeson-qq
                 ];
                 license = "unknown";
                 mainProgram = "homepage";

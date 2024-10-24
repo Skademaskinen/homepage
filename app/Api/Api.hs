@@ -31,12 +31,22 @@ import Database.Persist (selectList, Entity (Entity), insertEntity, Filter (Filt
 
 import Network.HTTP.Types (HeaderName)
 import Data.ByteString.UTF8 (ByteString)
+import Data.Aeson.QQ.Simple (aesonQQ)
 
 type Header = (HeaderName, ByteString)
 type APIResponse = IO (Status, String, [Header])
 
+j2s :: Value -> String
+j2s = unpackBS . toStrict .encode
+
 defaultHeaders :: [Header]
 defaultHeaders = [("Content-Type", "text/plain")]
+
+messageResponse :: String -> String
+messageResponse value = j2s [aesonQQ|{
+    "message":"#{value}"
+}|]
+
 
 handleGuestbookEntry :: T.GuestbookEntry -> APIResponse
 handleGuestbookEntry (T.GuestbookEntry "" _ _) = return (status400, "Error, name cannot be empty", defaultHeaders)
@@ -44,14 +54,14 @@ handleGuestbookEntry (T.GuestbookEntry _ "" _) = return (status400, "Error, cont
 handleGuestbookEntry (T.GuestbookEntry name content parentId) = do
     time <- fmap round getPOSIXTime :: IO Int
     runDb $ insertEntity $ GuestbookEntry 0 time name content parentId
-    return (status200, "Success", defaultHeaders)
+    return (status200, messageResponse "Success" , defaultHeaders)
 
 handleLeaderboardEntry :: T.LeaderboardEntry -> APIResponse
 handleLeaderboardEntry (T.LeaderboardEntry name score speed fruits) = do
     time <- fmap round getPOSIXTime :: IO Int
     runDb $ insertEntity $ Snake 0 time name score speed fruits
-    return (status200, "Success", defaultHeaders)
-handleLeaderboardEntry T.EmptyLeaderboard = return (status400, "Error", defaultHeaders)
+    return (status200, messageResponse "Success", defaultHeaders)
+handleLeaderboardEntry T.EmptyLeaderboard = return (status400, messageResponse "Error", defaultHeaders)
 
 handleLogin :: T.Credentials -> APIResponse
 handleLogin (T.Credentials username password) = do
@@ -69,9 +79,9 @@ handleLogin (T.Credentials username password) = do
                     let row = head rows
                     return (status200, tokenTokenToken row, defaultHeaders)
                     where
-            PasswordCheckFail -> return (status400, "Wrong username or password", defaultHeaders)
-        _ -> return (status400, "Error, no user exists", defaultHeaders)
-handleLogin _ = return (status400, "Invalid request", defaultHeaders)
+            PasswordCheckFail -> return (status400, messageResponse "Wrong username or password", defaultHeaders)
+        _ -> return (status400, messageResponse "Error, no user exists" , defaultHeaders)
+handleLogin _ = return (status400, messageResponse "Invalid request", defaultHeaders)
 
 api :: [String] -> Request -> APIResponse
 api ["visits", "new"] request = do
@@ -105,11 +115,13 @@ api ["admin", "login"] request = do
     let credentials = getDefault T.EmptyCredentials (decode (fromStrict body) :: Maybe T.Credentials)
     handleLogin credentials
 api ["hello"] _ = do
-    return (status200, "Hello World!", defaultHeaders)
+    return (status200, j2s [aesonQQ|{
+        "message":"Hello World!"
+    }|], defaultHeaders)
 api ["brainfuck"] request = do
     input <- getRequestBodyChunk request
     let result = code $ unpackBS input
     return (status200, result, [("Content-Disposition", "attachment; filename=\"brainfuck.c\"")])
 
 api xs request = do
-    return (status404, "{\"error\":\"Endpoint does not exist\"}", defaultHeaders)
+    return (status404, messageResponse "Endpoint does not exist", defaultHeaders)
