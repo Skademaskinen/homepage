@@ -11,7 +11,7 @@ import Data.List (intercalate, find)
 
 import System.Directory (doesFileExist)
 
-import Network.Wai (responseBuilder, responseFile, Request (queryString))
+import Network.Wai (responseBuilder, responseFile, Request (queryString), responseLBS)
 import Network.Wai.Handler.Warp (run)
 import Network.Wai.Internal (Response(ResponseBuilder, ResponseFile), Request, pathInfo, requestMethod)
 import Network.HTTP.Types (statusCode, status200, status404, Status, Query, HeaderName)
@@ -31,7 +31,7 @@ import Database.Database (doMigration)
 import Utils (unpackBS)
 import Settings (getPort, getCliState, getMigrate)
 import Logger (logger, tableify, info, warning)
-import Api.Api (api)
+import Api.Api (api, j2s)
 import Control.Concurrent (forkIO, ThreadId)
 import Repl (repl)
 import System.Environment (getArgs)
@@ -41,6 +41,8 @@ import Pages.Pages (findPage)
 import Data.List.Split (splitOn)
 import Control.Monad (when)
 import Page (embedText, embedImage, description)
+import Data.Aeson.QQ (aesonQQ)
+import Data.Aeson (encode)
 
 
 serve :: Html -> Response
@@ -66,7 +68,7 @@ serveFile path = do
         return $ responseFile status200 [autoContentType path] path Nothing
     else do
         warning "No file found!"
-        return $ responseBuilder status404 [("Content-Type", "text/json")] $ copyByteString "{\"error\":\"Error: file not found!\"}"
+        return $ responseLBS status404 [("Content-Type", "text/json")] $ encode [aesonQQ|{"error":"Error, file not found"}|]
 
 app :: Request -> (Response -> IO b)  -> IO b
 app request respond = do
@@ -80,8 +82,7 @@ app request respond = do
         serveFile "static/favicon.ico"
 
     else if x == "api" then do -- If the request is to the API
-        resp <- api request
-        (status, value, headers) <- resp
+        (status, value, headers) <- api request
         return $ responseBuilder status headers $ copyByteString (fromString value)
 
     else do -- If the content is to the HTML Frontend

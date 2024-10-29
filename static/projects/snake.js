@@ -90,7 +90,7 @@ async function launchGame() {
 
         if(name != "") {
             fetch("/api/snake/add", {
-                method: "post",
+                method: "PUT",
                 body: JSON.stringify({
                     name: document.getElementById("player-name").value,
                     timestamp: time,

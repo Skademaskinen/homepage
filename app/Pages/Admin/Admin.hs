@@ -167,14 +167,14 @@ page x = do
                         username:username,
                         password:password
                     })
-                }).then(response => response.text().then(text => {
+                }).then(response => response.json().then(data => {
                     if(response.ok) {
-                        setCookie("adminToken="+text+";path=/")
-                        window.location.href = "/admin/summary/"+text
+                        setCookie("adminToken="+data.token+";path=/")
+                        window.location.href = "/admin/summary/"+data.token
                     }
                     else {
                         var error_display = document.getElementById("error_display")
-                        error_display.innerHTML = text
+                        error_display.innerHTML = data.message
                     }
                 }))
             }
