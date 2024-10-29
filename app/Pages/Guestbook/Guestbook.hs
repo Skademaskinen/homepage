@@ -76,7 +76,7 @@ page = do
                 var name = document.getElementById("guestbook-name::"+id).value
                 console.log(id)
                 fetch("/api/guestbook/add", {
-                    method:"POST",
+                    method:"PUT",
                     body: JSON.stringify({
                         name: name,
                         content: text,
@@ -86,8 +86,8 @@ page = do
                     if(response.status == 200){
                         window.location.reload()
                     }
-                    else response.text().then(text => {
-                        alert(response.status + "\n" + text)
+                    else response.json().then(data => {
+                        alert(response.status + "\n" + data.message)
                     })
                 })
             }
