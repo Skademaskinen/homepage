@@ -1,21 +1,24 @@
 module Pages.Admin.Admin where
-import IHP.HSX.QQ (hsx)
-import Text.Blaze.Html (Html)
-import Database.Database (prettyPrintSchema, getVisits, getGuestbookEntries, getLeaderboard, getUsers, getTokens, validateToken, tokenToUsername)
+
 import CodeBlock (codeBlock)
-import Page (Page, PageSetting (Route, Description), getArgs)
-import Layout (layout)
 import Data.Text (Text)
-import Database.Schema (Visit(Visit), GuestbookEntry (GuestbookEntry), Snake (Snake), User (User), Token (Token))
+import Database.Database (getGuestbookEntries, getLeaderboard, getTokens, getUsers, getVisits, prettyPrintSchema, tokenToUsername, validateToken)
+import Database.Schema (GuestbookEntry (GuestbookEntry), Snake (Snake), Token (Token), User (User), Visit (Visit))
+import IHP.HSX.QQ (hsx)
+import Layout (layout)
+import Page (Page, PageSetting (Description, Route), getArgs)
+import Text.Blaze.Html (Html)
 
 nameRow :: [String] -> Html
-nameRow names = [hsx|
+nameRow names =
+  [hsx|
     <tr>
         {mconcat $ map element names}
     </tr>
 |]
-    where
-        element name = [hsx|
+ where
+  element name =
+    [hsx|
             <th class="common-table-element" style="color: red;">
                 {name}
             </th>
@@ -23,16 +26,18 @@ nameRow names = [hsx|
 
 visitsTable :: IO Html
 visitsTable = do
-    rows <- getVisits
-    return [hsx|
+  rows <- getVisits
+  return
+    [hsx|
         <h2>Visits</h2>
         <table class="common-table">
             {nameRow ["id", "timestamp", "uuid"]}
             {mconcat $ map makeRow rows}
         </table>
-    |] 
-    where
-        makeRow (Visit id timestamp uuid) = [hsx|
+    |]
+ where
+  makeRow (Visit id timestamp uuid) =
+    [hsx|
             <tr class="common-table-row">
                 <th class="common-table-element">{id}</th>
                 <th class="common-table-element">{timestamp}</th>
@@ -42,16 +47,18 @@ visitsTable = do
 
 guestbookTable :: IO Html
 guestbookTable = do
-    rows <- getGuestbookEntries
-    return [hsx|
+  rows <- getGuestbookEntries
+  return
+    [hsx|
         <h2>Guestbook</h2>
         <table class="common-table">
             {nameRow ["id", "timestamp", "name", "content", "parentId"]}
             {mconcat $ map makeRow rows}
         </table>
     |]
-    where
-        makeRow (GuestbookEntry id timestamp name content parent) = [hsx|
+ where
+  makeRow (GuestbookEntry id timestamp name content parent) =
+    [hsx|
             <tr class="common-table-row">
                 <th class="common-table-element">{id}</th>
                 <th class="common-table-element">{timestamp}</th>
@@ -63,16 +70,18 @@ guestbookTable = do
 
 snakeTable :: IO Html
 snakeTable = do
-    rows <- getLeaderboard
-    return [hsx|
+  rows <- getLeaderboard
+  return
+    [hsx|
         <h2>Snake Leaderboard</h2>
         <table class="common-table">
             {nameRow ["id", "timestamp", "name", "score", "speed", "fruits"]}
             {mconcat $ map makeRow rows}
         </table>
     |]
-    where
-        makeRow (Snake id timestamp name score speed fruits) = [hsx|
+ where
+  makeRow (Snake id timestamp name score speed fruits) =
+    [hsx|
             <tr class="common-table-row">
                 <th class="common-table-element">{id}</th>
                 <th class="common-table-element">{timestamp}</th>
@@ -85,16 +94,18 @@ snakeTable = do
 
 usersTable :: IO Html
 usersTable = do
-    rows <- getUsers
-    return [hsx|
+  rows <- getUsers
+  return
+    [hsx|
         <h2>Users</h2>
         <table class="common-table">
             {nameRow ["id", "username", "password"]}
             {mconcat $ map makeRow rows}
         </table>
     |]
-    where
-        makeRow (User id username password) = [hsx|
+ where
+  makeRow (User id username password) =
+    [hsx|
             <tr class="common-table-row">
                 <th class="common-table-element">{id}</th>
                 <th class="common-table-element">{username}</th>
@@ -104,16 +115,18 @@ usersTable = do
 
 validTokensTable :: IO Html
 validTokensTable = do
-    rows <- getTokens
-    return [hsx|
+  rows <- getTokens
+  return
+    [hsx|
         <h2>Valid Tokens</h2>
         <table class="common-table">
             {nameRow ["id", "token", "username"]}
             {mconcat $ map makeRow rows}
         </table>
     |]
-    where
-        makeRow (Token id token username) = [hsx|
+ where
+  makeRow (Token id token username) =
+    [hsx|
             <tr class="common-table-row">
                 <th class="common-table-element">{id}</th>
                 <th class="common-table-element">{token}</th>
@@ -123,10 +136,12 @@ validTokensTable = do
 
 page :: [String] -> IO Html
 page ["summary", token] = do
-    validity <- validateToken token
-    if validity then do
-        username <- tokenToUsername token
-        return [hsx|
+  validity <- validateToken token
+  if validity
+    then do
+      username <- tokenToUsername token
+      return
+        [hsx|
             <h1>Welcome {username}!</h1>
             Schema:
             {codeBlock "txt" prettyPrintSchema}
@@ -139,24 +154,25 @@ page ["summary", token] = do
             <a href={"/admin/dump/all/"++token}>All</a>
         |]
     else
-        page []
+      page []
 page ["dump", table, token] = do
-    validity <- validateToken token
-    if validity then showTable table
+  validity <- validateToken token
+  if validity
+    then showTable table
     else
-        page []
-    where
-        showTable "visits" = visitsTable
-        showTable "guestbook" = guestbookTable
-        showTable "snake" = snakeTable
-        showTable "users" = usersTable
-        showTable "tokens" = validTokensTable
-        showTable "all" = mconcat [visitsTable, guestbookTable, snakeTable, usersTable, validTokensTable]
-        showTable _ = [hsx||]
-
+      page []
+ where
+  showTable "visits" = visitsTable
+  showTable "guestbook" = guestbookTable
+  showTable "snake" = snakeTable
+  showTable "users" = usersTable
+  showTable "tokens" = validTokensTable
+  showTable "all" = mconcat [visitsTable, guestbookTable, snakeTable, usersTable, validTokensTable]
+  showTable _ = [hsx||]
 page x = do
-    print x
-    return [hsx|
+  print x
+  return
+    [hsx|
         <script>
             function login() {
                 var username = document.getElementById("username").value
@@ -193,12 +209,15 @@ page x = do
     |]
 
 settings :: [PageSetting]
-settings = [
-    Route "/admin", 
-    Description "Database Admin panel"
-    ]
+settings =
+  [ Route "/admin"
+  , Description "Database Admin panel"
+  ]
 
 admin :: Page
-admin = (settings, \req -> do
-    let (_:xs) = getArgs req
-    layout <$> page xs)
+admin =
+  ( settings
+  , \req -> do
+      let (_ : xs) = getArgs req
+      layout <$> page xs
+  )

@@ -8,12 +8,12 @@ import Section (section)
 
 import Data.List (filter)
 
-import Data.Time.Format ( defaultTimeLocale, formatTime )
-import Data.Time.Clock.POSIX ( POSIXTime, posixSecondsToUTCTime )
-import Tree (Tree(Tree))
-import Page (Page, PageSetting (Route, Description))
-import Layout (layout)
+import Data.Time.Clock.POSIX (POSIXTime, posixSecondsToUTCTime)
+import Data.Time.Format (defaultTimeLocale, formatTime)
 import Database.Schema (GuestbookEntry (GuestbookEntry))
+import Layout (layout)
+import Page (Page, PageSetting (Description, Route))
+import Tree (Tree (Tree))
 
 type Guestbook = [(Int, Int, String, String, Int)]
 
@@ -21,7 +21,10 @@ toPosix :: Int -> POSIXTime
 toPosix n = read (show n ++ "s") :: POSIXTime
 
 prettifyGuestbook :: [Tree GuestbookEntry] -> Html
-prettifyGuestbook ((Tree (GuestbookEntry id timestamp name content parent) children):xs) = mconcat [section [hsx|
+prettifyGuestbook ((Tree (GuestbookEntry id timestamp name content parent) children) : xs) =
+  mconcat
+    [ section
+        [hsx|
     <h3>{name} said: </h3>
     Posted: <span style="color: #ff0000">{formatTime defaultTimeLocale "%c" $ posixSecondsToUTCTime (toPosix timestamp)}</span>
     <br>
@@ -40,17 +43,21 @@ prettifyGuestbook ((Tree (GuestbookEntry id timestamp name content parent) child
     {prettifyGuestbook $ children} 
     {guestbookInput id True}
     <br><br>
-|], prettifyGuestbook xs]
+|]
+    , prettifyGuestbook xs
+    ]
 prettifyGuestbook [] = [hsx||]
 
 guestbookInput :: Int -> Bool -> Html
-guestbookInput parent False = [hsx|
+guestbookInput parent False =
+  [hsx|
     <textarea class="guestbook-text" id={"guestbook-text::"++show parent} type="text"></textarea>
     <br>
     Name: <input id={"guestbook-name::"++show parent} class="guestbook-name" type="text">
     <button id={show parent} onclick="post(this.id)">Post</button>
 |]
-guestbookInput parent True = [hsx|
+guestbookInput parent True =
+  [hsx|
     <button id={show parent} onclick="guestbookToggleInput(this.id)">New reply</button>
     <br>
     <div style="display:none;" id={"guestbook-reply::"++show parent}>
@@ -59,8 +66,9 @@ guestbookInput parent True = [hsx|
 |]
 
 page = do
-    guestbook <- getGuestbook
-    return [hsx|
+  guestbook <- getGuestbook
+  return
+    [hsx|
         <script>
             function guestbookToggleInput(id) {
                 var reply = document.getElementById("guestbook-reply::"+id)
@@ -100,12 +108,11 @@ page = do
         {prettifyGuestbook guestbook}
     |]
 
-
 settings :: [PageSetting]
-settings = [
-    Route "/guestbook", 
-    Description "A Guestbook where you can send me a message"
-    ]
+settings =
+  [ Route "/guestbook"
+  , Description "A Guestbook where you can send me a message"
+  ]
 
 guestbook :: Page
 guestbook = (settings, const $ layout <$> page)

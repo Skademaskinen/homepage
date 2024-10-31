@@ -3,15 +3,16 @@ module Pages.Sources.Sources where
 import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 
-import Utils (linkImage)
-import Pages.Sources.Repo (repo)
-import Page (Page, PageSetting (Description, Route))
 import Layout (layout)
+import Page (Page, PageSetting (Description, Route))
+import Pages.Sources.Repo (repo)
+import Utils (linkImage)
 
 page :: IO Html
 page = do
-    commitHistory <- repo
-    return [hsx|
+  commitHistory <- repo
+  return
+    [hsx|
     <h2 style="text-align:center;">Sources</h2>
     <div class="section" style="text-align:center;">
         This website is written using the following software:<br>
@@ -28,11 +29,10 @@ page = do
 |]
 
 settings :: [PageSetting]
-settings = [
-    Route "/sources", 
-    Description "Sources for this website and my source code"
-    ]
+settings =
+  [ Route "/sources"
+  , Description "Sources for this website and my source code"
+  ]
 
 sources :: Page
 sources = (settings, const $ layout <$> page)
-

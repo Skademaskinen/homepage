@@ -3,19 +3,21 @@ module Pages.Projects.Snake where
 import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 
-import Utils ( forEach )
 import Database.Database (getLeaderboard)
-import Page (Page, PageSetting (Description, Route))
-import Layout (layout)
 import Database.Schema (Snake (Snake))
+import Layout (layout)
+import Page (Page, PageSetting (Description, Route))
+import Utils (forEach)
 
 tile :: Int -> Html
-tile id = [hsx|
+tile id =
+  [hsx|
     <span class="tile" id={"tile-" ++ (show id)}></span>
 |]
 
 tileRow :: Int -> Html
-tileRow offset = [hsx|
+tileRow offset =
+  [hsx|
     <div>
         {forEach [(offset*20)..19+(offset*20)] tile}
     </div>
@@ -23,17 +25,20 @@ tileRow offset = [hsx|
 |]
 
 grid :: Html
-grid = [hsx|
+grid =
+  [hsx|
     {forEach [0..19] tileRow}
 |]
 
 fire :: Int -> Html
-fire _ = [hsx|
+fire _ =
+  [hsx|
     <img src="/static/projects/fire.gif" width="50%">
 |]
 
 snake :: Html
-snake = [hsx|
+snake =
+  [hsx|
     <link rel="stylesheet" href="/static/projects/snake.css">
     <div style="text-align:center;">
         <div class="snake">
@@ -85,12 +90,14 @@ snake = [hsx|
 |]
 
 leaderboardField :: String -> Html
-leaderboardField value = [hsx|
+leaderboardField value =
+  [hsx|
     <th style="width:100px">{value}</th>
 |]
 
 leaderboardEntry :: Snake -> Html
-leaderboardEntry (Snake id timestamp name score speed fruits) = [hsx|
+leaderboardEntry (Snake id timestamp name score speed fruits) =
+  [hsx|
     <tr>
         {mconcat $ map leaderboardField [name, show timestamp, show score, show speed, show fruits]}
     </tr>
@@ -98,8 +105,9 @@ leaderboardEntry (Snake id timestamp name score speed fruits) = [hsx|
 
 page :: IO Html
 page = do
-    l <- getLeaderboard
-    return [hsx|
+  l <- getLeaderboard
+  return
+    [hsx|
         <table>
             <tr>
                 <th>Name</th>
@@ -113,10 +121,10 @@ page = do
     |]
 
 settings :: [PageSetting]
-settings = [
-    Route "/snake-leaderboard", 
-    Description "Leaderboard of my snake project"
-    ]
+settings =
+  [ Route "/snake-leaderboard"
+  , Description "Leaderboard of my snake project"
+  ]
 
 leaderboard :: Page
 leaderboard = (settings, const $ layout <$> page)
