@@ -10,9 +10,7 @@ import Page (Page, PageSetting (Description, EmbedImage, EmbedText, Route))
 import Section (section)
 
 intro :: Html
-intro =
-  section
-    [hsx|
+intro = section [hsx|
     Welcome to my home page, returning visitors might notice that the same layout that i always use is still present, and yes the site is still written in Haskell.
     <br><br>
     I was using the whole IHP development suite to work on the site originally, but i have a problem with that framework: its huge and very overkill for what i'm trying to do.
@@ -42,30 +40,29 @@ intro =
 
 page :: IO Html
 page = do
-  visits <- show . length <$> getVisits
-  return
-    [hsx|
-    <h1>Skademaskinen</h1>
-    <img src="/static/icon.png" style="border-radius:50%">
-    <br>
-    <hr>
-    {intro}
-    Visitors: <p id="visits">{visits}</p>
-    <script>
-        fetch("/api/visits/new", {
-            method: "post",
-            body: getCookie("visitId")
-        }).then(res => res.json().then(data => setCookie("visitId="+data.uuid)))
-    </script>
-|]
+    visits <- show . length <$> getVisits
+    return [hsx|
+        <h1>Skademaskinen</h1>
+        <img src="/static/icon.png" style="border-radius:50%">
+        <br>
+        <hr>
+        {intro}
+        Visitors: <p id="visits">{visits}</p>
+        <script>
+            fetch("/api/visits/new", {
+                method: "post",
+                body: getCookie("visitId")
+            }).then(res => res.json().then(data => setCookie("visitId="+data.uuid)))
+        </script>
+    |]
 
 settings :: [PageSetting]
-settings =
-  [ Route "/"
-  , Description "This is the front page for Skademaskinen, a server built as a passion project."
-  , EmbedImage "/static/icon.png"
-  , EmbedText "Skademaskinen - Index"
-  ]
+settings = [
+    Route "/",
+    Description "This is the front page for Skademaskinen, a server built as a passion project.",
+    EmbedImage "/static/icon.png",
+    EmbedText "Skademaskinen - Index"
+    ]
 
 index :: Page
 index = (settings, const $ layout <$> page)

@@ -8,17 +8,16 @@ import Page (Page, PageSetting (Description, EmbedImage, EmbedText, Route))
 import Utils (linkImage, row)
 
 rows :: [Html]
-rows =
-  [ row [[hsx|Type|], [hsx|Address|]]
-  , row [[hsx|Email|], [hsx|<a href="mailto://mast3r@skade.dev">mast3r@skade.dev</a>|]]
-  , row [[hsx|University Email|], [hsx|<a href="mailto://tjen19@student.aau.dk">tjen19@student.aau.dk</a>|]]
-  , row [[hsx|Matrix|], [hsx|@mast3r:skade.dev|]]
-  , row [[hsx|Discord|], [hsx|mast3r_waf1z|]]
-  ]
+rows = [ 
+    row [[hsx|Type|], [hsx|Address|]], 
+    row [[hsx|Email|], [hsx|<a href="mailto://mast3r@skade.dev">mast3r@skade.dev</a>|]], 
+    row [[hsx|University Email|], [hsx|<a href="mailto://tjen19@student.aau.dk">tjen19@student.aau.dk</a>|]], 
+    row [[hsx|Matrix|], [hsx|@mast3r:skade.dev|]], 
+    row [[hsx|Discord|], [hsx|mast3r_waf1z|]]
+    ]
 
 page :: Html
-page =
-  [hsx|
+page = [hsx|
     <h1>Contact me</h1>
         Here's my various contact addresses
         <br>
@@ -40,12 +39,12 @@ page =
 |]
 
 settings :: [PageSetting]
-settings =
-  [ Route "/contact"
-  , EmbedText "Skademaskinen - Contact me"
-  , EmbedImage "/static/icon.png"
-  , Description "My contact information, and where to find me"
-  ]
+settings = [
+    Route "/contact", 
+    EmbedText "Skademaskinen - Contact me", 
+    EmbedImage "/static/icon.png", 
+    Description "My contact information, and where to find me"
+    ]
 
 contact :: Page
 contact = (settings, const $ return $ layout page)

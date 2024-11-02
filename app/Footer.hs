@@ -4,8 +4,7 @@ import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 
 footer :: Html
-footer =
-  [hsx|
+footer = [hsx|
     <div>
     </div>
 |]

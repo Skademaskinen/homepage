@@ -18,9 +18,7 @@ module Database.Schema where
 
 import Database.Persist.TH (mkEntityDefList, mkMigrate, mkPersist, persistLowerCase, share, sqlSettings)
 
-share
-  [mkPersist sqlSettings, mkMigrate "migrateAll", mkEntityDefList "defs"]
-  [persistLowerCase|
+share [mkPersist sqlSettings, mkMigrate "migrateAll", mkEntityDefList "defs"] [persistLowerCase|
     Visit                                   sql=visits
         rid                      Int         sql=id
         timestamp               Int         sql=timestamp
@@ -50,4 +48,5 @@ share
         rid                      Int         sql=id
         token                   String      sql=token
         name                    String      sql=username
+        deriving Eq Show
 |]

@@ -7,8 +7,7 @@ import Footer (footer)
 import Header (header)
 
 layout :: Html -> Html
-layout content =
-  [hsx|
+layout content = [hsx|
     <!DOCTYPE html>
     <html>
         <head>

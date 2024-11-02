@@ -26,35 +26,32 @@ import Text.Blaze.Html.Renderer.String (renderHtml)
 import Text.Regex (Regex, matchRegex, mkRegex)
 
 page404 :: [String] -> Html
-page404 args =
-  layout
-    [hsx|
+page404 args = layout [hsx|
     <h1>404 - Page not found</h1><br>
     params: {args}
 |]
 
 pages :: [Page]
-pages =
-  [ search pages
-  , admin
-  , contact
-  , sources
-  , guestbook
-  , projects
-  , leaderboard
-  , testPage
-  , index
-  ]
+pages = [ 
+    search pages,
+    admin,
+    contact,
+    sources,
+    guestbook,
+    projects,
+    leaderboard,
+    testPage,
+    index
+    ]
 
 findPage :: String -> Page
-findPage addr = case find
-  ( \(settings, _) -> case do
-      if route settings == "/" && addr /= "/"
-        then Nothing
+findPage addr = case find (_findPage addr) pages of
+    (Just page) -> page
+    Nothing -> ([], \req -> return $ page404 (map unpack $ pathInfo req))
+    where
+        _findPage :: String -> Page -> Bool
+        _findPage addr (settings, _) = case if route settings == "/" && addr /= "/" then
+            Nothing
         else matchRegex (mkRegex (route settings)) addr of
-      Nothing -> False
-      _ -> True
-  )
-  pages of
-  (Just page) -> page
-  Nothing -> ([], \req -> return $ page404 (map unpack $ pathInfo req))
+            Nothing -> False
+            _ -> True

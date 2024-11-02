@@ -5,26 +5,23 @@ import Page (Page, PageSetting (Route))
 import Text.Blaze.Html (Html)
 
 createStorage :: Html
-createStorage =
-  [hsx|
+createStorage = [hsx|
     <script>
         var storage = {}
     </script>
 |]
 
 initStorage :: String -> Html
-initStorage label =
-  [hsx|
+initStorage label = [hsx|
     <script data-label={label}>
         storage[document.currentScript.dataset.label] = {}
     </script>
 |]
 
 fetchGet :: String -> String -> (String -> Html) -> Html
-fetchGet label url callback =
-  [hsx|
-        {initStorage label}
-        {callback label}
+fetchGet label url callback = [hsx|
+    {initStorage label}
+    {callback label}
     <script data-label={label} data-url={url}>
         var label = document.currentScript.dataset.label
         var url = document.currentScript.dataset.url
@@ -40,9 +37,8 @@ fetchGet label url callback =
 
 alertRequestApi :: String -> Html
 alertRequestApi url = fetchGet "temp" url callback
- where
-  callback _ =
-    [hsx|
+    where
+        callback _ = [hsx|
             <script>
                 storage.temp.callback = text => alert(text)
             </script>
@@ -50,9 +46,8 @@ alertRequestApi url = fetchGet "temp" url callback
 
 showText :: String -> String -> Html
 showText label url = fetchGet label url callback
- where
-  callback label =
-    [hsx|
+    where
+        callback label = [hsx|
             <div id={label}></div>
             <script data-label={label}>
                 var label = document.currentScript.dataset.label
@@ -61,17 +56,16 @@ showText label url = fetchGet label url callback
         |]
 
 page :: Html
-page =
-  [hsx|
+page = [hsx|
     {createStorage}
     {alertRequestApi "/api/hello"}
     {showText "apitext" "/api/guestbook/get"}
 |]
 
 settings :: [PageSetting]
-settings =
-  [ Route "/test"
-  ]
+settings = [ 
+    Route "/test"
+    ]
 
 testPage :: Page
 testPage = (settings, const $ return page)

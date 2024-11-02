@@ -5,8 +5,7 @@ import Text.Blaze.Html (Html)
 
 makeLinks :: [(String, String)] -> Html
 makeLinks [] = [hsx||]
-makeLinks [(display, url)] =
-  [hsx|
+makeLinks [(display, url)] = [hsx|
     <a href={url}>{display}</a> | 
     <input id="search" placeholder="search">
     <script>
@@ -18,15 +17,13 @@ makeLinks [(display, url)] =
         }
     </script>
 |]
-makeLinks ((display, url) : xs) =
-  [hsx|
+makeLinks ((display, url) : xs) = [hsx|
     <a href={url}>{display}</a> |
     {makeLinks xs}
 |]
 
 header :: [(String, String)] -> Html
-header links =
-  [hsx|
+header links = [hsx|
     <div>
         {makeLinks links}
     </div>

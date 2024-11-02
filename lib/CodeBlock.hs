@@ -4,8 +4,7 @@ import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 
 codeBlock :: String -> String -> Html
-codeBlock language code =
-  [hsx|
+codeBlock language code = [hsx|
     <pre>
         <code class={"language-" ++ language}>
             {code}
@@ -15,42 +14,26 @@ codeBlock language code =
 |]
 
 hsxIntroCodeBlock :: Html
-hsxIntroCodeBlock =
-  codeBlock "haskell" $
-    mconcat
-      [ "view :: Html\n"
-      , "view = "
-      , rB
-      , "hsx"
-      , vl
-      , "\n"
-      , "\t<span>Hello, </span>\n"
-      , vl
-      , lB
-      , "\n\n"
-      , "index :: Html\n"
-      , "index = "
-      , rB
-      , "hsx"
-      , vl
-      , "\n"
-      , "\t{view}\n"
-      , "\t<span>World!</span>\n"
-      , vl
-      , lB
-      ]
+hsxIntroCodeBlock = codeBlock "haskell" $ mconcat [
+    "view :: Html\n", 
+    "view = ", rB, "hsx", vl, "\n", 
+    "\t<span>Hello, </span>\n",
+    vl, lB, "\n\n", 
+    "index :: Html\n",
+    "index = ", rB, "hsx", vl, "\n",
+    "\t{view}\n",
+    "\t<span>World!</span>\n",
+    vl, lB
+    ]
 
 introCodeView :: Html
-introCodeView =
-  [hsx|
+introCodeView = [hsx|
     <span>Hello, </span>
 |]
 introCodeIndex :: Html
-introCodeIndex =
-  [hsx|
+introCodeIndex = [hsx|
     {introCodeView}
     <span>World!</span>
-
 |]
 
 rB :: String
@@ -61,8 +44,7 @@ vl :: String
 vl = "|"
 
 wrapHsxCode :: Html -> Html
-wrapHsxCode code =
-  [hsx|
+wrapHsxCode code = [hsx|
     {rB}hsx{vl}
         {code}
     {vl}{lB}
