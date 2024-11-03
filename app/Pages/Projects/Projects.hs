@@ -16,6 +16,7 @@ import Database.Database (prettyPrintSchema)
 import Database.Schema (defs)
 import Layout (layout)
 import Page (Page, PageSetting (Description, Route), getArgs)
+import Pages.Projects.Editor (editor)
 
 defaultProject :: (String, Html)
 defaultProject = ("", section [hsx|
@@ -69,6 +70,7 @@ projectsTree = Tree defaultProject [
     |]) [
         Tree ("Snake", snake) [], 
         Tree ("Brainfuck Transpiler", brainfuck) [],
+        Tree ("Text Editor", editor) [],
         Tree ("Website", mconcat [
             section [hsx|
                 <div style="max-width: 100%">

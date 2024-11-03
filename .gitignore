@@ -11,6 +11,7 @@ result
 
 # runtime files
 *.db3
+editor_root
 
 # editor
 .vscode

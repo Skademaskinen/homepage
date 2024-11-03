@@ -69,6 +69,7 @@ executable homepage
         Pages.Projects.Projects,
         Pages.Projects.Snake,
         Pages.Projects.Brainfuck,
+        Pages.Projects.Editor,
         Pages.Guestbook.Guestbook,
         Pages.Sources.Sources,
         Pages.Sources.Repo,

@@ -33,6 +33,8 @@ import Data.ByteString.UTF8 (ByteString)
 import Data.List (find)
 import Network.HTTP.Types (HeaderName)
 import Text.Regex (matchRegex, mkRegex)
+import System.IO (openFile, IOMode (ReadMode, WriteMode), hGetContents, hPutStr, hClose, writeFile)
+import System.Directory (getDirectoryContents)
 
 type Header = (HeaderName, ByteString)
 type APIResponse = IO (Status, String, [Header])
@@ -93,6 +95,17 @@ apiMap = [
             input <- getRequestBodyChunk r
             let result = code $ unpackBS input
             return (status200, result, [("Content-Disposition", "attachment; filename=\"brainfuck.c\"")])
+        ),
+        ("/editor/new", \r -> do
+            filename <- getRequestBodyChunk r
+            files <- getDirectoryContents "./editor_root"
+            if elem (unpackBS filename) files then do
+                return (status400, j2s [aesonQQ|{"message":"Error! file already exists"}|], jsonHeaders)
+            else do
+                handle <- openFile ("./editor_root/" ++ unpackBS filename) WriteMode
+                hPutStr handle ""
+                hClose handle
+                return (status200, j2s [aesonQQ|{"status":"ok"}|], jsonHeaders)
         )
     ]),
     ("GET", [
@@ -103,6 +116,16 @@ apiMap = [
         ("/guestbook/get", \_ -> do
             entries <- getGuestbook
             return (status200, j2s [aesonQQ|{"entries":#{unpackBS $ toStrict $ encode $ show entries}}|], jsonHeaders)
+        ),
+        ("/editor/sidebar", \_ -> do
+            files <- getDirectoryContents "./editor_root"
+            return (status200, j2s [aesonQQ|#{files}|], jsonHeaders)
+        ),
+        ("/editor/content/.*", \r -> do
+            let filename = unpack $ last $ pathInfo r
+            handle <- openFile ("./editor_root/" ++ filename) ReadMode
+            contents  <- hGetContents handle
+            return (status200, contents, defaultHeaders)
         )
     ]),
     ("PUT", [
@@ -128,6 +151,15 @@ apiMap = [
                     time <- fmap round getPOSIXTime :: IO Int
                     runDb $ insertEntity $ Snake 0 time name score speed fruits
                     return (status200, messageResponse "Success", jsonHeaders)
+        ),
+        ("/editor/content/.*", \r -> do
+            body <- getRequestBodyChunk r
+            let content = unpackBS body
+            let filename = unpack $ last $ pathInfo r
+            handle <- openFile ("./editor_root/" ++ filename) WriteMode
+            hPutStr handle content
+            hClose handle
+            return (status200, messageResponse "ok", jsonHeaders)
         )
     ]),
     ("DELETE", [])
