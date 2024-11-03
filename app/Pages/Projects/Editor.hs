@@ -50,6 +50,17 @@ commands = [hsx|
                 body: content
             }).then(_ => status_message("Successfully saved file"))
         }
+        function delete_file() {
+            var filename = document.getElementById("filename").innerHTML
+            fetch("/api/editor/delete", {
+                method: "DELETE",
+                body: filename
+            }).then(async _ => {
+                sidebar.innerHTML = ""
+                await populate_sidebar()
+                status_message("deleted file!")
+            })
+        }
     </script>
 |]
 
@@ -87,6 +98,7 @@ mainFrame = [hsx|
     <textarea style="min-width: 700px; min-height: 300px;" id="editor">
     </textarea><br>
     <button onclick="save_file()">Save File</button>
+    <button onclick="delete_file()">Delete File</button>
 |]
 
 editor :: Html

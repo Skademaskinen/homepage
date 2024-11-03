@@ -123,13 +123,18 @@
                     type = lib.types.str;
                     default = "homepage";
                 };
+                editor.root = lib.mkOption {
+                    type = lib.types.str;
+                    default = "/var/run/website/editor";
+                };
             };
 
-            config.systemd.services.website = {
+            config.systemd.services.homepage = {
                 enable = cfg.enable;
                 environment.HOMEPAGE_PORT = builtins.toString cfg.port;
                 environment.HOMEPAGE_DB = cfg.db.name;
                 environment.HOMEPAGE_DB_USER = cfg.db.user;
+                environment.HOMEPAGE_EDITOR_ROOT = cfg.editor.root;
                 serviceConfig = {
                     User = cfg.db.user;
                     WorkingDirectory = "${packages.${system}.default}";

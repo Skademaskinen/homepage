@@ -59,3 +59,7 @@ getColor = argOrEnvOrBool "--color" "HOMEPAGE_COLOR"
 
 getMigrate :: IO Bool
 getMigrate = argOrEnvOrBool "--migrate" "HOMEPAGE_MIGRATE"
+
+getEditorRoot :: IO String
+getEditorRoot = argOrEnvOrDefault "--editor_root" "HOMEPAGE_EDITOR_ROOT" "./editor_root"
+
