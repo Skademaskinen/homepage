@@ -17,6 +17,7 @@ import Database.Schema (defs)
 import Layout (layout)
 import Page (Page, PageSetting (Description, Route), getArgs)
 import Pages.Projects.Editor (editor)
+import Api.Api (apiMap)
 
 defaultProject :: (String, Html)
 defaultProject = ("", section [hsx|
@@ -87,6 +88,12 @@ projectsTree = Tree defaultProject [
                     <br><br>
                     This page about projects is actually also pretty cool, its defined as a tree data structure, so i can also easily print it:
                     {codeBlock "haskell" $ show (Tree ("projects", "<html>") [Tree ("page2", "<html>") [], Tree ("page3", "<html>") [], Tree ("page4", "<html>") []])}
+
+                    The api is likewise actually implemented as a list of pairs of strings and lists of pairs of strings and functions taking a request and returning a triple as a response.
+
+                    Below the API will dynamically update the more endpoints i'll add.
+                    {codeBlock "txt" $ intercalate "\n" $ map (\(method, routes) -> method ++ "\n\t/api" ++ (intercalate "\n\t/api" $ map fst routes)) apiMap}
+
                     <h2>Versions</h2>
                     In the sidebar, or below you can choose to read about each version of this website.
                 </div>
@@ -119,7 +126,7 @@ projectsTree = Tree defaultProject [
                 This version is also written in haskell, but this time also using Warp directly to translate HSX to blaze and parse blaze to a bytestring. Its this current site and doesn't require a link :P<br>
                 Source code is available at <a href="https://github.com/Mast3rwaf1z/homepage">https://github.com/Mast3rwaf1z/homepage</a>
                 <br>
-                The best feature of this rewrite is that i've combined the backend and the frontend into one, and since HSX allows me to put IO code directly inline with my html, i can access the database directly instead of the frontend sending a million HTTP requests. This means that the website is A LOT faster than the first few iterations, and instead of a lot of content loading at different times, its all loaded at once at the server side, with as little javascript as possible.
+                The best feature of  this rewrite is that i've combined the backend and the frontend into one, and since HSX allows me to put IO code directly inline with my html, i can access the database directly instead of the frontend sending a million HTTP requests. This means that the website is A LOT faster than the first few iterations, and instead of a lot of content loading at different times, its all loaded at once at the server side, with as little javascript as possible.
             |]) []
         ],
         Tree ("Skademaskinen", section [hsx|
