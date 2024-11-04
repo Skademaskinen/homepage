@@ -111,6 +111,13 @@ apiMap = [
         )
     ]),
     ("GET", [
+        ("(/|)$", \_ -> do
+            let apiData = map (\(method, routes) -> [aesonQQ|{
+                "method":#{method},
+                "routes":#{map fst routes}
+            }|]) apiMap
+            return (status200, j2s [aesonQQ|#{apiData}|], jsonHeaders)
+        ),
         ("/visits/get", \_ -> do
             visits <- show . length <$> getVisits
             return (status200, j2s [aesonQQ|{"visits":#{visits}}|], jsonHeaders)
