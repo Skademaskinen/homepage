@@ -25,21 +25,7 @@
         packages.${system} = let 
             version = "0.1.0.0";
         in {
-            homepage = pkgs.haskellPackages.mkDerivation {
-                pname = "homepage-bin";
-                version = version;
-                src = ./.;
-                isLibrary = false;
-                isExecutable = true;
-                executableHaskellDepends = with pkgs.haskellPackages; [
-                    base blaze-builder blaze-html bytestring http-types ihp-hsx
-                    text time utf8-string uuid wai warp directory aeson split
-                    password cryptonite string-random regex-compat http-conduit
-                    yaml persistent persistent-mysql monad-logger aeson-qq
-                ];
-                license = "unknown";
-                mainProgram = "homepage";
-            };
+            homepage = pkgs.callPackage ./nix-support/package.nix {};
 
             default = pkgs.stdenv.mkDerivation {
                 name = "homepage";

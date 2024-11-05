@@ -8,190 +8,49 @@ import IHP.HSX.QQ (hsx)
 import Layout (layout)
 import Page (Page, PageSetting (Description, Route), getArgs)
 import Text.Blaze.Html (Html)
+import Network.Wai (Request)
+import State (getStates, loggedIn)
 
-nameRow :: [String] -> Html
-nameRow names = [hsx|
-    <tr>
-        {mconcat $ map element names}
-    </tr>
+panel :: Html
+panel = [hsx|
+    Here are actions when logged in
 |]
-    where
-        element name = [hsx|
-            <th class="common-table-element" style="color: red;">
-                {name}
-            </th>
-        |]
 
-visitsTable :: IO Html
-visitsTable = do
-    rows <- getVisits
-    return [hsx|
-        <h2>Visits</h2>
-        <table class="common-table">
-            {nameRow ["id", "timestamp", "uuid"]}
-            {mconcat $ map makeRow rows}
-        </table>
-    |]
-    where
-        makeRow (Visit id timestamp uuid) = [hsx|
-            <tr class="common-table-row">
-                <th class="common-table-element">{id}</th>
-                <th class="common-table-element">{timestamp}</th>
-                <th class="common-table-element">{uuid}</th>
-            </tr>
-        |]
+login :: Html
+login = [hsx|
+    Please type login info here
+    <br>
+    <script>
+        function login() {
+            var username = document.getElementById("username").value
+            var password = document.getElementById("password").value
 
-guestbookTable :: IO Html
-guestbookTable = do
-    rows <- getGuestbookEntries
-    return [hsx|
-        <h2>Guestbook</h2>
-        <table class="common-table">
-            {nameRow ["id", "timestamp", "name", "content", "parentId"]}
-            {mconcat $ map makeRow rows}
-        </table>
-    |]
-    where
-        makeRow (GuestbookEntry id timestamp name content parent) = [hsx|
-            <tr class="common-table-row">
-                <th class="common-table-element">{id}</th>
-                <th class="common-table-element">{timestamp}</th>
-                <th class="common-table-element">{name}</th>
-                <th class="common-table-element">{content}</th>
-                <th class="common-table-element">{parent}</th>
-            </tr>
-        |]
-
-snakeTable :: IO Html
-snakeTable = do
-    rows <- getLeaderboard
-    return [hsx|
-        <h2>Snake Leaderboard</h2>
-        <table class="common-table">
-            {nameRow ["id", "timestamp", "name", "score", "speed", "fruits"]}
-            {mconcat $ map makeRow rows}
-        </table>
-    |]
-    where
-        makeRow (Snake id timestamp name score speed fruits) = [hsx|
-            <tr class="common-table-row">
-                <th class="common-table-element">{id}</th>
-                <th class="common-table-element">{timestamp}</th>
-                <th class="common-table-element">{name}</th>
-                <th class="common-table-element">{score}</th>
-                <th class="common-table-element">{speed}</th>
-                <th class="common-table-element">{fruits}</th>
-            </tr>
-        |]
-
-usersTable :: IO Html
-usersTable = do
-    rows <- getUsers
-    return [hsx|
-        <h2>Users</h2>
-        <table class="common-table">
-            {nameRow ["id", "username", "password"]}
-            {mconcat $ map makeRow rows}
-        </table>
-    |]
-    where
-        makeRow (User id username password) = [hsx|
-            <tr class="common-table-row">
-                <th class="common-table-element">{id}</th>
-                <th class="common-table-element">{username}</th>
-                <th class="common-table-element">{password}</th>
-            </tr>
-        |]
-
-validTokensTable :: IO Html
-validTokensTable = do
-    rows <- getTokens
-    return [hsx|
-        <h2>Valid Tokens</h2>
-        <table class="common-table">
-            {nameRow ["id", "token", "username"]}
-            {mconcat $ map makeRow rows}
-        </table>
-    |]
-    where
-        makeRow (Token id token username) = [hsx|
-            <tr class="common-table-row">
-                <th class="common-table-element">{id}</th>
-                <th class="common-table-element">{token}</th>
-                <th class="common-table-element">{username}</th>
-            </tr>
-        |]
-
-page :: [String] -> IO Html
-page ["summary", token] = do
-    validity <- validateToken token
-    if validity then do
-        username <- tokenToUsername token
-        return [hsx|
-            <h1>Welcome {username}!</h1>
-            Schema:
-                {codeBlock "txt" prettyPrintSchema}
-                <h2>Database tables</h2>
-                <a href={"/admin/dump/visits/"++token}>Visits</a><br>
-                <a href={"/admin/dump/guestbook/"++token}>Guestbook</a><br>
-                <a href={"/admin/dump/snake/"++token}>Snake</a><br>
-                <a href={"/admin/dump/users/"++token}>Users</a><br>
-                <a href={"/admin/dump/tokens/"++token}>Valid tokens</a><br>
-                <a href={"/admin/dump/all/"++token}>All</a>
-        |]
-    else
-        page []
-page ["dump", table, token] = do
-    validity <- validateToken token
-    if validity then 
-        showTable table
-    else
-        page []
-    where
-        showTable "visits" = visitsTable
-        showTable "guestbook" = guestbookTable
-        showTable "snake" = snakeTable
-        showTable "users" = usersTable
-        showTable "tokens" = validTokensTable
-        showTable "all" = mconcat [visitsTable, guestbookTable, snakeTable, usersTable, validTokensTable]
-        showTable _ = [hsx||]
-page x = do
-    print x
-    return [hsx|
-        <script>
-            function login() {
-                var username = document.getElementById("username").value
-                var password = document.getElementById("password").value
-                fetch("/api/admin/login", {
-                    method: "post",
-                    body: JSON.stringify({
-                        username:username,
-                        password:password
+            fetch("/api/login", {
+                method: "POST",
+                body: JSON.stringify({
+                    username:username,
+                    password:password
+                })
+            }).then(response => {
+                if (response.status == 200)
+                    response.text().then(text => {
+                        setCookie("accessToken="+text)
                     })
-                }).then(response => response.json().then(data => {
-                    if(response.ok) {
-                        setCookie("adminToken="+data.token+";path=/")
-                        window.location.href = "/admin/summary/"+data.token
-                    }
-                    else {
-                        var error_display = document.getElementById("error_display")
-                        error_display.innerHTML = data.message
-                    }
-                }))
-            }
-        </script>
+            })
+        }
+    </script>
+    <input id="username" type="text">
+    <input id="password" type="password">
+    <button onclick="login()">Log in</button>
+|]
 
-        <h1>Admin panel login</h1>
-        Manages DB and other stuff...
-
-        <input placeholder="Username" class="admin-input" id="username" type="text">
-
-        <input placeholder="Password" class="admin-input" id="password" type="password">
-
-        <button onclick="login()">Login</button>
-
-        <p id="error_display"></p>
-    |]
+page :: Request -> IO Html
+page request = do
+    let states = getStates request
+    if loggedIn states then
+        return panel
+    else
+        return login
 
 settings :: [PageSetting]
 settings = [ 
@@ -202,5 +61,5 @@ settings = [
 admin :: Page
 admin = (settings, \req -> do
     let (_ : xs) = getArgs req
-    layout <$> page xs
+    layout <$> page req
     )

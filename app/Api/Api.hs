@@ -71,7 +71,7 @@ apiMap = [
                 return $ unpackBS body
             return (status200, j2s [aesonQQ|{"uuid":#{res}}|], jsonHeaders)
         ),
-        ("/admin/login", \r -> do
+        ("/login", \r -> do
             body <- getRequestBodyChunk r
             let credentials = getDefault T.EmptyCredentials (decode (fromStrict body) :: Maybe T.Credentials)
             case credentials of
