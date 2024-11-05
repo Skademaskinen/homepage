@@ -11,7 +11,7 @@ import Data.Text (Text, pack, unpack)
 import Database.Persist.MySQL (ConnectInfo (ConnectInfo, connectDatabase, connectUser), Entity (Entity), EntityNameDB (unEntityNameDB), FieldDef (FieldDef), FieldNameHS (unFieldNameHS), Filter (Filter), FilterValue (FilterValue), PersistFilter (BackendSpecificFilter), PersistStoreWrite (insert_), SqlPersistT, defaultConnectInfo, fieldDBName, getEntityDBName, getEntityFields, runMigration, runSqlConn, selectList, withMySQLConn)
 import Database.Persist.TH (mkMigrate, mkPersist, persistLowerCase, share, sqlSettings)
 import Database.Persist.Types (EntityDef, FieldDef (fieldSqlType), fieldHaskell)
-import Database.Schema (EntityField (TokenToken, VisitUuid), GuestbookEntry (GuestbookEntry), Snake, Token (tokenName), User (userName), Visit, defs, migrateAll)
+import Database.Schema (EntityField (TokenToken, VisitUuid), GuestbookEntry (GuestbookEntry), Snake, Token (tokenName, tokenToken), User (userName), Visit, defs, migrateAll)
 import Logger (info)
 import Tree (Tree (Tree))
 
@@ -94,6 +94,4 @@ prettyPrintSchema =
 validateToken :: String -> IO Bool
 validateToken token = do
     tokens <- getTokens
-    case tokens of
-        [] -> return False
-        _ -> return True
+    return $ any (\x -> tokenToken x == token) tokens

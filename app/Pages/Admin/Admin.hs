@@ -9,7 +9,7 @@ import Layout (layout)
 import Page (Page, PageSetting (Description, Route), getArgs)
 import Text.Blaze.Html (Html)
 import Network.Wai (Request)
-import State (getStates, loggedIn)
+import State (getStates, loggedIn, accessToken)
 
 panel :: Html
 panel = [hsx|
@@ -33,8 +33,9 @@ login = [hsx|
                 })
             }).then(response => {
                 if (response.status == 200)
-                    response.text().then(text => {
-                        setCookie("accessToken="+text)
+                    response.json().then(json => {
+                        setCookie("accessToken="+json.token)
+                        window.location.reload()
                     })
             })
         }
@@ -47,8 +48,13 @@ login = [hsx|
 page :: Request -> IO Html
 page request = do
     let states = getStates request
-    if loggedIn states then
-        return panel
+    if loggedIn states then do
+        let token = accessToken states
+        valid <- validateToken token
+        if valid then
+            return panel
+        else
+            return login
     else
         return login
 
