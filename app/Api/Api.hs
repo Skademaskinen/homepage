@@ -103,7 +103,7 @@ apiMap = [
             filename <- getRequestBodyChunk r
             editor_root <- getEditorRoot
             files <- getDirectoryContents editor_root
-            if elem (unpackBS filename) files then do
+            if unpackBS filename `elem` files then do
                 return (status400, j2s [aesonQQ|{"message":"Error! file already exists"}|], jsonHeaders)
             else do
                 handle <- openFile (editor_root ++ "/" ++ unpackBS filename) WriteMode
@@ -195,15 +195,15 @@ apiMap = [
                     (DatabaseDelete table id) -> do
                         case table of
                             "visits" -> do
-                                runDb $ deleteWhere [VisitRid ==. id] :: IO ()
+                                runDb $ deleteWhere [VisitRid ==. id]
                             "guestbook" -> do
-                                runDb $ deleteWhere [GuestbookEntryRid ==. id] :: IO ()
+                                runDb $ deleteWhere [GuestbookEntryRid ==. id]
                             "snake" -> do
-                                runDb $ deleteWhere [SnakeRid ==. id] :: IO ()
+                                runDb $ deleteWhere [SnakeRid ==. id]
                             "users" -> do
-                                runDb $ deleteWhere [UserRid ==. id] :: IO ()
+                                runDb $ deleteWhere [UserRid ==. id]
                             "valid_tokens" -> do
-                                runDb $ deleteWhere [TokenRid ==. id] :: IO ()
+                                runDb $ deleteWhere [TokenRid ==. id]
                             _ -> putStr "no table, doing nothing..."
                         return (status200, messageResponse "ok", jsonHeaders)
                     EmptyDatabaseDelete -> return (status400, messageResponse "Invalid JSON", jsonHeaders)
