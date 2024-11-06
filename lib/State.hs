@@ -12,7 +12,8 @@ getCookies :: Request -> [(String, String)]
 getCookies request = do
     let headers = requestHeaders request
     let cookies = (case find (\x -> ((==) . fst) x "Cookie") headers of (Just x) -> snd x; _ -> "")
-    map ((\(e1:e2:_) -> (e1, e2)) . splitOn "=") (splitOn "; " $ unpackBS cookies)
+    if cookies == "" then []
+    else map ((\(e1:e2:_) -> (e1, e2)) . splitOn "=") (splitOn "; " $ unpackBS cookies)
 
 
 accessToken :: [State] -> String
