@@ -101,7 +101,8 @@ app request respond = do
             <meta content={description settings} property="og:description">
         |] else [hsx||]
 
-        return $ serve (mconcat [result, image, text, desc, footer request])
+        footer' <- footer request
+        return $ serve (mconcat [result, image, text, desc, footer'])
 
     logger request response
     respond response

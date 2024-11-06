@@ -52,7 +52,7 @@ page = do
             fetch("/api/visits/new", {
                 method: "post",
                 body: getCookie("visitId")
-            }).then(res => res.json().then(data => setCookie("visitId="+data.uuid)))
+            }).then(res => res.json().then(data => setCookie("visitId="+data.uuid + ";max-age="+(24*60*60))))
         </script>
     |]
 

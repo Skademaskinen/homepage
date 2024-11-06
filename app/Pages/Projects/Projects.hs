@@ -9,7 +9,6 @@ import Pages.Projects.Brainfuck (brainfuck)
 import Pages.Projects.Snake (snake)
 import Section (section)
 import Tree (Tree (..))
-import Utils (forEach)
 
 import CodeBlock (codeBlock)
 import Database.Database (prettyPrintSchema)
@@ -29,25 +28,29 @@ defaultProject = ("", section [hsx|
 
 projectsTree :: Tree (String, Html)
 projectsTree = Tree defaultProject [
-    Tree ("Semester Projects", section [hsx|
-        Here's all the projects i've done at Aalborg University, they're defined as Pn where n is the semester they were done at. for example, P6 and P10 is my bachelor and master's projects respectively.
-    |]) [
+    Tree ("Semester Projects", mconcat $ section [hsx|
+            Here's all the projects i've done at Aalborg University, they're defined as Pn where n is the semester they were done at. for example, P6 and P10 is my bachelor and master's projects respectively.
+        |] : [mconcat [[hsx|<h3>{"P"++show i ++ " Project"}</h3>|], snd $ findItem ["", "Semester Projects", "P"++show i] projectsTree] | i <- [1..9]]
+        
+    ) [
         Tree ("P1", section [hsx|
-            P1 was about Random Linear Network Coding
+            P1 was about Random Linear Network Coding, to send extra bytes coded together, and reduce the impact of packet loss
             <br>
             It was cool
         |])[], 
         Tree ("P2", section [hsx|
-            A Project about adaptive cruise control in cars
+            A Project about adaptive cruise control in cars, this was written in python using the pygame library. 
         |]) [],
         Tree ("P3", section [hsx|
             We made a satellite ground station to be full duplex, as the previous implementation could only send data one way at a time, would be cool to use two channels.
         |]) [],
         Tree ("P4", section [hsx|
-            Detecting fires on a map, it wasn't particularly interesting.
+            Detecting fires on a map, it wasn't particularly interesting.<br>
+            We learned how to use libraries like OpenCV and further sharpened knowledge about common python libraries like numpy
         |]) [],
         Tree ("P5", section [hsx|
-            Testing TCP performance using NS3, we learned a bit of C++, it was nice.
+            Testing TCP performance using NS3, we learned a bit of C++, it was nice.<br>
+            There was some interesting plots of the congestion control algorithms and their performance, we didn't have a statistics course yet, but i think if we had, we could have analyzed the results much more accurately
         |]) [],
         Tree ("P6", section [hsx|
             Modeling a testbed for edge nodes for measurement in real world scenarios<br><br>
@@ -65,6 +68,11 @@ projectsTree = Tree defaultProject [
             This was a project about conducting a user-study, measuring people's stress and questioning them through an app on a mobile phone.
             <br>
             (this project was very, very bad imo, but i learned more C++)
+        |]) [],
+        Tree ("P9", section [hsx|
+            This is my pre-specialization project, it is focused on distributed systems, and how to more efficiently schedule pods in Kubernetes.<br>
+
+            In this project we're attempting to use machine learning to predict the traffic of a system, then scale the system up based on the predictions.
         |]) []
     ], Tree ("Personal Projects", section [hsx|
         I find it fun coding in my free time, i do it a lot and as such this website was also born!
@@ -75,7 +83,7 @@ projectsTree = Tree defaultProject [
         Tree ("Website", mconcat [
             section [hsx|
                 <div style="max-width: 100%">
-                    Written in Haskell using IHP-HSX as the primary library, and sqlite-simple as the database implementation.<br>
+                    Written in Haskell using IHP-HSX as the primary library, and persistent-mysql as the database implementation.<br>
 
                     The database is actually pretty cool, its implemented as a list of table objects, and since i'm writing html directly inside my haskell code i can easily print the database structure inline here:<br><br>
                     {codeBlock "txt" $ show defs}
@@ -88,11 +96,15 @@ projectsTree = Tree defaultProject [
                     <br><br>
                     This page about projects is actually also pretty cool, its defined as a tree data structure, so i can also easily print it:
                     {codeBlock "haskell" $ show (Tree ("projects", "<html>") [Tree ("page2", "<html>") [], Tree ("page3", "<html>") [], Tree ("page4", "<html>") []])}
-
+                    <h3>API</h3>
                     The api is likewise actually implemented as a list of pairs of strings and lists of pairs of strings and functions taking a request and returning a triple as a response.
 
+                    <br>
+                    Each endpoint is addressed using a string representing the method from the REST standard, and a route in the form of a regular expression (see more below).
+
+                    <br>
                     Below the API will dynamically update the more endpoints i'll add.
-                    {codeBlock "txt" $ intercalate "\n" $ map (\(method, routes) -> method ++ "\n\t/api" ++ (intercalate "\n\t/api" $ map fst routes)) apiMap}
+                    {codeBlock "txt" $ intercalate "\n" $ map (\(method, routes) -> method ++ "\n\t" ++ (intercalate "\n\t" $ map fst routes)) apiMap}
 
                     <h2>Versions</h2>
                     In the sidebar, or below you can choose to read about each version of this website.
@@ -163,7 +175,7 @@ services = mconcat $ map (\(name, d) -> [hsx|
         srv = [("Nextcloud", "cloud"), ("Jupyter", "jupyter"), ("Matrix", "matrix"), ("Website", "api"), ("Taoshi", "taoshi")]
 
 makeIndent :: Int -> Html
-makeIndent n = forEach [0 .. n] (\_ -> [hsx|&emsp;|])
+makeIndent n = mconcat $ map (\_ -> [hsx|&emsp;|]) [0..n]
 
 buildSidebarSection :: [Tree (String, Html)] -> Int -> String -> Html
 buildSidebarSection (x : xs) indent path = [hsx|

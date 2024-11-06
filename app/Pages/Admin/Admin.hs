@@ -3,23 +3,24 @@ module Pages.Admin.Admin where
 import CodeBlock (codeBlock)
 import Data.Text (Text, unpack, pack)
 import Database.Database (getGuestbookEntries, getLeaderboard, getTokens, getUsers, getVisits, prettyPrintSchema, tokenToUsername, validateToken, runDb, AdminTable (button, toList, getData))
-import Database.Schema (GuestbookEntry (GuestbookEntry, guestbookEntryRid), Snake (Snake, snakeRid), Token (Token, tokenRid), User (User, userRid), Visit (Visit, visitRid), defs)
+import Database.Schema (GuestbookEntry (GuestbookEntry, guestbookEntryIndex), Snake (Snake, snakeIndex), Token (Token, tokenIndex), User (User, userIndex), Visit (Visit, visitIndex), defs, EntityField (UserName, TokenToken))
 import IHP.HSX.QQ (hsx)
 import Layout (layout)
 import Page (Page, PageSetting (Description, Route), getArgs)
 import Text.Blaze.Html (Html)
 import Network.Wai (Request (pathInfo))
 import State (getStates, loggedIn, accessToken)
-import Database.Persist (Entity(Entity), selectList, EntityNameDB (unEntityNameDB), getEntityDBName, FieldNameHS (unFieldNameHS), FieldDef (fieldHaskell), getEntityFields)
+import Database.Persist (Entity(Entity), selectList, EntityNameDB (unEntityNameDB), getEntityDBName, FieldNameHS (unFieldNameHS), FieldDef (fieldHaskell), getEntityFields, (==.), PersistQueryWrite (deleteWhere))
 import Database.Persist.MySQL (rawSql, mkColumns)
+import Logger (warning)
 
 panel :: IO Html
 panel = do 
-    visits <- mapUnpack $ runDb (selectList [] []) :: IO [Visit]
-    guestbook <- mapUnpack $ runDb (selectList [] []) :: IO [GuestbookEntry]
-    snake <- mapUnpack $ runDb (selectList [] []) :: IO [Snake]
-    users <- mapUnpack $ runDb (selectList [] []) :: IO [User]
-    valid_tokens <- mapUnpack $ runDb (selectList [] []) :: IO [Token]
+    visits <- getData [] :: IO [Visit]
+    guestbook <- getData [] :: IO [GuestbookEntry]
+    snake <- getData [] :: IO [Snake]
+    users <- getData [] :: IO [User]
+    valid_tokens <- getData [] :: IO [Token]
     return [hsx|
         Here are actions when logged in
         <br>
@@ -40,8 +41,6 @@ panel = do
         </table>
     |]
     where
-        unpackEntity (Entity _ e) = e
-        mapUnpack = (map unpackEntity <$>)
         th x = [hsx|<th>{x}</th>|]
         row :: (String, [Int]) -> Html
         row (name, values) = [hsx|
@@ -156,7 +155,7 @@ login = [hsx|
             }).then(response => {
                 if (response.status == 200)
                     response.json().then(json => {
-                        setCookie("accessToken="+json.token + ";path=/")
+                        setCookie("accessToken="+json.token + ";max-age=" + (24*60*60*7) + ";path=/")
                         window.location.reload()
                     })
             })
@@ -167,19 +166,29 @@ login = [hsx|
     <button onclick="login()">Log in</button>
 |]
 
-logout :: Html
-logout = [hsx|
-    <script>
-        deleteCookie("accessToken=")
-    </script>
-    You have successfully logged out!
-|]
+logout :: Request -> IO Html
+logout request = do 
+    let states = getStates request
+    if loggedIn states then do
+        let token = accessToken states
+        valid <- validateToken token
+        if valid then do
+            runDb $ deleteWhere [TokenToken ==. token]
+        else warning "Not a valid token"
+    else warning "Not logged in!"
+
+    return [hsx|
+        <script>
+            deleteCookie("accessToken=")
+        </script>
+        You have successfully logged out!
+    |]
 
 page :: Request -> IO Html
 page request = do
     let states = getStates request
     if last (pathInfo request) == "logout" then
-        return logout
+        logout request
     else if loggedIn states then do
         let token = accessToken states
         valid <- validateToken token

@@ -2,7 +2,7 @@
 
 module Api.Api where
 
-import Database.Database (getGuestbook, getVisits, runDb, uuidExists, validateToken)
+import Database.Database (getGuestbook, getVisits, runDb, uuidExists, validateToken, AdminTable (getData))
 import Pages.Projects.Brainfuck (code)
 import qualified Tables as T (Credentials (Credentials, EmptyCredentials), GuestbookEntry (EmptyGuestbook, GuestbookEntry), LeaderboardEntry (EmptyLeaderboard, LeaderboardEntry))
 import Utils (getDefault, unpackBS)
@@ -21,10 +21,10 @@ import Crypto.Random (getRandomBytes)
 import Data.Aeson (Value (String), decode, encode)
 import Data.ByteString.Lazy (fromStrict, toStrict)
 import Data.Password.Bcrypt (PasswordCheck (PasswordCheckFail, PasswordCheckSuccess), PasswordHash (PasswordHash), checkPassword, mkPassword)
-import Data.Text (intercalate, pack, unpack)
+import Data.Text (intercalate, pack, unpack, Text)
 import Data.Text.Array (Array (ByteArray))
 import Database.Persist (Entity (Entity), Filter (Filter), FilterValue (FilterValue), PersistFilter (BackendSpecificFilter), insertEntity, selectList, PersistQueryWrite (deleteWhere), (==.))
-import Database.Schema (EntityField (TokenName, UserName, UserRid, VisitRid, GuestbookEntryRid, SnakeRid, TokenRid), GuestbookEntry (GuestbookEntry, guestbookEntryContent, guestbookEntryName, guestbookEntryParentId, guestbookEntryRid, guestbookEntryTimestamp), Snake (Snake), Token (Token, tokenToken), User (User, userName, userPassword), Visit (Visit))
+import Database.Schema (EntityField (TokenName, UserName, UserIndex, VisitIndex, GuestbookEntryIndex, SnakeIndex, TokenIndex), GuestbookEntry (GuestbookEntry, guestbookEntryContent, guestbookEntryName, guestbookEntryParentId, guestbookEntryIndex, guestbookEntryTimestamp), Snake (Snake), Token (Token, tokenToken), User (User, userName, userPassword), Visit (Visit))
 import Logger (info)
 import Text.StringRandom (stringRandomIO)
 
@@ -61,7 +61,7 @@ messageResponse value = j2s [aesonQQ|{
 apiMap :: [APIRoute]
 apiMap = [
     ("POST", [
-        ("/visits/new", \r -> do
+        ("^/visits/new(/|)$", \r -> do
             body <- getRequestBodyChunk r
             result <- uuidExists $ unpackBS body
             res <- if result then do
@@ -73,33 +73,29 @@ apiMap = [
                 return $ unpackBS body
             return (status200, j2s [aesonQQ|{"uuid":#{res}}|], jsonHeaders)
         ),
-        ("/login", \r -> do
+        ("^/login(/|)$", \r -> do
             body <- getRequestBodyChunk r
             let credentials = getDefault T.EmptyCredentials (decode (fromStrict body) :: Maybe T.Credentials)
             case credentials of
                 (T.Credentials username password) -> do
                     let pass = mkPassword $ pack password
-                    rows <- map (\(Entity _ e) -> e) <$> (runDb $ selectList [UserName ==. username] [] :: IO [Entity User])
+                    rows <- getData [UserName ==. username]
                     case rows of
                         [user] -> case checkPassword pass (PasswordHash $ pack (userPassword user)) of
                             PasswordCheckSuccess -> do
-                                rows <- map (\(Entity _ e) -> e) <$> (runDb $ selectList [TokenName ==. username] [] :: IO [Entity Token])
-                                response <- if null rows then do
-                                    token <- stringRandomIO "[0-9a-zA-Z]{4}-[0-9a-ZA-Z]{10}-[0-9a-zA-Z]{15}"
-                                    runDb $ insertEntity $ Token 0 (unpack token) username
-                                    return $ unpack token
-                                else return $ tokenToken $ head rows
-                                return (status200, j2s [aesonQQ|{"token":#{response}}|], jsonHeaders)
+                                token <- stringRandomIO "[0-9a-zA-Z]{4}-[0-9a-ZA-Z]{10}-[0-9a-zA-Z]{15}"
+                                runDb $ insertEntity $ Token 0 (unpack token) username
+                                return (status200, j2s [aesonQQ|{"token":#{unpack token}}|], jsonHeaders)
                             PasswordCheckFail -> return (status400, messageResponse "Error, Wrong username or password", jsonHeaders)
                         _ -> return (status400, messageResponse "Error, no user exists", jsonHeaders)
                 _ -> return (status400, messageResponse "Error, Invalid request", jsonHeaders)
         ),
-        ("/brainfuck", \r -> do
+        ("^/brainfuck(/|)$", \r -> do
             input <- getRequestBodyChunk r
             let result = code $ unpackBS input
             return (status200, result, [("Content-Disposition", "attachment; filename=\"brainfuck.c\"")])
         ),
-        ("/editor/new", \r -> do
+        ("^/editor/new(/|)$", \r -> do
             filename <- getRequestBodyChunk r
             editor_root <- getEditorRoot
             files <- getDirectoryContents editor_root
@@ -113,27 +109,27 @@ apiMap = [
         )
     ]),
     ("GET", [
-        ("(/|)$", \_ -> do
+        ("^(/|)$", \_ -> do
             let apiData = map (\(method, routes) -> [aesonQQ|{
                 "method":#{method},
                 "routes":#{map fst routes}
             }|]) apiMap
             return (status200, j2s [aesonQQ|#{apiData}|], jsonHeaders)
         ),
-        ("/visits/get", \_ -> do
+        ("^/visits/get(/|)$", \_ -> do
             visits <- show . length <$> getVisits
             return (status200, j2s [aesonQQ|{"visits":#{visits}}|], jsonHeaders)
         ),
-        ("/guestbook/get", \_ -> do
+        ("^/guestbook/get(/|)$", \_ -> do
             entries <- getGuestbook
             return (status200, j2s [aesonQQ|{"entries":#{unpackBS $ toStrict $ encode $ show entries}}|], jsonHeaders)
         ),
-        ("/editor/sidebar", \_ -> do
+        ("^/editor/sidebar(/|)$", \_ -> do
             editor_root <- getEditorRoot
             files <- getDirectoryContents editor_root
             return (status200, j2s [aesonQQ|#{files}|], jsonHeaders)
         ),
-        ("/editor/content/.*", \r -> do
+        ("^/editor/content/.*(/|)$", \r -> do
             let filename = unpack $ last $ pathInfo r
             editor_root <- getEditorRoot
             handle <- openFile (editor_root ++ "/" ++ filename) ReadMode
@@ -142,7 +138,7 @@ apiMap = [
         )
     ]),
     ("PUT", [
-        ("/guestbook/add", \r -> do
+        ("^/guestbook/add(/|)$", \r -> do
             body <- getRequestBodyChunk r
             let entry = getDefault T.EmptyGuestbook (decode (fromStrict body) :: Maybe T.GuestbookEntry)
             case entry of
@@ -155,7 +151,7 @@ apiMap = [
                     runDb $ insertEntity $ GuestbookEntry 0 time name content parentId
                     return (status200, messageResponse "Success", jsonHeaders)
         ),
-        ("/snake/add", \r -> do
+        ("^/snake/add(/|)$", \r -> do
             body <- getRequestBodyChunk r
             let entry = getDefault T.EmptyLeaderboard (decode (fromStrict body) :: Maybe T.LeaderboardEntry)
             case entry of
@@ -165,7 +161,7 @@ apiMap = [
                     runDb $ insertEntity $ Snake 0 time name score speed fruits
                     return (status200, messageResponse "Success", jsonHeaders)
         ),
-        ("/editor/content/.*", \r -> do
+        ("^/editor/content/.*(/|)$", \r -> do
             body <- getRequestBodyChunk r
             let content = unpackBS body
             let filename = unpack $ last $ pathInfo r
@@ -177,14 +173,14 @@ apiMap = [
         )
     ]),
     ("DELETE", [
-        ("/editor/delete", \r -> do
+        ("^/editor/delete(/|)$", \r -> do
             body <- getRequestBodyChunk r
             editor_root <- getEditorRoot
             let filename = unpackBS body
             removeFile $ editor_root ++ "/" ++ filename
             return (status200, messageResponse "ok", jsonHeaders)
         ),
-        ("/database/delete", \r -> do
+        ("^/database/delete(/|)$", \r -> do
             body <- getRequestBodyChunk r
             let json = getDefault EmptyDatabaseDelete (decode (fromStrict body) :: Maybe DatabaseDelete)
             let states = getStates r
@@ -195,15 +191,15 @@ apiMap = [
                     (DatabaseDelete table id) -> do
                         case table of
                             "visits" -> do
-                                runDb $ deleteWhere [VisitRid ==. id]
+                                runDb $ deleteWhere [VisitIndex ==. id]
                             "guestbook" -> do
-                                runDb $ deleteWhere [GuestbookEntryRid ==. id]
+                                runDb $ deleteWhere [GuestbookEntryIndex ==. id]
                             "snake" -> do
-                                runDb $ deleteWhere [SnakeRid ==. id]
+                                runDb $ deleteWhere [SnakeIndex ==. id]
                             "users" -> do
-                                runDb $ deleteWhere [UserRid ==. id]
+                                runDb $ deleteWhere [UserIndex ==. id]
                             "valid_tokens" -> do
-                                runDb $ deleteWhere [TokenRid ==. id]
+                                runDb $ deleteWhere [TokenIndex ==. id]
                             _ -> putStr "no table, doing nothing..."
                         return (status200, messageResponse "ok", jsonHeaders)
                     EmptyDatabaseDelete -> return (status400, messageResponse "Invalid JSON", jsonHeaders)
@@ -217,12 +213,13 @@ api :: Request -> APIResponse
 api request = do
     let method = unpackBS $ requestMethod request
     let path = pathInfo request
+    
     case find (\(name, _) -> name == method) apiMap of
         (Just (_, endpoints)) -> case find (checkEndpoint path) endpoints of
             (Just (_, f)) -> f request
-            Nothing -> return (status400, messageResponse "Error, no endpoint found", defaultHeaders)
-        Nothing -> return (status400, messageResponse "Error, no endpoint found", defaultHeaders)
+            Nothing -> return (status400, messageResponse "Error, no endpoint found", jsonHeaders)
+        Nothing -> return (status400, messageResponse "Error, no endpoint found", jsonHeaders)
     where
-        checkEndpoint path (regex, _) = case matchRegex (mkRegex ("api" ++ regex)) $ unpack (intercalate "/" path) of
+        checkEndpoint path (regex, _) = case matchRegex (mkRegex regex) $ "/" ++ unpack (intercalate "/" (drop 1 path)) of
             Nothing -> False
             _ -> True
