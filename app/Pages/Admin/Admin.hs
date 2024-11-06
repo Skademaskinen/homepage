@@ -41,7 +41,7 @@ panel = do
         </table>
     |]
     where
-        th x = [hsx|<th>{x}</th>|]
+        th x = [hsx|<th class="common-table-element">{x}</th>|]
         row :: (String, [Int]) -> Html
         row (name, values) = [hsx|
             <tr>
