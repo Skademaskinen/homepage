@@ -3,7 +3,6 @@ module Pages.Guestbook.Guestbook where
 import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 
-import Database.Database (getGuestbook)
 import Section (section)
 
 import Data.List (filter)
@@ -14,6 +13,7 @@ import Database.Schema (GuestbookEntry (GuestbookEntry))
 import Layout (layout)
 import Page (Page, PageSetting (Description, Route))
 import Tree (Tree (Tree))
+import Database.Database (AdminTable(getData))
 
 type Guestbook = [(Int, Int, String, String, Int)]
 
@@ -60,6 +60,16 @@ guestbookInput parent True = [hsx|
     </div>
 |]
 
+guestbookToTree :: [GuestbookEntry] -> Int -> [Tree GuestbookEntry]
+guestbookToTree entries targetParent = [Tree (GuestbookEntry id timestamp name content parent) $ guestbookToTree entries id | (GuestbookEntry id timestamp name content parent) <- entries, parent == targetParent]
+
+getGuestbook :: IO [Tree GuestbookEntry]
+getGuestbook = do
+    entries <- getData [] [] :: IO [GuestbookEntry]
+    return $ guestbookToTree entries (-1)
+
+
+page :: IO Html
 page = do
     guestbook <- getGuestbook
     return [hsx|

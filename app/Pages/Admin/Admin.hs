@@ -2,7 +2,7 @@ module Pages.Admin.Admin where
 
 import CodeBlock (codeBlock)
 import Data.Text (Text, unpack, pack)
-import Database.Database (getGuestbookEntries, getLeaderboard, getTokens, getUsers, getVisits, prettyPrintSchema, tokenToUsername, validateToken, runDb, AdminTable (button, toList, getData))
+import Database.Database (prettyPrintSchema, validateToken, runDb, AdminTable (button, toList, getData))
 import Database.Schema (GuestbookEntry (GuestbookEntry, guestbookEntryIndex), Snake (Snake, snakeIndex), Token (Token, tokenIndex), User (User, userIndex), Visit (Visit, visitIndex), defs, EntityField (UserName, TokenToken))
 import IHP.HSX.QQ (hsx)
 import Layout (layout)
@@ -16,11 +16,11 @@ import Logger (warning)
 
 panel :: IO Html
 panel = do 
-    visits <- getData [] :: IO [Visit]
-    guestbook <- getData [] :: IO [GuestbookEntry]
-    snake <- getData [] :: IO [Snake]
-    users <- getData [] :: IO [User]
-    valid_tokens <- getData [] :: IO [Token]
+    visits <- getData [] [] :: IO [Visit]
+    guestbook <- getData [] [] :: IO [GuestbookEntry]
+    snake <- getData [] [] :: IO [Snake]
+    users <- getData [] [] :: IO [User]
+    valid_tokens <- getData [] [] :: IO [Token]
     return [hsx|
         Here are actions when logged in
         <br>
@@ -89,23 +89,23 @@ browse table = do
     where
         getTableData :: String -> IO [([String], Html)]
         getTableData "visits" = do
-            tableData <- getData [] :: IO [Visit]
+            tableData <- getData [] []:: IO [Visit]
             let columnNames = getColumnNames "visits"
             return $ zip (map toList tableData) (map button tableData)
         getTableData "guestbook" = do
-            tableData <- getData [] :: IO [GuestbookEntry]
+            tableData <- getData [] [] :: IO [GuestbookEntry]
             let columnNames = getColumnNames "guestbook"
             return $ zip (map toList tableData) (map button tableData)
         getTableData "snake" = do
-            tableData <- getData [] :: IO [Snake]
+            tableData <- getData [] [] :: IO [Snake]
             let columnNames = getColumnNames "snake"
             return $ zip (map toList tableData) (map button tableData)
         getTableData "users" = do 
-            tableData <- getData [] :: IO [User]
+            tableData <- getData [] [] :: IO [User]
             let columnNames = getColumnNames "users"
             return $ zip (map toList tableData) (map button tableData)
         getTableData "valid_tokens" = do
-            tableData <- getData [] :: IO [Token]
+            tableData <- getData [] [] :: IO [Token]
             let columnNames = getColumnNames "valid_tokens"
             return $ zip (map toList tableData) (map button tableData)
         getTableData _ = do

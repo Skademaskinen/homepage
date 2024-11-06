@@ -4,12 +4,12 @@ import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 
 import CodeBlock (hsxIntroCodeBlock, introCodeIndex)
-import Database.Database (getVisits, AdminTable (getData))
+import Database.Database (AdminTable (getData))
 import Layout (layout)
 import Page (Page, PageSetting (Description, EmbedImage, EmbedText, Route))
 import Section (section)
 import Database.Schema (EntityField(VisitTimestamp), Visit (Visit, visitTimestamp))
-import Database.Persist ((>.))
+import Database.Persist ((>.), SelectOpt (LimitTo, Asc, Desc))
 
 intro :: Html
 intro = section [hsx|
@@ -42,9 +42,10 @@ intro = section [hsx|
 
 page :: IO Html
 page = do
-    visits <- show . length <$> getVisits
-    lastVisit <- foldr max 0 <$> fmap (map visitTimestamp) (getData [] :: IO [Visit])
-    visitsToday <- show . length <$> getData [VisitTimestamp >. lastVisit-(24*60*60)]
+    visits <- show . length <$> (getData [] [] :: IO [Visit])
+    lastVisit <- visitTimestamp . head <$> getData [] [Desc VisitTimestamp, LimitTo 1]
+    print lastVisit
+    visitsToday <- show . length <$> getData [VisitTimestamp >. lastVisit-(24*60*60)] []
     return [hsx|
         <h1>Skademaskinen</h1>
         <img src="/static/icon.png" style="border-radius:50%">

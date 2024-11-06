@@ -2,7 +2,7 @@
 
 module Api.Api where
 
-import Database.Database (getGuestbook, getVisits, runDb, uuidExists, validateToken, AdminTable (getData))
+import Database.Database (runDb, AdminTable (getData), toList, validateToken)
 import Pages.Projects.Brainfuck (code)
 import qualified Tables as T (Credentials (Credentials, EmptyCredentials), GuestbookEntry (EmptyGuestbook, GuestbookEntry), LeaderboardEntry (EmptyLeaderboard, LeaderboardEntry))
 import Utils (getDefault, unpackBS)
@@ -23,8 +23,8 @@ import Data.ByteString.Lazy (fromStrict, toStrict)
 import Data.Password.Bcrypt (PasswordCheck (PasswordCheckFail, PasswordCheckSuccess), PasswordHash (PasswordHash), checkPassword, mkPassword)
 import Data.Text (intercalate, pack, unpack, Text)
 import Data.Text.Array (Array (ByteArray))
-import Database.Persist (Entity (Entity), Filter (Filter), FilterValue (FilterValue), PersistFilter (BackendSpecificFilter), insertEntity, selectList, PersistQueryWrite (deleteWhere), (==.))
-import Database.Schema (EntityField (TokenName, UserName, UserIndex, VisitIndex, GuestbookEntryIndex, SnakeIndex, TokenIndex), GuestbookEntry (GuestbookEntry, guestbookEntryContent, guestbookEntryName, guestbookEntryParentId, guestbookEntryIndex, guestbookEntryTimestamp), Snake (Snake), Token (Token, tokenToken), User (User, userName, userPassword), Visit (Visit))
+import Database.Persist (Entity (Entity), Filter (Filter), FilterValue (FilterValue), PersistFilter (BackendSpecificFilter), insertEntity, selectList, PersistQueryWrite (deleteWhere), (==.), (=.))
+import Database.Schema (EntityField (TokenName, UserName, UserIndex, VisitIndex, GuestbookEntryIndex, SnakeIndex, TokenIndex, VisitUuid, TokenToken), GuestbookEntry (GuestbookEntry, guestbookEntryContent, guestbookEntryName, guestbookEntryParentId, guestbookEntryIndex, guestbookEntryTimestamp), Snake (Snake), Token (Token, tokenToken), User (User, userName, userPassword), Visit (Visit))
 import Logger (info)
 import Text.StringRandom (stringRandomIO)
 
@@ -63,7 +63,7 @@ apiMap = [
     ("POST", [
         ("^/visits/new(/|)$", \r -> do
             body <- getRequestBodyChunk r
-            result <- uuidExists $ unpackBS body
+            result <- null <$> getData [VisitUuid ==. unpackBS body] []
             res <- if result then do
                 time <- fmap round getPOSIXTime :: IO Int
                 uuid <- nextRandom
@@ -79,7 +79,7 @@ apiMap = [
             case credentials of
                 (T.Credentials username password) -> do
                     let pass = mkPassword $ pack password
-                    rows <- getData [UserName ==. username]
+                    rows <- getData [UserName ==. username] []
                     case rows of
                         [user] -> case checkPassword pass (PasswordHash $ pack (userPassword user)) of
                             PasswordCheckSuccess -> do
@@ -117,12 +117,13 @@ apiMap = [
             return (status200, j2s [aesonQQ|#{apiData}|], jsonHeaders)
         ),
         ("^/visits/get(/|)$", \_ -> do
-            visits <- show . length <$> getVisits
+            visits <- show . length <$> (getData [] [] :: IO [Visit])
             return (status200, j2s [aesonQQ|{"visits":#{visits}}|], jsonHeaders)
         ),
         ("^/guestbook/get(/|)$", \_ -> do
-            entries <- getGuestbook
-            return (status200, j2s [aesonQQ|{"entries":#{unpackBS $ toStrict $ encode $ show entries}}|], jsonHeaders)
+            entries <- getData [] [] :: IO [GuestbookEntry]
+            let l = map toList entries
+            return (status200, j2s [aesonQQ|{"entries":#{l}}|], jsonHeaders)
         ),
         ("^/editor/sidebar(/|)$", \_ -> do
             editor_root <- getEditorRoot

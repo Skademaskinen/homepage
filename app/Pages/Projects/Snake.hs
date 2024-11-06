@@ -3,11 +3,11 @@ module Pages.Projects.Snake where
 import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 
-import Database.Database (getLeaderboard)
 import Database.Schema (Snake (Snake))
 import Layout (layout)
 import Page (Page, PageSetting (Description, Route))
 import Utils (forEach)
+import Database.Database (AdminTable(getData))
 
 tile :: Int -> Html
 tile id = [hsx|
@@ -98,7 +98,7 @@ leaderboardEntry (Snake id timestamp name score speed fruits) = [hsx|
 
 page :: IO Html
 page = do
-    l <- getLeaderboard
+    l <- getData [] [] :: IO [Snake]
     return [hsx|
         <table class="common-table">
             <tr>
