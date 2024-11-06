@@ -43,7 +43,8 @@ import Settings (getCliState, getMigrate, getPort)
 import System.Environment (getArgs)
 import Text.Regex (Regex, matchRegex, mkRegex)
 import Utils (unpackBS)
-import State (getStates)
+import State (getStates, getCookies)
+import Footer (footer)
 
 serve :: Html -> Response
 serve content = responseBuilder status200 [("Content-Type", "text/html")] $ copyByteString (fromString (renderHtml content))
@@ -74,6 +75,8 @@ app request respond = do
     let xs = map unpack $ pathInfo request
     let x = if null xs then "" else head xs
     let args = "/" ++ intercalate "/" xs
+    print $ getStates request
+    print $ getCookies request
     response <- if x == "static" then do
         -- If the requested content is a file
         serveFile $ intercalate "/" xs
@@ -98,7 +101,7 @@ app request respond = do
             <meta content={description settings} property="og:description">
         |] else [hsx||]
 
-        return $ serve (mconcat [result, image, text, desc])
+        return $ serve (mconcat [result, image, text, desc, footer request])
 
     logger request response
     respond response

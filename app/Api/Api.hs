@@ -2,7 +2,7 @@
 
 module Api.Api where
 
-import Database.Database (getGuestbook, getVisits, runDb, uuidExists)
+import Database.Database (getGuestbook, getVisits, runDb, uuidExists, validateToken)
 import Pages.Projects.Brainfuck (code)
 import qualified Tables as T (Credentials (Credentials, EmptyCredentials), GuestbookEntry (EmptyGuestbook, GuestbookEntry), LeaderboardEntry (EmptyLeaderboard, LeaderboardEntry))
 import Utils (getDefault, unpackBS)
@@ -23,8 +23,8 @@ import Data.ByteString.Lazy (fromStrict, toStrict)
 import Data.Password.Bcrypt (PasswordCheck (PasswordCheckFail, PasswordCheckSuccess), PasswordHash (PasswordHash), checkPassword, mkPassword)
 import Data.Text (intercalate, pack, unpack)
 import Data.Text.Array (Array (ByteArray))
-import Database.Persist (Entity (Entity), Filter (Filter), FilterValue (FilterValue), PersistFilter (BackendSpecificFilter), insertEntity, selectList)
-import Database.Schema (EntityField (TokenName, UserName), GuestbookEntry (GuestbookEntry, guestbookEntryContent, guestbookEntryName, guestbookEntryParentId, guestbookEntryRid, guestbookEntryTimestamp), Snake (Snake), Token (Token, tokenToken), User (User, userName, userPassword), Visit (Visit))
+import Database.Persist (Entity (Entity), Filter (Filter), FilterValue (FilterValue), PersistFilter (BackendSpecificFilter), insertEntity, selectList, PersistQueryWrite (deleteWhere), (==.))
+import Database.Schema (EntityField (TokenName, UserName, UserRid, VisitRid, GuestbookEntryRid, SnakeRid, TokenRid), GuestbookEntry (GuestbookEntry, guestbookEntryContent, guestbookEntryName, guestbookEntryParentId, guestbookEntryRid, guestbookEntryTimestamp), Snake (Snake), Token (Token, tokenToken), User (User, userName, userPassword), Visit (Visit))
 import Logger (info)
 import Text.StringRandom (stringRandomIO)
 
@@ -36,6 +36,8 @@ import Text.Regex (matchRegex, mkRegex)
 import System.IO (openFile, IOMode (ReadMode, WriteMode), hGetContents, hPutStr, hClose, writeFile)
 import System.Directory (getDirectoryContents, removeFile)
 import Settings (getEditorRoot)
+import Tables (DatabaseDelete(DatabaseDelete, EmptyDatabaseDelete))
+import State (getCookies, getStates, loggedIn, accessToken)
 
 type Header = (HeaderName, ByteString)
 type APIResponse = IO (Status, String, [Header])
@@ -77,11 +79,11 @@ apiMap = [
             case credentials of
                 (T.Credentials username password) -> do
                     let pass = mkPassword $ pack password
-                    rows <- map (\(Entity _ e) -> e) <$> (runDb $ selectList [Filter UserName (FilterValue username) (BackendSpecificFilter "LIKE")] [] :: IO [Entity User])
+                    rows <- map (\(Entity _ e) -> e) <$> (runDb $ selectList [UserName ==. username] [] :: IO [Entity User])
                     case rows of
                         [user] -> case checkPassword pass (PasswordHash $ pack (userPassword user)) of
                             PasswordCheckSuccess -> do
-                                rows <- map (\(Entity _ e) -> e) <$> (runDb $ selectList [Filter TokenName (FilterValue username) (BackendSpecificFilter "LIKE")] [] :: IO [Entity Token])
+                                rows <- map (\(Entity _ e) -> e) <$> (runDb $ selectList [TokenName ==. username] [] :: IO [Entity Token])
                                 response <- if null rows then do
                                     token <- stringRandomIO "[0-9a-zA-Z]{4}-[0-9a-ZA-Z]{10}-[0-9a-zA-Z]{15}"
                                     runDb $ insertEntity $ Token 0 (unpack token) username
@@ -181,6 +183,32 @@ apiMap = [
             let filename = unpackBS body
             removeFile $ editor_root ++ "/" ++ filename
             return (status200, messageResponse "ok", jsonHeaders)
+        ),
+        ("/database/delete", \r -> do
+            body <- getRequestBodyChunk r
+            let json = getDefault EmptyDatabaseDelete (decode (fromStrict body) :: Maybe DatabaseDelete)
+            let states = getStates r
+
+            if loggedIn states then do 
+                validity <- validateToken (accessToken states)
+                if validity then case json of
+                    (DatabaseDelete table id) -> do
+                        case table of
+                            "visits" -> do
+                                runDb $ deleteWhere [VisitRid ==. id] :: IO ()
+                            "guestbook" -> do
+                                runDb $ deleteWhere [GuestbookEntryRid ==. id] :: IO ()
+                            "snake" -> do
+                                runDb $ deleteWhere [SnakeRid ==. id] :: IO ()
+                            "users" -> do
+                                runDb $ deleteWhere [UserRid ==. id] :: IO ()
+                            "valid_tokens" -> do
+                                runDb $ deleteWhere [TokenRid ==. id] :: IO ()
+                            _ -> putStr "no table, doing nothing..."
+                        return (status200, messageResponse "ok", jsonHeaders)
+                    EmptyDatabaseDelete -> return (status400, messageResponse "Invalid JSON", jsonHeaders)
+                else return (status400, messageResponse "Invalid token", jsonHeaders)
+            else return (status400, messageResponse "Not logged in", jsonHeaders)
         )
     ])
     ]

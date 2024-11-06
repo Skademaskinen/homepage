@@ -11,9 +11,12 @@ import Data.Text (Text, pack, unpack)
 import Database.Persist.MySQL (ConnectInfo (ConnectInfo, connectDatabase, connectUser), Entity (Entity), EntityNameDB (unEntityNameDB), FieldDef (FieldDef), FieldNameHS (unFieldNameHS), Filter (Filter), FilterValue (FilterValue), PersistFilter (BackendSpecificFilter), PersistStoreWrite (insert_), SqlPersistT, defaultConnectInfo, fieldDBName, getEntityDBName, getEntityFields, runMigration, runSqlConn, selectList, withMySQLConn)
 import Database.Persist.TH (mkMigrate, mkPersist, persistLowerCase, share, sqlSettings)
 import Database.Persist.Types (EntityDef, FieldDef (fieldSqlType), fieldHaskell)
-import Database.Schema (EntityField (TokenToken, VisitUuid), GuestbookEntry (GuestbookEntry), Snake, Token (tokenName, tokenToken), User (userName), Visit, defs, migrateAll)
+import Database.Persist ((==.))
+import Database.Schema (EntityField (TokenToken, VisitUuid), GuestbookEntry (GuestbookEntry, guestbookEntryRid), Snake (Snake, snakeRid), Token (tokenName, tokenToken, Token, tokenRid), User (userName, User, userRid), Visit (Visit, visitRid), defs, migrateAll)
 import Logger (info)
 import Tree (Tree (Tree))
+import Text.Blaze.Html (Html)
+import IHP.HSX.QQ (hsx)
 
 -- Database boilerplate
 
@@ -69,13 +72,13 @@ getTokens = do
 
 uuidExists :: String -> IO Bool
 uuidExists uuid = do
-    visits <- runDb $ selectList [Filter VisitUuid (FilterValue uuid) (BackendSpecificFilter "LIKE")] [] :: IO [Entity Visit]
+    visits <- runDb $ selectList [VisitUuid ==. uuid] [] :: IO [Entity Visit]
     print visits
     return (null visits)
 
 tokenToUsername :: String -> IO String
 tokenToUsername token = do
-    (Entity _ token : _) <- runDb $ selectList [Filter TokenToken (FilterValue token) (BackendSpecificFilter "LIKE")] []
+    (Entity _ token : _) <- runDb $ selectList [TokenToken ==. token] []
     return $ tokenName token
 
 -- schema
@@ -92,6 +95,29 @@ prettyPrintSchema =
         fieldType field = show $ fieldSqlType field
 
 validateToken :: String -> IO Bool
-validateToken token = do
-    tokens <- getTokens
-    return $ any (\x -> tokenToken x == token) tokens
+validateToken token = any (\x -> tokenToken x == token) <$> getTokens
+
+class AdminTable a where
+    toList :: a -> [String]
+    button :: a -> Html
+    getData :: [Filter a] -> IO [a] 
+instance AdminTable Visit where
+    toList (Visit rid timestamp uuid) = [show rid, show timestamp, uuid]
+    button a = [hsx|<button id={"visits::"++(show $ visitRid a)} onclick="delete_row(this.id)">Delete</button>|]
+    getData f = map (\(Entity _ e) -> e) <$> runDb (selectList f []) :: IO [Visit]  
+instance AdminTable GuestbookEntry where
+    toList (GuestbookEntry rid timestamp name content parentId) = [show rid, show timestamp, name, content, show parentId]
+    button a = [hsx|<button id={"guestbook::"++(show $ guestbookEntryRid a)} onclick="delete_row(this.id)">Delete</button>|]
+    getData f = map (\(Entity _ e) -> e) <$> runDb (selectList f []) :: IO [GuestbookEntry] 
+instance AdminTable Snake where
+    toList (Snake rid timestamp name score speed fruits) = [show rid, show timestamp, name, show score, show speed, show fruits]
+    button a = [hsx|<button id={"snake::"++(show $ snakeRid a)} onclick="delete_row(this.id)">Delete</button>|]
+    getData f = map (\(Entity _ e) -> e) <$> runDb (selectList f []) :: IO [Snake] 
+instance AdminTable User where
+    toList (User rid name password) = [show rid, name, password]
+    button a = [hsx||<button id={"users::"++(show $ userRid a)} onclick="delete_row(this.id)">Delete</button>|]
+    getData f = map (\(Entity _ e) -> e) <$> runDb (selectList f []) :: IO [User] 
+instance AdminTable Token where
+    toList (Token rid token name) = [show rid, token, name]
+    button a = [hsx|<button id={"valid_tokens::"++(show $ tokenRid a)} onclick="delete_row(this.id)">Delete</button>|]
+    getData f = map (\(Entity _ e) -> e) <$> runDb (selectList f []) :: IO [Token] 

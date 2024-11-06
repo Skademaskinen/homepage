@@ -44,3 +44,10 @@ instance FromJSON Credentials where
         <$> v .: "username"
         <*> v .: "password"
     parseJSON _ = empty
+
+data DatabaseDelete = DatabaseDelete String Int | EmptyDatabaseDelete
+instance FromJSON DatabaseDelete where
+    parseJSON (Object v) = DatabaseDelete
+        <$> v .: "table"
+        <*> v .: "id"
+    parseJSON _ = empty

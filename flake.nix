@@ -1,7 +1,7 @@
 {
     description = "Homepage nix flake";
     inputs = {
-        nixpkgs.url = "nixpkgs/nixos-24.05";
+        nixpkgs.url = "nixpkgs/nixos-unstable";
     };
     outputs = { self, nixpkgs }: let
         system = "x86_64-linux";
@@ -9,17 +9,11 @@
         lib = pkgs.lib;
     in rec {
         devShells.${system}.default = pkgs.mkShell {
-            packages = with pkgs.haskellPackages; [
-                (ghcWithPackages (hs: with hs; [
+            packages = with pkgs; [
+                (haskellPackages.ghcWithPackages (hs: with hs; [
                     cabal-install
-                    mysql
-                    pkgs.pcre.out
-                    pkgs.pcre.dev
-                ]))
-                pkgs.mysql
-                pkgs.pcre.out
-                pkgs.pcre.dev
-                pkgs.zstd.out
+                    haskell-language-server
+                ] ++ ((pkgs.callPackage ./nix-support/package.nix {}).buildInputs)))
             ];
         };
         packages.${system} = let 

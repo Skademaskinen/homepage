@@ -5,6 +5,7 @@ import Text.Blaze.Html (Html)
 
 import Footer (footer)
 import Header (header)
+import Network.Wai (Request)
 
 layout :: Html -> Html
 layout content = [hsx|
@@ -32,6 +33,5 @@ layout content = [hsx|
                 <hr>
             </div>
         </body>
-        {footer}
     </html>
 |]

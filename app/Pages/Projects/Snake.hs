@@ -91,7 +91,7 @@ leaderboardField value = [hsx|
 
 leaderboardEntry :: Snake -> Html
 leaderboardEntry (Snake id timestamp name score speed fruits) = [hsx|
-    <tr>
+    <tr class="common-table-element">
         {mconcat $ map leaderboardField [name, show timestamp, show score, show speed, show fruits]}
     </tr>
 |]
@@ -100,13 +100,13 @@ page :: IO Html
 page = do
     l <- getLeaderboard
     return [hsx|
-        <table>
+        <table class="common-table">
             <tr>
-                <th>Name</th>
-                <th>Time</th>
-                <th>Score</th>
-                <th>Speed</th>
-                <th>Fruits</th>
+                <th class="common-table-element">Name</th>
+                <th class="common-table-element">Time</th>
+                <th class="common-table-element">Score</th>
+                <th class="common-table-element">Speed</th>
+                <th class="common-table-element">Fruits</th>
             </tr>
             {mconcat $ map leaderboardEntry l}
         </table>

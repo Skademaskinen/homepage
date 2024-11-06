@@ -50,17 +50,17 @@ repo = do
     return [hsx|
         <hr>
         Commit History:<br>
-        <table style="display:inline-block;border:1px solid white; padding:5px; overflow-y: scroll; max-height: 500px;">
+        <table class="common-table">
         {result}
         </table>
     |]
     where
         handleCommits ((CommitData url (Commit message (Author date))) : xs) = [hsx|
             <tr>
-                <th style="width:500px; height: 50px;">
+                <th class="common-table-element">
                     <a href={url}>{message}</a>
                 </th>
-                <th style="width:100px; height: 50px;">
+                <th class="common-table-element">
                     {date}
                 </th>
             </tr>

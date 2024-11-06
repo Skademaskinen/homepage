@@ -9,7 +9,11 @@ data State = EmptyState
     deriving Show
 
 getCookies :: Request -> [(String, String)]
-getCookies request = map (\(_, cookie) -> (head $ splitOn "="  (unpackBS cookie), splitOn "=" (unpackBS cookie) !! 1)) $ filter (\(header, value) -> header == "Cookie") $ requestHeaders request
+getCookies request = do
+    let headers = requestHeaders request
+    let cookies = (case find (\x -> ((==) . fst) x "Cookie") headers of (Just x) -> snd x; _ -> "")
+    map ((\(e1:e2:_) -> (e1, e2)) . splitOn "=") (splitOn "; " $ unpackBS cookies)
+
 
 accessToken :: [State] -> String
 accessToken states = case find (\case

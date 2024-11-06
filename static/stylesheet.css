@@ -109,6 +109,7 @@ button:active {
     border-collapse: collapse;
     overflow:scroll;
     max-height:300px;
+    min-width: 1000px;
 }
 
 .common-table-row {
@@ -117,7 +118,7 @@ button:active {
 
 .common-table-element {
     padding: 4px;
-    width: 100px;
+    min-width: 200px;
     text-align: left;
     overflow-x:scroll;
 }
