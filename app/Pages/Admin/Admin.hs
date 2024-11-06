@@ -77,7 +77,7 @@ browse table = do
                 })
             }
         </script>
-        <table class="common-table">
+        <table class="common-table" style="max-height:700px;">
             {row (columnNames, empty)}
             {mconcat $ map row tableData}
         </table><br>
