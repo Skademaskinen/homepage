@@ -4,10 +4,12 @@ import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 
 import CodeBlock (hsxIntroCodeBlock, introCodeIndex)
-import Database.Database (getVisits)
+import Database.Database (getVisits, AdminTable (getData))
 import Layout (layout)
 import Page (Page, PageSetting (Description, EmbedImage, EmbedText, Route))
 import Section (section)
+import Database.Schema (EntityField(VisitTimestamp), Visit (Visit, visitTimestamp))
+import Database.Persist ((>.))
 
 intro :: Html
 intro = section [hsx|
@@ -41,13 +43,24 @@ intro = section [hsx|
 page :: IO Html
 page = do
     visits <- show . length <$> getVisits
+    lastVisit <- foldr max 0 <$> fmap (map visitTimestamp) (getData [] :: IO [Visit])
+    visitsToday <- show . length <$> getData [VisitTimestamp >. lastVisit-(24*60*60)]
     return [hsx|
         <h1>Skademaskinen</h1>
         <img src="/static/icon.png" style="border-radius:50%">
         <br>
         <hr>
         {intro}
-        Visitors: <p id="visits">{visits}</p>
+        <table class="common-table">
+            <tr>
+                <th class="common-table-element">Visits</th>
+                <th class="common-table-element">Visits today</th>
+            </tr>
+            <tr>
+                <th class="common-table-element">{visits}</th>
+                <th class="common-table-element">{visitsToday}</th>
+            </tr>
+        </table>
         <script>
             fetch("/api/visits/new", {
                 method: "post",
