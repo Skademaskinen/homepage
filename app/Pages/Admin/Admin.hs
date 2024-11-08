@@ -45,11 +45,11 @@ panel = do
         row :: (String, [Int]) -> Html
         row (name, values) = [hsx|
             <tr>
-                <th class="common-table-element">
+                <td class="common-table-element">
                     {name}
-                </th>
+                </td>
                 {mconcat $ map th values}
-                <th><a href={"/admin/browse/"++name}>Browse</a></th>
+                <td><a href={"/admin/browse/"++name}>Browse</a></td>
             </tr>
         |]
 

@@ -57,12 +57,12 @@ repo = do
     where
         handleCommits ((CommitData url (Commit message (Author date))) : xs) = [hsx|
             <tr>
-                <th class="common-table-element">
+                <td class="common-table-element">
                     <a href={url}>{message}</a>
-                </th>
-                <th class="common-table-element">
+                </td>
+                <td class="common-table-element">
                     {date}
-                </th>
+                </td>
             </tr>
             {handleCommits xs}
         |]

@@ -86,7 +86,7 @@ snake = [hsx|
 
 leaderboardField :: String -> Html
 leaderboardField value = [hsx|
-    <th style="width:100px">{value}</th>
+    <td style="width:100px">{value}</td>
 |]
 
 leaderboardEntry :: Snake -> Html
