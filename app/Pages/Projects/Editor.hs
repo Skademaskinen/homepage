@@ -3,6 +3,48 @@ module Pages.Projects.Editor where
 import Text.Blaze.Html (Html)
 import IHP.HSX.QQ (hsx)
 
+styles :: Html
+styles = [hsx|
+    <style>
+        .sidebar * {
+            all: unset;
+            width: 200px;
+            border 0px solid black;
+            border-radius: 0px;
+            padding: 2px;
+            margin: 0px;
+        }
+        .sidebar button {
+            background-color: #222222;
+            color: white;
+        }
+        .sidebar button:hover {
+            background-color: #444444;
+        }
+        .sidebar_input {
+            all: unset;
+            width: 200px;
+            border: 0px solid black;
+            padding: 2px;
+            margin: 0px;
+            background-color: white;
+            color: black;
+        }
+        .editor {
+            all: unset;
+            width: 100%;
+            height: 400px;
+            background-color: #151515;
+            color: white;
+            white-space: pre-wrap;
+            resize: none;
+            text-align: left;
+            padding: 5px;
+        }
+        
+    </style>
+|]
+
 commands :: Html
 commands = [hsx|
     <script>
@@ -19,6 +61,15 @@ commands = [hsx|
                 document.getElementById("editor").value = text
                 document.getElementById("filename").innerHTML = filename
                 status_message("switched file")
+                var items = document.getElementById("sidebar").getElementsByTagName("button")
+                for(i = 0; i < items.length; i++) {
+                    if (items[i].innerHTML == filename) {
+                        items[i].style.backgroundColor = "#444444"
+                    }
+                    else {
+                        items[i].style.backgroundColor = "#222222"
+                    }
+                }
             }))
         }
 
@@ -67,8 +118,8 @@ commands = [hsx|
 
 sidebar :: Html
 sidebar = [hsx|
-    <input id="new-file">
-    <div id="sidebar"></div>
+    <input class="sidebar_input" id="new-file" placeholder="Write name of new file">
+    <div class="sidebar" id="sidebar"></div>
     <script>
         var new_file = document.getElementById("new-file")
         new_file.onkeypress = event => {
@@ -94,8 +145,7 @@ sidebar = [hsx|
 
 mainFrame :: Html
 mainFrame = [hsx|
-    <h3 id="filename"></h3>
-    <textarea style="min-width: 700px; min-height: 300px;" id="editor">
+    <textarea class="editor" id="editor">
     </textarea><br>
     <button onclick="save_file()">Save File</button>
     <button onclick="delete_file()">Delete File</button>
@@ -103,17 +153,19 @@ mainFrame = [hsx|
 
 editor :: Html
 editor = [hsx|
+    {styles}
     For this project, i've written a text editor, feel free to make the files you want, i was considering putting a field for specifying a method to run it but i don't want to create obvious vulnerabilities..
     {commands}
+
     <table>
         <tr>
-            <th style="width: 300px; text-align: left;">
+            <td style="width: 300px; text-align: left; vertical-align: top;">
                 {sidebar}
-            </th>
-            <th>
+            </td>
+            <td style="width: 100%; vertical-align: top;">
                 {mainFrame}
-            </th>
+            </td>
         </tr>
     </table>
-    <p id="status"></p>
+    <span id="filename"></span> | <span id="status"></span>
 |]
