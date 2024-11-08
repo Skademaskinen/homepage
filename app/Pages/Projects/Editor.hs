@@ -32,7 +32,7 @@ styles = [hsx|
         }
         .editor {
             all: unset;
-            width: 100%;
+            width: 99%;
             height: 400px;
             background-color: #151515;
             color: white;
