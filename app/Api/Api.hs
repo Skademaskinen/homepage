@@ -61,18 +61,6 @@ messageResponse value = j2s [aesonQQ|{
 apiMap :: [APIRoute]
 apiMap = [
     ("POST", [
-        ("^/visits/new(/|)$", \r -> do
-            body <- getRequestBodyChunk r
-            result <- null <$> getData [VisitUuid ==. unpackBS body] []
-            res <- if result then do
-                time <- fmap round getPOSIXTime :: IO Int
-                uuid <- nextRandom
-                runDb $ insertEntity $ Visit 0 time $ toString uuid
-                return $ toString uuid
-            else
-                return $ unpackBS body
-            return (status200, j2s [aesonQQ|{"uuid":#{res}}|], jsonHeaders)
-        ),
         ("^/login(/|)$", \r -> do
             body <- getRequestBodyChunk r
             let credentials = getDefault T.EmptyCredentials (decode (fromStrict body) :: Maybe T.Credentials)

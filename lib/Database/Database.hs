@@ -8,7 +8,7 @@ import Settings (getDatabaseName, getDatabaseUser)
 import Control.Monad.Logger (NoLoggingT (runNoLoggingT))
 import Data.List (inits, intercalate)
 import Data.Text (Text, pack, unpack)
-import Database.Persist.MySQL (ConnectInfo (ConnectInfo, connectDatabase, connectUser), Entity (Entity), EntityNameDB (unEntityNameDB), FieldDef (FieldDef), FieldNameHS (unFieldNameHS), Filter (Filter), FilterValue (FilterValue), PersistFilter (BackendSpecificFilter), PersistStoreWrite (insert_), SqlPersistT, defaultConnectInfo, fieldDBName, getEntityDBName, getEntityFields, runMigration, runSqlConn, selectList, withMySQLConn, SelectOpt)
+import Database.Persist.MySQL (ConnectInfo (ConnectInfo, connectDatabase, connectUser), Entity (Entity), EntityNameDB (unEntityNameDB), FieldDef (FieldDef), FieldNameHS (unFieldNameHS), Filter (Filter), FilterValue (FilterValue), PersistFilter (BackendSpecificFilter), PersistStoreWrite (insert_), SqlPersistT, defaultConnectInfo, fieldDBName, getEntityDBName, getEntityFields, runMigration, runSqlConn, selectList, withMySQLConn, SelectOpt, insertEntity)
 import Database.Persist.TH (mkMigrate, mkPersist, persistLowerCase, share, sqlSettings)
 import Database.Persist.Types (EntityDef, FieldDef (fieldSqlType), fieldHaskell)
 import Database.Persist ((==.), (=.))
@@ -17,6 +17,9 @@ import Logger (info)
 import Tree (Tree (Tree))
 import Text.Blaze.Html (Html)
 import IHP.HSX.QQ (hsx)
+import Data.Time.Clock.POSIX (getPOSIXTime)
+import Data.UUID.V4 (nextRandom)
+import Data.UUID (toString)
 
 -- Database boilerplate
 
@@ -51,6 +54,13 @@ prettyPrintSchema =
 
 validateToken :: String -> IO Bool
 validateToken token = any (\x -> tokenToken x == token) <$> (getData [] [] :: IO [Token])
+
+newVisit :: IO String
+newVisit = do
+    time <- fmap round getPOSIXTime :: IO Int
+    uuid <- nextRandom
+    runDb $ insertEntity $ Visit 0 time $ toString uuid
+    return $ toString uuid
 
 class AdminTable a where
     toList :: a -> [String]

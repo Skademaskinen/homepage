@@ -4,12 +4,15 @@ import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 
 import CodeBlock (hsxIntroCodeBlock, introCodeIndex)
-import Database.Database (AdminTable (getData))
+import Database.Database (AdminTable (getData), newVisit)
 import Layout (layout)
 import Page (Page, PageSetting (Description, EmbedImage, EmbedText, Route))
 import Section (section)
-import Database.Schema (EntityField(VisitTimestamp), Visit (Visit, visitTimestamp))
-import Database.Persist ((>.), SelectOpt (LimitTo, Asc, Desc))
+import Database.Schema (EntityField(VisitTimestamp, VisitUuid), Visit (Visit, visitTimestamp, visitUuid))
+import Database.Persist ((>.), (==.), SelectOpt (LimitTo, Asc, Desc))
+import Network.Wai (Request, getRequestBodyChunk)
+import Utils (unpackBS)
+import State (getStates, visitId)
 
 intro :: Html
 intro = section [hsx|
@@ -40,11 +43,23 @@ intro = section [hsx|
     </div>
 |]
 
-page :: IO Html
-page = do
+page :: Request -> IO Html
+page request = do
+    let states = getStates request
+    let uuid = visitId states
+    result <- fmap visitUuid <$> getData [VisitUuid ==. uuid] []
+    script <- if null result then do
+        -- generate new uuid
+        id <- newVisit
+        return [hsx|
+            <script data-id={id}>
+                setCookie("visitId="+document.currentScript.dataset.id + ";max-age="+(24*60*60))
+            </script>
+        |]
+    else
+        return [hsx||]
     visits <- show . length <$> (getData [] [] :: IO [Visit])
     lastVisit <- visitTimestamp . head <$> getData [] [Desc VisitTimestamp, LimitTo 1]
-    print lastVisit
     visitsToday <- show . length <$> getData [VisitTimestamp >. lastVisit-(24*60*60)] []
     return [hsx|
         <h1>Skademaskinen</h1>
@@ -62,12 +77,7 @@ page = do
                 <th class="common-table-element">{visitsToday}</th>
             </tr>
         </table>
-        <script>
-            fetch("/api/visits/new", {
-                method: "post",
-                body: getCookie("visitId")
-            }).then(res => res.json().then(data => setCookie("visitId="+data.uuid + ";max-age="+(24*60*60))))
-        </script>
+        {script}
     |]
 
 settings :: [PageSetting]
@@ -79,4 +89,4 @@ settings = [
     ]
 
 index :: Page
-index = (settings, const $ layout <$> page)
+index = (settings, fmap layout . page)
