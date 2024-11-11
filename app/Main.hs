@@ -70,6 +70,12 @@ serveFile path = do
         warning "No file found!"
         return $ responseLBS status404 [("Content-Type", "text/json")] $ encode [aesonQQ|{"error":"Error, file not found"}|]
 
+checkUserAgent :: Request -> [String] -> Bool
+checkUserAgent request (x:xs) = case requestHeaderUserAgent request of
+    (Just useragent) -> not (isInfixOf (pack x) (pack $ unpackBS useragent)) && checkUserAgent request xs
+    Nothing -> True
+checkUserAgent _ [] = True
+
 app :: Request -> (Response -> IO b) -> IO b
 app request respond = do
     let xs = map unpack $ pathInfo request
@@ -77,35 +83,34 @@ app request respond = do
     let args = "/" ++ intercalate "/" xs
     print $ getStates request
     print $ getCookies request
-    response <- case isInfixOf "Firefox" . pack . unpackBS <$> requestHeaderUserAgent request of
-        (Just True) -> do
-            if x == "static" then do
-                -- If the requested content is a file
-                serveFile $ intercalate "/" xs
-            else if x == "favicon.ico" then do
-                -- If the requested file is the icon file
-                serveFile "static/favicon.ico"
-            else if x == "api" then do
-                -- If the request is to the API
-                (status, value, headers) <- api request
-                return $ responseBuilder status headers $ copyByteString (fromString value)
-            else do
-                -- If the content is to the HTML Frontend
-                let (settings, page) = findPage args
-                result <- page request
-                let image = if embedImage settings /= "" then [hsx|
-                    <meta content={embedImage settings} property="og:image">
-                |] else [hsx||]
-                let text = if embedText settings /= "" then [hsx|
-                    <meta content={embedText settings} property="og:title">
-                |] else [hsx||]
-                let desc = if description settings /= "" then [hsx|
-                    <meta content={description settings} property="og:description">
-                |] else [hsx||]
+    response <- if checkUserAgent request ["Conduwuit", "Synapse"] then do
+        if x == "static" then do
+            -- If the requested content is a file
+            serveFile $ intercalate "/" xs
+        else if x == "favicon.ico" then do
+            -- If the requested file is the icon file
+            serveFile "static/favicon.ico"
+        else if x == "api" then do
+            -- If the request is to the API
+            (status, value, headers) <- api request
+            return $ responseBuilder status headers $ copyByteString (fromString value)
+        else do
+            -- If the content is to the HTML Frontend
+            let (settings, page) = findPage args
+            result <- page request
+            let image = if embedImage settings /= "" then [hsx|
+                <meta content={embedImage settings} property="og:image">
+            |] else [hsx||]
+            let text = if embedText settings /= "" then [hsx|
+                <meta content={embedText settings} property="og:title">
+            |] else [hsx||]
+            let desc = if description settings /= "" then [hsx|
+                <meta content={description settings} property="og:description">
+            |] else [hsx||]
         
-                footer' <- footer request
-                return $ serve (mconcat [result, image, text, desc, footer'])
-        _ -> return $ serve [hsx|Error, only firefox is currently supported!|]
+            footer' <- footer request
+            return $ serve (mconcat [result, image, text, desc, footer'])
+    else return $ serve [hsx|Error, Hacky solution to disallow matrix federation to query here|]
 
     logger request response
     respond response
