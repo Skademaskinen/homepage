@@ -63,3 +63,5 @@ getMigrate = argOrEnvOrBool "--migrate" "HOMEPAGE_MIGRATE"
 getEditorRoot :: IO String
 getEditorRoot = argOrEnvOrDefault "--editor_root" "HOMEPAGE_EDITOR_ROOT" "./editor_root"
 
+getLocal :: IO Bool
+getLocal = argOrEnvOrBool "--local" "HOMEPAGE_LOCAL"

@@ -16,7 +16,7 @@ pkgs.haskellPackages.mkDerivation {
         aeson aeson-qq base blaze-builder blaze-html bytestring cryptonite
         directory http-conduit http-types ihp-hsx monad-logger password
         persistent persistent-mysql regex-compat split string-random text
-        time utf8-string uuid wai warp yaml
+        time utf8-string uuid wai warp yaml raw-strings-qq persistent-sqlite
     ];
     testHaskellDepends = with pkgs.haskellPackages; [ base ];
     doHaddock = false;

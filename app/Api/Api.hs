@@ -58,6 +58,16 @@ messageResponse value = j2s [aesonQQ|{
     "message":#{value}
 }|]
 
+(<!>) :: [APIRoute] -> String -> [APIEndpoint]
+((method, value):xs) <!> target | method == target  = value
+                                | otherwise         = xs <!> target
+[] <!> _ = []
+
+(<!!>) :: [APIEndpoint] -> String -> (Request -> APIResponse)
+((regex, response):xs) <!!> target  | regex == target  = response
+                                    | otherwise         = xs <!!> target
+[] <!!> _ = \r -> return (status400, j2s [aesonQQ|{}|], jsonHeaders)
+
 apiMap :: [APIRoute]
 apiMap = [
     ("POST", [

@@ -41,3 +41,6 @@ getDefault :: a -> Maybe a -> a
 getDefault def a = case a of
     (Just v) -> v
     Nothing -> def
+
+count :: Eq a => a -> [a] -> Int
+count x = length . filter (x==)

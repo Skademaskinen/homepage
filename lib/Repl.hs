@@ -5,12 +5,14 @@ import System.Exit (exitSuccess)
 import Data.List (intercalate)
 import Data.Password.Bcrypt (PasswordHash (PasswordHash), hashPassword, mkPassword)
 import Data.Text (pack, unpack)
-import Database.Database (runDb)
-import Database.Persist (PersistQueryWrite (deleteWhere), insertEntity)
+import Database.Database (runDb, AdminTable (getData, toList), doMigration)
+import Database.Persist (PersistQueryWrite (deleteWhere), insertEntity, SelectOpt (LimitTo))
 import Database.Persist.MySQL ((==.))
-import Database.Schema (EntityField (UserName), User (User))
+import Database.Schema (EntityField (UserName), User (User), Visit (Visit), GuestbookEntry (GuestbookEntry), Snake (Snake), Token (Token))
 import Logger (clearEnd, clearLine, right, up)
 import System.IO (hFlush, stdout)
+import Text.RawString.QQ (r)
+import Utils (count)
 
 resetCursor :: Int -> IO ()
 resetCursor n = do
@@ -18,19 +20,22 @@ resetCursor n = do
 
 doCommand :: [String] -> IO ()
 doCommand ("help" : _) = do
-    putStrLn $ intercalate "\n" help
-    resetCursor $ length help + 1
+    putStrLn help
+    resetCursor $ count '\n' help +2
     repl
     where
-        help = [
-            "Homepage CLI command list:", 
-            "",
-            "exit:" ++ right 10 ++ "Exits the program", 
-            "help:" ++ right 10 ++ "Shows help about the CLI", 
-            "drop:" ++ right 10 ++ "Deletes a table and reruns init schema :: REMOVED",
-            "adduser:" ++ right 7 ++ "Adds a user to the users table",
-            "removeuser:" ++ right 4 ++ "removes a user from the users table"
-            ]
+        help :: String
+        help = [r|
+            Homepage CLI command list:
+
+            exit:       Exits the program
+            help:       Shows help about the CLI
+            drop:       Deletes a table and reruns init schema :: REMOVED
+            adduser:    Adds a user to the users table
+            show:       Show a table
+            migrate:    Migrate the database
+            removeuser: Removes a user from the users table
+        |]
 doCommand ("exit" : _) = do
     putStrLn "Exiting"
     exitSuccess
@@ -45,6 +50,30 @@ doCommand ["removeuser", username] = do
     runDb $ deleteWhere [UserName ==. username]
     putStrLn "Successfully removed user"
     resetCursor 2
+    repl
+doCommand ["show", table, lines] = do
+    let lineCount = read lines :: Int
+    rows <- case table of
+        "visits" -> do
+            fmap toList <$> (getData [] [LimitTo lineCount] :: IO [Visit])
+        "guestbook" -> do
+            fmap toList <$> (getData [] [LimitTo lineCount] :: IO [GuestbookEntry])
+        "snake" -> do
+            fmap toList <$> (getData [] [LimitTo lineCount] :: IO [Snake])
+        "users" -> do
+            fmap toList <$> (getData [] [LimitTo lineCount] :: IO [User])
+        "tokens" -> do
+            fmap toList <$> (getData [] [LimitTo lineCount] :: IO [Token])
+        _ -> do
+            return [["Error, no such table"]]
+
+    putStrLn $ intercalate "\n" $ map unwords rows
+    resetCursor $ length rows + 1
+    repl
+doCommand ["show", table] = doCommand ["show", table, "5"]
+doCommand ["migrate"] = do
+    doMigration
+    resetCursor 1
     repl
 doCommand x = do
     putStrLn $ "Error, no such command: [" ++ unwords x ++ "]"

@@ -3,12 +3,13 @@
 
 module Database.Database where
 
-import Settings (getDatabaseName, getDatabaseUser)
+import Settings (getDatabaseName, getDatabaseUser, getLocal)
 
 import Control.Monad.Logger (NoLoggingT (runNoLoggingT))
 import Data.List (inits, intercalate)
 import Data.Text (Text, pack, unpack)
 import Database.Persist.MySQL (ConnectInfo (ConnectInfo, connectDatabase, connectUser), Entity (Entity), EntityNameDB (unEntityNameDB), FieldDef (FieldDef), FieldNameHS (unFieldNameHS), Filter (Filter), FilterValue (FilterValue), PersistFilter (BackendSpecificFilter), PersistStoreWrite (insert_), SqlPersistT, defaultConnectInfo, fieldDBName, getEntityDBName, getEntityFields, runMigration, runSqlConn, selectList, withMySQLConn, SelectOpt, insertEntity)
+import qualified Database.Persist.Sqlite as SQLite
 import Database.Persist.TH (mkMigrate, mkPersist, persistLowerCase, share, sqlSettings)
 import Database.Persist.Types (EntityDef, FieldDef (fieldSqlType), fieldHaskell)
 import Database.Persist ((==.), (=.))
@@ -20,6 +21,7 @@ import IHP.HSX.QQ (hsx)
 import Data.Time.Clock.POSIX (getPOSIXTime)
 import Data.UUID.V4 (nextRandom)
 import Data.UUID (toString)
+import Database.Persist.Sqlite (withSqliteConn)
 
 -- Database boilerplate
 
@@ -32,7 +34,12 @@ connectInfo = do
 runDb :: SqlPersistT (NoLoggingT IO) a -> IO a
 runDb cmd = do
     info <- connectInfo
-    runNoLoggingT . withMySQLConn info . runSqlConn $ cmd
+    local <- getLocal
+    if local then
+        runNoLoggingT . withSqliteConn "test.db3" . runSqlConn $ cmd
+    else
+        runNoLoggingT . withMySQLConn info . runSqlConn $ cmd
+
 
 doMigration :: IO ()
 doMigration = runDb $ runMigration migrateAll

@@ -41,7 +41,9 @@ library lib-homepage
         yaml,
         persistent,
         persistent-mysql,
-        monad-logger
+        persistent-sqlite,
+        monad-logger,
+        raw-strings-qq
     hs-source-dirs:   lib
     default-language: GHC2021
     default-extensions:
