@@ -39,7 +39,7 @@ import Page (description, embedImage, embedText)
 import Pages.Admin.Admin (admin)
 import Pages.Pages (findPage)
 import Repl (repl)
-import Settings (getCliState, getMigrate, getPort)
+import Settings (getInteractiveState, getMigrate, getPort)
 import System.Environment (getArgs)
 import Text.Regex (Regex, matchRegex, mkRegex)
 import Utils (unpackBS)
@@ -83,6 +83,7 @@ app request respond = do
     let args = "/" ++ intercalate "/" xs
     print $ getStates request
     print $ getCookies request
+    print $ requestHeaderUserAgent request
     response <- if checkUserAgent request ["Conduwuit", "Synapse"] then do
         if x == "static" then do
             -- If the requested content is a file
@@ -126,7 +127,7 @@ main = do
     if migrate then
         doMigration
     else do
-        cliState <- getCliState
+        cliState <- getInteractiveState
         if cliState then do
             forkIO $ run port app
             repl

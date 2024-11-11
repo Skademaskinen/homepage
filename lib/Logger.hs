@@ -6,7 +6,7 @@ import Network.HTTP.Types (Status (statusCode))
 import Network.Wai.Internal (Request, Response (ResponseBuilder, ResponseFile), pathInfo, requestMethod)
 
 import Control.Monad (when)
-import Settings (LogLevel (..), getCliState, getLogLevel)
+import Settings (LogLevel (..), getInteractiveState, getLogLevel)
 import System.IO (hFlush, stdout)
 import Utils (unpackBS)
 
@@ -72,7 +72,7 @@ logger :: Request -> Response -> IO ()
 logger request (ResponseBuilder status _ _) = do
     let method = unpackBS (requestMethod request)
     let path = getPath request
-    cliState <- getCliState
+    cliState <- getInteractiveState
     when cliState $ putStr $ "\r" ++ clearEnd
     putStrLn $ tableify [method, show $ statusCode status, path]
     when cliState $ putStr "> "
@@ -80,7 +80,7 @@ logger request (ResponseBuilder status _ _) = do
 logger request (ResponseFile status _ _ _) = do
     let method = unpackBS (requestMethod request)
     let path = getPath request
-    cliState <- getCliState
+    cliState <- getInteractiveState
     when cliState $ putStr $ "\r" ++ clearEnd
     putStrLn $ tableify [method, show $ statusCode status, path]
     when cliState $ putStr "> "
@@ -88,7 +88,7 @@ logger request (ResponseFile status _ _ _) = do
 logger request x = do
     let method = unpackBS (requestMethod request)
     let path = getPath request
-    cliState <- getCliState
+    cliState <- getInteractiveState
     when cliState $ putStr $ "\r" ++ clearEnd
     putStrLn $ tableify [method, path]
     when cliState $ putStr "> "

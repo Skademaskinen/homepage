@@ -51,8 +51,8 @@ getLogLevel = do
         "error" -> Error
         _ -> Error
 
-getCliState :: IO Bool
-getCliState = argOrEnvOrBool "--cli" "HOMEPAGE_CLI"
+getInteractiveState :: IO Bool
+getInteractiveState = argOrEnvOrBool "--interactive" "HOMEPAGE_INTERACTIVE"
 
 getColor :: IO Bool
 getColor = argOrEnvOrBool "--color" "HOMEPAGE_COLOR"
