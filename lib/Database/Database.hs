@@ -13,7 +13,7 @@ import qualified Database.Persist.Sqlite as SQLite
 import Database.Persist.TH (mkMigrate, mkPersist, persistLowerCase, share, sqlSettings)
 import Database.Persist.Types (EntityDef, FieldDef (fieldSqlType), fieldHaskell)
 import Database.Persist ((==.), (=.))
-import Database.Schema (EntityField (TokenToken, VisitUuid), GuestbookEntry (GuestbookEntry, guestbookEntryIndex), Snake (Snake, snakeIndex), Token (tokenName, tokenToken, Token, tokenIndex), User (userName, User, userIndex), Visit (Visit, visitIndex), defs, migrateAll)
+import Database.Schema (EntityField (TokenToken, VisitUuid), GuestbookEntry (GuestbookEntry, guestbookEntryIndex), Snake (Snake, snakeIndex), Token (tokenName, tokenToken, Token, tokenIndex), User (userName, User, userIndex), Visit (Visit, visitIndex, visitTimestamp, visitUuid), defs, migrateAll)
 import Logger (info)
 import Tree (Tree (Tree))
 import Text.Blaze.Html (Html)

@@ -13,7 +13,7 @@ import System.Directory (doesFileExist)
 
 import Blaze.ByteString.Builder (copyByteString)
 import Data.ByteString.UTF8 (ByteString, fromString)
-import Network.HTTP.Types (HeaderName, Query, Status, status200, status404, statusCode)
+import Network.HTTP.Types (HeaderName, Query, Status, status200, status404, statusCode, status400)
 import Network.Wai (Request (queryString, requestHeaderUserAgent), responseBuilder, responseFile, responseLBS)
 import Network.Wai.Handler.Warp (run)
 import Network.Wai.Internal (Request, Response (ResponseBuilder, ResponseFile), pathInfo, requestMethod)
@@ -71,10 +71,13 @@ serveFile path = do
         return $ responseLBS status404 [("Content-Type", "text/json")] $ encode [aesonQQ|{"error":"Error, file not found"}|]
 
 checkUserAgent :: Request -> [String] -> Bool
+checkUserAgent request [x] = case requestHeaderUserAgent request of
+    (Just useragent) -> pack x `isInfixOf` pack (unpackBS useragent)
+    Nothing -> False
 checkUserAgent request (x:xs) = case requestHeaderUserAgent request of
-    (Just useragent) -> not (isInfixOf (pack x) (pack $ unpackBS useragent)) && checkUserAgent request xs
-    Nothing -> True
-checkUserAgent _ [] = True
+    (Just useragent) -> (pack x `isInfixOf` pack (unpackBS useragent)) || checkUserAgent request xs
+    Nothing -> False
+checkUserAgent _ [] = False
 
 app :: Request -> (Response -> IO b) -> IO b
 app request respond = do
@@ -84,7 +87,7 @@ app request respond = do
     print $ getStates request
     print $ getCookies request
     print $ requestHeaderUserAgent request
-    response <- if checkUserAgent request ["Conduwuit", "Synapse"] then do
+    response <- if checkUserAgent request ["Firefox", "Safari", "Chrome", "curl"] then do
         if x == "static" then do
             -- If the requested content is a file
             serveFile $ intercalate "/" xs
@@ -111,7 +114,7 @@ app request respond = do
         
             footer' <- footer request
             return $ serve (mconcat [result, image, text, desc, footer'])
-    else return $ serve [hsx|Error, Hacky solution to disallow matrix federation to query here|]
+    else return . responseBuilder status400 [] . copyByteString . fromString $ renderHtml [hsx|Error, user agent is not in allowed list|]
 
     logger request response
     respond response
