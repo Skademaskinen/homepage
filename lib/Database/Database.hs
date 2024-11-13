@@ -13,7 +13,7 @@ import qualified Database.Persist.Sqlite as SQLite
 import Database.Persist.TH (mkMigrate, mkPersist, persistLowerCase, share, sqlSettings)
 import Database.Persist.Types (EntityDef, FieldDef (fieldSqlType), fieldHaskell)
 import Database.Persist ((==.), (=.))
-import Database.Schema (EntityField (TokenToken, VisitUuid), GuestbookEntry (GuestbookEntry, guestbookEntryIndex), Snake (Snake, snakeIndex), Token (tokenName, tokenToken, Token, tokenIndex), User (userName, User, userIndex), Visit (Visit, visitIndex, visitTimestamp, visitUuid), defs, migrateAll)
+import Database.Schema (EntityField (TokenToken, VisitUuid), GuestbookEntry (GuestbookEntry), Snake (Snake), Token (tokenName, tokenToken, Token), User (userName, User), Visit (Visit, visitTimestamp, visitUuid), defs, migrateAll)
 import Logger (info)
 import Tree (Tree (Tree))
 import Text.Blaze.Html (Html)
@@ -60,36 +60,36 @@ prettyPrintSchema =
         fieldType field = show $ fieldSqlType field
 
 validateToken :: String -> IO Bool
-validateToken token = any (\x -> tokenToken x == token) <$> (getData [] [] :: IO [Token])
+validateToken token = any (\(Entity id x) -> tokenToken x == token) <$> getData [] []
 
 newVisit :: IO String
 newVisit = do
     time <- fmap round getPOSIXTime :: IO Int
     uuid <- nextRandom
-    runDb $ insertEntity $ Visit 0 time $ toString uuid
+    runDb $ insertEntity $ Visit time $ toString uuid
     return $ toString uuid
 
 class AdminTable a where
-    toList :: a -> [String]
-    button :: a -> Html
-    getData :: [Filter a] -> [SelectOpt a] -> IO [a] 
+    toList :: Entity a -> [String]
+    makeButton :: Entity a -> Html
+    getData :: [Filter a] -> [SelectOpt a] -> IO [Entity a] 
 instance AdminTable Visit where
-    toList (Visit rid timestamp uuid) = [show rid, show timestamp, uuid]
-    button a = [hsx|<button id={"visits::"++(show $ visitIndex a)} onclick="delete_row(this.id)">Delete</button>|]
-    getData f o = map (\(Entity _ e) -> e) <$> runDb (selectList f o) :: IO [Visit]  
+    toList (Entity id (Visit timestamp uuid)) = [show id, show timestamp, uuid]
+    makeButton (Entity id a) = [hsx|<button id={"visits::"++(show id)} onclick="delete_row(this.id)">Delete</button>|]
+    getData f o = runDb (selectList f o)  
 instance AdminTable GuestbookEntry where
-    toList (GuestbookEntry rid timestamp name content parentId) = [show rid, show timestamp, name, content, show parentId]
-    button a = [hsx|<button id={"guestbook::"++(show $ guestbookEntryIndex a)} onclick="delete_row(this.id)">Delete</button>|]
-    getData f o = map (\(Entity _ e) -> e) <$> runDb (selectList f o) :: IO [GuestbookEntry] 
+    toList (Entity id (GuestbookEntry timestamp name content parentId)) = [show id, show timestamp, name, content, show parentId]
+    makeButton (Entity id a) = [hsx|<button id={"guestbook::"++(show id)} onclick="delete_row(this.id)">Delete</button>|]
+    getData f o = runDb (selectList f o)
 instance AdminTable Snake where
-    toList (Snake rid timestamp name score speed fruits) = [show rid, show timestamp, name, show score, show speed, show fruits]
-    button a = [hsx|<button id={"snake::"++(show $ snakeIndex a)} onclick="delete_row(this.id)">Delete</button>|]
-    getData f o = map (\(Entity _ e) -> e) <$> runDb (selectList f o) :: IO [Snake] 
+    toList (Entity id (Snake timestamp name score speed fruits)) = [show id, show timestamp, name, show score, show speed, show fruits]
+    makeButton (Entity id a) = [hsx|<button id={"snake::"++(show id)} onclick="delete_row(this.id)">Delete</button>|]
+    getData f o = runDb (selectList f o)
 instance AdminTable User where
-    toList (User rid name password) = [show rid, name, password]
-    button a = [hsx|<button id={"users::"++(show $ userIndex a)} onclick="delete_row(this.id)">Delete</button>|]
-    getData f o = map (\(Entity _ e) -> e) <$> runDb (selectList f o) :: IO [User] 
+    toList (Entity id (User name password)) = [show id, name, password]
+    makeButton (Entity id a) = [hsx|<button id={"users::"++(show id)} onclick="delete_row(this.id)">Delete</button>|]
+    getData f o = runDb (selectList f o)
 instance AdminTable Token where
-    toList (Token rid token name) = [show rid, token, name]
-    button a = [hsx|<button id={"valid_tokens::"++(show $ tokenIndex a)} onclick="delete_row(this.id)">Delete</button>|]
-    getData f o = map (\(Entity _ e) -> e) <$> runDb (selectList f o) :: IO [Token] 
+    toList (Entity id (Token token name)) = [token, name]
+    makeButton (Entity id a) = [hsx|<button id={"valid_tokens::"++(show id)} onclick="delete_row(this.id)">Delete</button>|]
+    getData f o = runDb (selectList f o)

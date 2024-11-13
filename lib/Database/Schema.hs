@@ -19,34 +19,29 @@ module Database.Schema where
 import Database.Persist.TH (mkEntityDefList, mkMigrate, mkPersist, persistLowerCase, share, sqlSettings)
 
 share [mkPersist sqlSettings, mkMigrate "migrateAll", mkEntityDefList "defs"] [persistLowerCase|
-    Visit                                   sql=visits
-        index                   Int         sql=id
-        timestamp               Int         sql=timestamp
-        uuid                    String      sql=uuid
+    Visit                                               sql=visits
+        timestamp               Int                     sql=timestamp
+        uuid                    String                  sql=uuid
         deriving Eq Show
-    GuestbookEntry                          sql=guestbook
-        index                   Int         sql=id
-        timestamp               Int         sql=timestamp
-        name                    String      sql=name
-        content                 String      sql=content
-        parentId                Int         sql=parentId
+    GuestbookEntry                                      sql=guestbook
+        timestamp               Int                     sql=timestamp
+        name                    String                  sql=name
+        content                 String                  sql=content
+        parentId                Int                     sql=parentId
         deriving Eq Show
-    Snake                                   sql=snake
-        index                   Int         sql=id
-        timestamp               Int         sql=timestamp
-        name                    String      sql=name
-        score                   Int         sql=score
-        speed                   Int         sql=speed
-        fruits                  Int         sql=fruits
+    Snake                                               sql=snake
+        timestamp               Int                     sql=timestamp
+        name                    String                  sql=name
+        score                   Int                     sql=score
+        speed                   Int                     sql=speed
+        fruits                  Int                     sql=fruits
         deriving Eq Show
-    User                                    sql=users
-        index                   Int         sql=id
-        name                    String      sql=username
-        password                String      sql=password
+    User                                                sql=users
+        name                    String                  sql=username
+        password                String                  sql=password
         deriving Eq Show
-    Token                                   sql=valid_tokens
-        index                   Int         sql=id
-        token                   String      sql=token
-        name                    String      sql=username
+    Token                                               sql=valid_tokens
+        token                   String                  sql=token
+        name                    String                  sql=username
         deriving Eq Show
 |]

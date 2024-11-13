@@ -9,19 +9,21 @@ import Data.List (filter)
 
 import Data.Time.Clock.POSIX (POSIXTime, posixSecondsToUTCTime)
 import Data.Time.Format (defaultTimeLocale, formatTime)
-import Database.Schema (GuestbookEntry (GuestbookEntry))
+import Database.Schema (GuestbookEntry (GuestbookEntry), GuestbookEntryId, Key (GuestbookEntryKey), EntityField (GuestbookEntryId))
 import Layout (layout)
 import Page (Page, PageSetting (Description, Route))
 import Tree (Tree (Tree))
 import Database.Database (AdminTable(getData))
+import Database.Persist (Entity (Entity))
+import Database.Persist.MySQL (toSqlKey, BackendKey (SqlBackendKey))
 
 type Guestbook = [(Int, Int, String, String, Int)]
 
 toPosix :: Int -> POSIXTime
 toPosix n = read (show n ++ "s") :: POSIXTime
 
-prettifyGuestbook :: [Tree GuestbookEntry] -> Html
-prettifyGuestbook ((Tree (GuestbookEntry id timestamp name content parent) children) : xs) = mconcat [
+prettifyGuestbook :: [Tree (Entity GuestbookEntry)] -> Html
+prettifyGuestbook ((Tree (Entity (GuestbookEntryKey (SqlBackendKey id)) (GuestbookEntry timestamp name content parent)) children) : xs) = mconcat [
     section [hsx|
         <h3>{name} said: </h3>
         Posted: <span style="color: #ff0000">{formatTime defaultTimeLocale "%c" $ posixSecondsToUTCTime (toPosix timestamp)}</span>
@@ -39,7 +41,7 @@ prettifyGuestbook ((Tree (GuestbookEntry id timestamp name content parent) child
             </table>
         </div>
         {prettifyGuestbook $ children} 
-        {guestbookInput id True}
+        {guestbookInput (fromIntegral id) True}
         <br><br>
     |], prettifyGuestbook xs
     ]
@@ -60,13 +62,13 @@ guestbookInput parent True = [hsx|
     </div>
 |]
 
-guestbookToTree :: [GuestbookEntry] -> Int -> [Tree GuestbookEntry]
-guestbookToTree entries targetParent = [Tree (GuestbookEntry id timestamp name content parent) $ guestbookToTree entries id | (GuestbookEntry id timestamp name content parent) <- entries, parent == targetParent]
+guestbookToTree :: [Entity GuestbookEntry] -> GuestbookEntryId -> [Tree (Entity GuestbookEntry)]
+guestbookToTree entries targetParent = [Tree (Entity id (GuestbookEntry timestamp name content parent)) $ guestbookToTree entries id | (Entity id (GuestbookEntry timestamp name content parent)) <- entries, (toSqlKey . fromIntegral) parent == targetParent]
 
-getGuestbook :: IO [Tree GuestbookEntry]
+getGuestbook :: IO [Tree (Entity GuestbookEntry)]
 getGuestbook = do
-    entries <- getData [] [] :: IO [GuestbookEntry]
-    return $ guestbookToTree entries (-1)
+    entries <- getData [] [] :: IO [Entity GuestbookEntry]
+    return $ guestbookToTree entries ((toSqlKey . read . show) (-1))
 
 
 page :: IO Html

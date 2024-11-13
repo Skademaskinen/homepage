@@ -8,6 +8,7 @@ import Layout (layout)
 import Page (Page, PageSetting (Description, Route))
 import Utils (forEach)
 import Database.Database (AdminTable(getData))
+import Database.Persist (Entity(Entity, entityVal))
 
 tile :: Int -> Html
 tile id = [hsx|
@@ -90,7 +91,7 @@ leaderboardField value = [hsx|
 |]
 
 leaderboardEntry :: Snake -> Html
-leaderboardEntry (Snake id timestamp name score speed fruits) = [hsx|
+leaderboardEntry (Snake timestamp name score speed fruits) = [hsx|
     <tr class="common-table-element">
         {mconcat $ map leaderboardField [name, show timestamp, show score, show speed, show fruits]}
     </tr>
@@ -98,7 +99,7 @@ leaderboardEntry (Snake id timestamp name score speed fruits) = [hsx|
 
 page :: IO Html
 page = do
-    l <- getData [] [] :: IO [Snake]
+    l <- getData [] [] :: IO [Entity Snake]
     return [hsx|
         <table class="common-table">
             <tr>
@@ -108,7 +109,7 @@ page = do
                 <th class="common-table-element">Speed</th>
                 <th class="common-table-element">Fruits</th>
             </tr>
-            {mconcat $ map leaderboardEntry l}
+            {mconcat $ map (\e -> leaderboardEntry $ entityVal e) l}
         </table>
     |]
 

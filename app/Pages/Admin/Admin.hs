@@ -2,8 +2,8 @@ module Pages.Admin.Admin where
 
 import CodeBlock (codeBlock)
 import Data.Text (Text, unpack, pack)
-import Database.Database (prettyPrintSchema, validateToken, runDb, AdminTable (button, toList, getData))
-import Database.Schema (GuestbookEntry (GuestbookEntry, guestbookEntryIndex), Snake (Snake, snakeIndex), Token (Token, tokenIndex), User (User, userIndex), Visit (Visit, visitIndex), defs, EntityField (UserName, TokenToken))
+import Database.Database (prettyPrintSchema, validateToken, runDb, AdminTable (makeButton, toList, getData))
+import Database.Schema (GuestbookEntry (GuestbookEntry), Snake (Snake), Token (Token), User (User), Visit (Visit), defs, EntityField (UserName, TokenToken))
 import IHP.HSX.QQ (hsx)
 import Layout (layout)
 import Page (Page, PageSetting (Description, Route), getArgs)
@@ -16,11 +16,11 @@ import Logger (warning)
 
 panel :: IO Html
 panel = do 
-    visits <- getData [] [] :: IO [Visit]
-    guestbook <- getData [] [] :: IO [GuestbookEntry]
-    snake <- getData [] [] :: IO [Snake]
-    users <- getData [] [] :: IO [User]
-    valid_tokens <- getData [] [] :: IO [Token]
+    visits <- getData [] [] :: IO [Entity Visit]
+    guestbook <- getData [] [] :: IO [Entity GuestbookEntry]
+    snake <- getData [] [] :: IO [Entity Snake]
+    users <- getData [] [] :: IO [Entity User]
+    valid_tokens <- getData [] [] :: IO [Entity Token]
     return [hsx|
         Here are actions when logged in
         <br>
@@ -89,25 +89,25 @@ browse table = do
     where
         getTableData :: String -> IO [([String], Html)]
         getTableData "visits" = do
-            tableData <- getData [] []:: IO [Visit]
+            tableData <- getData [] []:: IO [Entity Visit]
             let columnNames = getColumnNames "visits"
-            return $ zip (map toList tableData) (map button tableData)
+            return $ zip (map toList tableData) (map makeButton tableData)
         getTableData "guestbook" = do
-            tableData <- getData [] [] :: IO [GuestbookEntry]
+            tableData <- getData [] [] :: IO [Entity GuestbookEntry]
             let columnNames = getColumnNames "guestbook"
-            return $ zip (map toList tableData) (map button tableData)
+            return $ zip (map toList tableData) (map makeButton tableData)
         getTableData "snake" = do
-            tableData <- getData [] [] :: IO [Snake]
+            tableData <- getData [] [] :: IO [Entity Snake]
             let columnNames = getColumnNames "snake"
-            return $ zip (map toList tableData) (map button tableData)
+            return $ zip (map toList tableData) (map makeButton tableData)
         getTableData "users" = do 
-            tableData <- getData [] [] :: IO [User]
+            tableData <- getData [] [] :: IO [Entity User]
             let columnNames = getColumnNames "users"
-            return $ zip (map toList tableData) (map button tableData)
+            return $ zip (map toList tableData) (map makeButton tableData)
         getTableData "valid_tokens" = do
-            tableData <- getData [] [] :: IO [Token]
+            tableData <- getData [] [] :: IO [Entity Token]
             let columnNames = getColumnNames "valid_tokens"
-            return $ zip (map toList tableData) (map button tableData)
+            return $ zip (map toList tableData) (map makeButton tableData)
         getTableData _ = do
             return [(["Error!"], [hsx||]), (["No such table"], [hsx||])]
 

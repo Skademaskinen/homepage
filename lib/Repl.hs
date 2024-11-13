@@ -6,7 +6,7 @@ import Data.List (intercalate)
 import Data.Password.Bcrypt (PasswordHash (PasswordHash), hashPassword, mkPassword)
 import Data.Text (pack, unpack)
 import Database.Database (runDb, AdminTable (getData, toList), doMigration)
-import Database.Persist (PersistQueryWrite (deleteWhere), insertEntity, SelectOpt (LimitTo))
+import Database.Persist (PersistQueryWrite (deleteWhere), insertEntity, SelectOpt (LimitTo), Entity (Entity))
 import Database.Persist.MySQL ((==.))
 import Database.Schema (EntityField (UserName), User (User), Visit (Visit), GuestbookEntry (GuestbookEntry), Snake (Snake), Token (Token))
 import Logger (clearEnd, clearLine, right, up)
@@ -42,7 +42,7 @@ doCommand ("exit" : _) = do
 doCommand ["adduser", username, password] = do
     let pass = mkPassword $ pack password
     (PasswordHash hash) <- hashPassword pass
-    runDb $ insertEntity $ User 0 username $ unpack hash
+    runDb $ insertEntity $ User username $ unpack hash
     putStrLn "Successfully added user"
     resetCursor 2
     repl
@@ -55,15 +55,15 @@ doCommand ["show", table, lines] = do
     let lineCount = read lines :: Int
     rows <- case table of
         "visits" -> do
-            fmap toList <$> (getData [] [LimitTo lineCount] :: IO [Visit])
+            fmap toList <$> (getData [] [LimitTo lineCount] :: IO [Entity Visit])
         "guestbook" -> do
-            fmap toList <$> (getData [] [LimitTo lineCount] :: IO [GuestbookEntry])
+            fmap toList <$> (getData [] [LimitTo lineCount] :: IO [Entity GuestbookEntry])
         "snake" -> do
-            fmap toList <$> (getData [] [LimitTo lineCount] :: IO [Snake])
+            fmap toList <$> (getData [] [LimitTo lineCount] :: IO [Entity Snake])
         "users" -> do
-            fmap toList <$> (getData [] [LimitTo lineCount] :: IO [User])
+            fmap toList <$> (getData [] [LimitTo lineCount] :: IO [Entity User])
         "tokens" -> do
-            fmap toList <$> (getData [] [LimitTo lineCount] :: IO [Token])
+            fmap toList <$> (getData [] [LimitTo lineCount] :: IO [Entity Token])
         _ -> do
             return [["Error, no such table"]]
 

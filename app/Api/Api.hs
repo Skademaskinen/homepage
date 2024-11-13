@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DataKinds #-}
 
 module Api.Api where
 
@@ -14,7 +15,7 @@ import Data.Time.Clock.POSIX (getPOSIXTime)
 import Data.UUID (toString)
 import Data.UUID.V4 (nextRandom)
 
-import Network.HTTP.Types.Status (Status, status200, status400, status404)
+import Network.HTTP.Types.Status (Status, status200, status400, status404, status500)
 import Network.Wai (Request (pathInfo, requestMethod), getRequestBodyChunk)
 
 import Crypto.Random (getRandomBytes)
@@ -23,8 +24,8 @@ import Data.ByteString.Lazy (fromStrict, toStrict)
 import Data.Password.Bcrypt (PasswordCheck (PasswordCheckFail, PasswordCheckSuccess), PasswordHash (PasswordHash), checkPassword, mkPassword)
 import Data.Text (intercalate, pack, unpack, Text)
 import Data.Text.Array (Array (ByteArray))
-import Database.Persist (Entity (Entity), Filter (Filter), FilterValue (FilterValue), PersistFilter (BackendSpecificFilter), insertEntity, selectList, PersistQueryWrite (deleteWhere), (==.), (=.))
-import Database.Schema (EntityField (TokenName, UserName, UserIndex, VisitIndex, GuestbookEntryIndex, SnakeIndex, TokenIndex, VisitUuid, TokenToken), GuestbookEntry (GuestbookEntry, guestbookEntryContent, guestbookEntryName, guestbookEntryParentId, guestbookEntryIndex, guestbookEntryTimestamp), Snake (Snake), Token (Token, tokenToken), User (User, userName, userPassword), Visit (Visit))
+import Database.Persist (Entity (Entity, entityKey), Filter (Filter), FilterValue (FilterValue), PersistFilter (BackendSpecificFilter), insertEntity, selectList, PersistQueryWrite (deleteWhere), (==.), (=.), PersistField (toPersistValue), PersistStoreRead (get))
+import Database.Schema (EntityField (TokenName, UserName, VisitUuid, TokenToken, GuestbookEntryId, VisitId, SnakeId, UserId, TokenId, GuestbookEntryParentId), GuestbookEntry (GuestbookEntry, guestbookEntryContent, guestbookEntryName, guestbookEntryParentId, guestbookEntryTimestamp), Snake (Snake), Token (Token, tokenToken), User (User, userName, userPassword), Visit (Visit), Key (GuestbookEntryKey))
 import Logger (info)
 import Text.StringRandom (stringRandomIO)
 
@@ -38,6 +39,7 @@ import System.Directory (getDirectoryContents, removeFile)
 import Settings (getEditorRoot)
 import Tables (DatabaseDelete(DatabaseDelete, EmptyDatabaseDelete))
 import State (getCookies, getStates, loggedIn, accessToken)
+import Database.Persist.Sql (toSqlKey)
 
 type Header = (HeaderName, ByteString)
 type APIResponse = IO (Status, String, [Header])
@@ -79,10 +81,10 @@ apiMap = [
                     let pass = mkPassword $ pack password
                     rows <- getData [UserName ==. username] []
                     case rows of
-                        [user] -> case checkPassword pass (PasswordHash $ pack (userPassword user)) of
+                        [Entity id user] -> case checkPassword pass (PasswordHash $ pack (userPassword user)) of
                             PasswordCheckSuccess -> do
                                 token <- stringRandomIO "[0-9a-zA-Z]{4}-[0-9a-ZA-Z]{10}-[0-9a-zA-Z]{15}"
-                                runDb $ insertEntity $ Token 0 (unpack token) username
+                                runDb $ insertEntity $ Token (unpack token) username
                                 return (status200, j2s [aesonQQ|{"token":#{unpack token}}|], jsonHeaders)
                             PasswordCheckFail -> return (status400, messageResponse "Error, Wrong username or password", jsonHeaders)
                         _ -> return (status400, messageResponse "Error, no user exists", jsonHeaders)
@@ -115,11 +117,11 @@ apiMap = [
             return (status200, j2s [aesonQQ|#{apiData}|], jsonHeaders)
         ),
         ("^/visits/get(/|)$", \_ -> do
-            visits <- show . length <$> (getData [] [] :: IO [Visit])
+            visits <- show . length <$> (getData [] [] :: IO [Entity Visit])
             return (status200, j2s [aesonQQ|{"visits":#{visits}}|], jsonHeaders)
         ),
         ("^/guestbook/get(/|)$", \_ -> do
-            entries <- getData [] [] :: IO [GuestbookEntry]
+            entries <- getData [] [] :: IO [Entity GuestbookEntry]
             let l = map toList entries
             return (status200, j2s [aesonQQ|{"entries":#{l}}|], jsonHeaders)
         ),
@@ -147,8 +149,11 @@ apiMap = [
                     return (status400, messageResponse "Error, content cannot be empty", jsonHeaders)
                 (T.GuestbookEntry name content parentId) -> do
                     time <- fmap round getPOSIXTime :: IO Int
-                    runDb $ insertEntity $ GuestbookEntry 0 time name content parentId
+                    runDb $ do
+                        insertEntity $ GuestbookEntry time name content parentId
                     return (status200, messageResponse "Success", jsonHeaders)
+                _ -> do
+                    return (status500, messageResponse "Error, server failed", jsonHeaders)
         ),
         ("^/snake/add(/|)$", \r -> do
             body <- getRequestBodyChunk r
@@ -157,7 +162,7 @@ apiMap = [
                 T.EmptyLeaderboard -> return (status400, messageResponse "Error, leaderboard empty", jsonHeaders)
                 (T.LeaderboardEntry name score speed fruits) -> do
                     time <- fmap round getPOSIXTime :: IO Int
-                    runDb $ insertEntity $ Snake 0 time name score speed fruits
+                    runDb $ insertEntity $ Snake time name score speed fruits
                     return (status200, messageResponse "Success", jsonHeaders)
         ),
         ("^/editor/content/.*(/|)$", \r -> do
@@ -190,15 +195,15 @@ apiMap = [
                     (DatabaseDelete table id) -> do
                         case table of
                             "visits" -> do
-                                runDb $ deleteWhere [VisitIndex ==. id]
+                                runDb $ deleteWhere [VisitId ==. (toSqlKey . read . show) id]
                             "guestbook" -> do
-                                runDb $ deleteWhere [GuestbookEntryIndex ==. id]
+                                runDb $ deleteWhere [GuestbookEntryId ==. (toSqlKey . read . show) id]
                             "snake" -> do
-                                runDb $ deleteWhere [SnakeIndex ==. id]
+                                runDb $ deleteWhere [SnakeId ==. (toSqlKey . read . show) id]
                             "users" -> do
-                                runDb $ deleteWhere [UserIndex ==. id]
+                                runDb $ deleteWhere [UserId ==. (toSqlKey . read . show) id]
                             "valid_tokens" -> do
-                                runDb $ deleteWhere [TokenIndex ==. id]
+                                runDb $ deleteWhere [TokenId ==. (toSqlKey . read . show) id]
                             _ -> putStr "no table, doing nothing..."
                         return (status200, messageResponse "ok", jsonHeaders)
                     EmptyDatabaseDelete -> return (status400, messageResponse "Invalid JSON", jsonHeaders)
