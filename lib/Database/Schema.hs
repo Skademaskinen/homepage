@@ -39,9 +39,11 @@ share [mkPersist sqlSettings, mkMigrate "migrateAll", mkEntityDefList "defs"] [p
     User                                                sql=users
         name                    String                  sql=username
         password                String                  sql=password
+        Username name
         deriving Eq Show
     Token                                               sql=valid_tokens
         token                   String                  sql=token
         name                    String                  sql=username
+        ValidToken token
         deriving Eq Show
 |]

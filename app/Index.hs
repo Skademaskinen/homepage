@@ -4,12 +4,12 @@ import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 
 import CodeBlock (hsxIntroCodeBlock, introCodeIndex)
-import Database.Database (AdminTable (getData), newVisit, runDb)
+import Database.Database (AdminTable (getRows), newVisit, runDb)
 import Layout (layout)
 import Page (Page, PageSetting (Description, EmbedImage, EmbedText, Route))
 import Section (section)
 import Database.Schema (EntityField(VisitTimestamp, VisitUuid), Visit (Visit, visitTimestamp, visitUuid))
-import Database.Persist ((>.), (==.), SelectOpt (LimitTo, Asc, Desc), Entity (Entity), selectList)
+import Database.Persist ((>.), (==.), SelectOpt (LimitTo, Asc, Desc), Entity (Entity), selectList, PersistQueryRead (count))
 import Network.Wai (Request, getRequestBodyChunk)
 import Utils (unpackBS)
 import State (getStates, visitId)
@@ -47,8 +47,8 @@ page :: Request -> IO Html
 page request = do
     let states = getStates request
     let uuid = visitId states
-    result <- getData [VisitUuid ==. uuid] []
-    script <- if null result then do
+    uuidExists <- fmap (==0) <$> runDb $ count [VisitUuid ==. uuid]
+    script <- if uuidExists then do
         -- generate new uuid
         id <- newVisit
         return [hsx|
@@ -58,10 +58,10 @@ page request = do
         |]
     else
         return [hsx||]
-    visits <- show . length <$> (getData [] [] :: IO [Entity Visit])
-    visitsToday <- show . length <$> runDb (do
+    visits <- runDb $ count [VisitTimestamp >. 0]
+    visitsToday <- runDb (do
         (Entity _ lastVisit) <- head <$> selectList [] [Desc VisitTimestamp, LimitTo 1]
-        selectList [VisitTimestamp >. visitTimestamp lastVisit-(24*60*60)] [])
+        count [VisitTimestamp >. visitTimestamp lastVisit-(24*60*60)])
 
     return [hsx|
         <h1>Skademaskinen</h1>

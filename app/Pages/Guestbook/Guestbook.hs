@@ -13,7 +13,7 @@ import Database.Schema (GuestbookEntry (GuestbookEntry), GuestbookEntryId, Key (
 import Layout (layout)
 import Page (Page, PageSetting (Description, Route))
 import Tree (Tree (Tree))
-import Database.Database (AdminTable(getData))
+import Database.Database (AdminTable(getRows))
 import Database.Persist (Entity (Entity))
 import Database.Persist.MySQL (toSqlKey, BackendKey (SqlBackendKey))
 
@@ -67,7 +67,7 @@ guestbookToTree entries targetParent = [Tree (Entity id (GuestbookEntry timestam
 
 getGuestbook :: IO [Tree (Entity GuestbookEntry)]
 getGuestbook = do
-    entries <- getData [] [] :: IO [Entity GuestbookEntry]
+    entries <- getRows [] [] :: IO [Entity GuestbookEntry]
     return $ guestbookToTree entries ((toSqlKey . read . show) (-1))
 
 

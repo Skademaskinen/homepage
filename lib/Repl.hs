@@ -5,7 +5,7 @@ import System.Exit (exitSuccess)
 import Data.List (intercalate)
 import Data.Password.Bcrypt (PasswordHash (PasswordHash), hashPassword, mkPassword)
 import Data.Text (pack, unpack)
-import Database.Database (runDb, AdminTable (getData, toList), doMigration)
+import Database.Database (runDb, AdminTable (getRows, toList), doMigration)
 import Database.Persist (PersistQueryWrite (deleteWhere), insertEntity, SelectOpt (LimitTo), Entity (Entity))
 import Database.Persist.MySQL ((==.))
 import Database.Schema (EntityField (UserName), User (User), Visit (Visit), GuestbookEntry (GuestbookEntry), Snake (Snake), Token (Token))
@@ -55,15 +55,15 @@ doCommand ["show", table, lines] = do
     let lineCount = read lines :: Int
     rows <- case table of
         "visits" -> do
-            fmap toList <$> (getData [] [LimitTo lineCount] :: IO [Entity Visit])
+            fmap toList <$> (getRows [] [LimitTo lineCount] :: IO [Entity Visit])
         "guestbook" -> do
-            fmap toList <$> (getData [] [LimitTo lineCount] :: IO [Entity GuestbookEntry])
+            fmap toList <$> (getRows [] [LimitTo lineCount] :: IO [Entity GuestbookEntry])
         "snake" -> do
-            fmap toList <$> (getData [] [LimitTo lineCount] :: IO [Entity Snake])
+            fmap toList <$> (getRows [] [LimitTo lineCount] :: IO [Entity Snake])
         "users" -> do
-            fmap toList <$> (getData [] [LimitTo lineCount] :: IO [Entity User])
+            fmap toList <$> (getRows [] [LimitTo lineCount] :: IO [Entity User])
         "tokens" -> do
-            fmap toList <$> (getData [] [LimitTo lineCount] :: IO [Entity Token])
+            fmap toList <$> (getRows [] [LimitTo lineCount] :: IO [Entity Token])
         _ -> do
             return [["Error, no such table"]]
 

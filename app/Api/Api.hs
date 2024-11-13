@@ -3,7 +3,7 @@
 
 module Api.Api where
 
-import Database.Database (runDb, AdminTable (getData), toList, validateToken)
+import Database.Database (runDb, AdminTable (getRows), toList, validateToken)
 import Pages.Projects.Brainfuck (code)
 import qualified Tables as T (Credentials (Credentials, EmptyCredentials), GuestbookEntry (EmptyGuestbook, GuestbookEntry), LeaderboardEntry (EmptyLeaderboard, LeaderboardEntry))
 import Utils (getDefault, unpackBS)
@@ -24,8 +24,8 @@ import Data.ByteString.Lazy (fromStrict, toStrict)
 import Data.Password.Bcrypt (PasswordCheck (PasswordCheckFail, PasswordCheckSuccess), PasswordHash (PasswordHash), checkPassword, mkPassword)
 import Data.Text (intercalate, pack, unpack, Text)
 import Data.Text.Array (Array (ByteArray))
-import Database.Persist (Entity (Entity, entityKey), Filter (Filter), FilterValue (FilterValue), PersistFilter (BackendSpecificFilter), insertEntity, selectList, PersistQueryWrite (deleteWhere), (==.), (=.), PersistField (toPersistValue), PersistStoreRead (get))
-import Database.Schema (EntityField (TokenName, UserName, VisitUuid, TokenToken, GuestbookEntryId, VisitId, SnakeId, UserId, TokenId, GuestbookEntryParentId), GuestbookEntry (GuestbookEntry, guestbookEntryContent, guestbookEntryName, guestbookEntryParentId, guestbookEntryTimestamp), Snake (Snake), Token (Token, tokenToken), User (User, userName, userPassword), Visit (Visit), Key (GuestbookEntryKey))
+import Database.Persist (Entity (Entity, entityKey), Filter (Filter), FilterValue (FilterValue), PersistFilter (BackendSpecificFilter), insertEntity, selectList, PersistQueryWrite (deleteWhere), (==.), (=.), (>.), PersistField (toPersistValue), PersistStoreRead (get), PersistUniqueRead (getBy), PersistQueryRead (count))
+import Database.Schema (EntityField (TokenName, UserName, VisitUuid, TokenToken, GuestbookEntryId, VisitId, SnakeId, UserId, TokenId, GuestbookEntryParentId, VisitTimestamp), GuestbookEntry (GuestbookEntry, guestbookEntryContent, guestbookEntryName, guestbookEntryParentId, guestbookEntryTimestamp), Snake (Snake), Token (Token, tokenToken), User (User, userName, userPassword), Visit (Visit), Key (GuestbookEntryKey), Unique (Username))
 import Logger (info)
 import Text.StringRandom (stringRandomIO)
 
@@ -79,9 +79,9 @@ apiMap = [
             case credentials of
                 (T.Credentials username password) -> do
                     let pass = mkPassword $ pack password
-                    rows <- getData [UserName ==. username] []
-                    case rows of
-                        [Entity id user] -> case checkPassword pass (PasswordHash $ pack (userPassword user)) of
+                    maybeUser <- runDb $ getBy $ Username username
+                    case maybeUser of
+                        (Just (Entity id user)) -> case checkPassword pass (PasswordHash $ pack (userPassword user)) of
                             PasswordCheckSuccess -> do
                                 token <- stringRandomIO "[0-9a-zA-Z]{4}-[0-9a-ZA-Z]{10}-[0-9a-zA-Z]{15}"
                                 runDb $ insertEntity $ Token (unpack token) username
@@ -117,11 +117,11 @@ apiMap = [
             return (status200, j2s [aesonQQ|#{apiData}|], jsonHeaders)
         ),
         ("^/visits/get(/|)$", \_ -> do
-            visits <- show . length <$> (getData [] [] :: IO [Entity Visit])
+            visits <- runDb $ count [VisitTimestamp >. 0]
             return (status200, j2s [aesonQQ|{"visits":#{visits}}|], jsonHeaders)
         ),
         ("^/guestbook/get(/|)$", \_ -> do
-            entries <- getData [] [] :: IO [Entity GuestbookEntry]
+            entries <- getRows [] [] :: IO [Entity GuestbookEntry]
             let l = map toList entries
             return (status200, j2s [aesonQQ|{"entries":#{l}}|], jsonHeaders)
         ),
@@ -149,8 +149,7 @@ apiMap = [
                     return (status400, messageResponse "Error, content cannot be empty", jsonHeaders)
                 (T.GuestbookEntry name content parentId) -> do
                     time <- fmap round getPOSIXTime :: IO Int
-                    runDb $ do
-                        insertEntity $ GuestbookEntry time name content parentId
+                    runDb $ insertEntity $ GuestbookEntry time name content parentId
                     return (status200, messageResponse "Success", jsonHeaders)
                 _ -> do
                     return (status500, messageResponse "Error, server failed", jsonHeaders)
