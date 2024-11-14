@@ -108,6 +108,7 @@ executable homepage
         persistent,
         persistent-mysql,
         monad-logger,
+        matplotlib,
         lib-homepage
 
     hs-source-dirs:   app

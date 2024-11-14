@@ -3,17 +3,19 @@ module Pages.Admin.Admin where
 import CodeBlock (codeBlock)
 import Data.Text (Text, unpack, pack)
 import Database.Database (prettyPrintSchema, validateToken, runDb, AdminTable (makeButton, toList, getRows))
-import Database.Schema (GuestbookEntry (GuestbookEntry), Snake (Snake), Token (Token), User (User), Visit (Visit), defs, EntityField (UserName, TokenToken))
+import Database.Schema (GuestbookEntry (GuestbookEntry, guestbookEntryTimestamp), Snake (Snake, snakeTimestamp), Token (Token), User (User), Visit (Visit, visitTimestamp), defs, EntityField (UserName, TokenToken))
 import IHP.HSX.QQ (hsx)
 import Layout (layout)
 import Page (Page, PageSetting (Description, Route), getArgs)
 import Text.Blaze.Html (Html, preEscapedToHtml)
 import Network.Wai (Request (pathInfo))
 import State (getStates, loggedIn, accessToken)
-import Database.Persist (Entity(Entity), selectList, EntityNameDB (unEntityNameDB), getEntityDBName, FieldNameHS (unFieldNameHS), FieldDef (fieldHaskell), getEntityFields, (==.), PersistQueryWrite (deleteWhere))
+import Database.Persist (Entity(Entity, entityVal), selectList, EntityNameDB (unEntityNameDB), getEntityDBName, FieldNameHS (unFieldNameHS), FieldDef (fieldHaskell), getEntityFields, (==.), PersistQueryWrite (deleteWhere))
 import Database.Persist.MySQL (rawSql, mkColumns)
 import Logger (warning)
-import Plot (plotSVG)
+import Plot (plotSVG, barSVG)
+import Data.List (nub)
+import Graphics.Matplotlib (toSvg, bar, onscreen, ylim, (%), ylabel, title)
 
 panel :: IO Html
 panel = do 
@@ -56,14 +58,66 @@ panel = do
             </tr>
         |]
 
+aggregatedVisits :: IO [Int]
+aggregatedVisits = do
+    timestamps <- fmap (fromIntegral . visitTimestamp . entityVal) <$> getRows [] []
+    return $ nub $ map (\x -> div x (60*60*24)) timestamps
+
+aggregatedGuestbook :: IO [Int]
+aggregatedGuestbook = do
+    timestamps <- fmap (fromIntegral . guestbookEntryTimestamp . entityVal) <$> getRows [] []
+    return $ nub $ map (\x -> div x (60*60*24)) timestamps
+
+aggregatedLeaderboard :: IO [Int]
+aggregatedLeaderboard = do
+    timestamps <- fmap (fromIntegral . snakeTimestamp . entityVal) <$> getRows [] []
+    return $ nub $ map (\x -> div x (60*60*24)) timestamps
+
 metrics :: IO Html
 metrics = do
-    rows <- fmap toList <$> (getRows [] [] :: IO [Entity Visit])
-    print rows
-    plot <- plotSVG (fmap (read . (!!1)) rows :: [Int]) (fmap (read . (!!0)) rows)
+    visitsPlot <- do 
+        aggregated <- aggregatedVisits
+        svg <- toSvg $
+            bar [show i | i <- [0 .. length aggregated - 1]] aggregated %
+            ylim (head aggregated - 1) (last aggregated) %
+            ylabel "daysSinceEpoch" %
+            title "Visits"
+        return $ case svg of
+            Left x -> x
+            Right x -> x
+
+    guestbookPlot <- do
+        aggregated <- aggregatedGuestbook
+        print aggregated
+        svg <- toSvg $
+            bar [show i | i <- [0 .. length aggregated - 1]] aggregated %
+            ylim (head aggregated - 1) (last aggregated) %
+            ylabel "daysSinceEpoch" %
+            title "Guestbook"
+        return $ case svg of
+            Left x -> x
+            Right x -> x
+
+    leaderboardPlot <- do
+        aggregated <- aggregatedLeaderboard
+        svg <- toSvg $
+            bar [show i | i <- [0 .. length aggregated - 1]] aggregated %
+            ylim (head aggregated - 1) (last aggregated) %
+            ylabel "daysSinceEpoch" %
+            title "Snake Leaderboard"
+        return $ case svg of
+            Left x -> x
+            Right x -> x
+
     return [hsx|
-        Visits over time:
-        {preEscapedToHtml plot}
+        Visits over time:<br>
+        {preEscapedToHtml visitsPlot}
+        <hr>
+        Guestbook entries over time:<br>
+        {preEscapedToHtml guestbookPlot}
+        <hr>
+        Snake leaderboard entries over time:<br>
+        {preEscapedToHtml leaderboardPlot}
     |]
 
 browse :: String -> IO Html
