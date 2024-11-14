@@ -16,7 +16,8 @@ library lib-homepage
         Repl,
         Scripts,
         Page,
-        State
+        State,
+        Plot
     build-depends:
         base,
         ihp-hsx,
@@ -43,7 +44,8 @@ library lib-homepage
         persistent-mysql,
         persistent-sqlite,
         monad-logger,
-        raw-strings-qq
+        raw-strings-qq,
+        matplotlib
     hs-source-dirs:   lib
     default-language: GHC2021
     default-extensions:

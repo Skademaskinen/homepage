@@ -12,8 +12,19 @@
             packages = with pkgs; [
                 (haskellPackages.ghcWithPackages (hs: with hs; [
                     cabal-install
+                    matplotlib
                     haskell-language-server
+                    (python311.withPackages (py: with py; [
+                        matplotlib
+                        ipython
+                    ]))
                 ] ++ ((pkgs.callPackage ./nix-support/package.nix {}).buildInputs)))
+                (python311.withPackages (py: with py; [
+                    matplotlib
+                    ipython
+                    scipy
+                ]))
+ 
             ];
         };
         packages.${system} = let 

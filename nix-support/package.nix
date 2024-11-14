@@ -17,6 +17,11 @@ pkgs.haskellPackages.mkDerivation {
         directory http-conduit http-types ihp-hsx monad-logger password
         persistent persistent-mysql regex-compat split string-random text
         time utf8-string uuid wai warp yaml raw-strings-qq persistent-sqlite
+        matplotlib
+        (pkgs.python311.withPackages (py: with py; [
+            matplotlib
+            scipy
+        ]))
     ];
     testHaskellDepends = with pkgs.haskellPackages; [ base ];
     doHaddock = false;

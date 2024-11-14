@@ -7,12 +7,13 @@ import Database.Schema (GuestbookEntry (GuestbookEntry), Snake (Snake), Token (T
 import IHP.HSX.QQ (hsx)
 import Layout (layout)
 import Page (Page, PageSetting (Description, Route), getArgs)
-import Text.Blaze.Html (Html)
+import Text.Blaze.Html (Html, preEscapedToHtml)
 import Network.Wai (Request (pathInfo))
 import State (getStates, loggedIn, accessToken)
 import Database.Persist (Entity(Entity), selectList, EntityNameDB (unEntityNameDB), getEntityDBName, FieldNameHS (unFieldNameHS), FieldDef (fieldHaskell), getEntityFields, (==.), PersistQueryWrite (deleteWhere))
 import Database.Persist.MySQL (rawSql, mkColumns)
 import Logger (warning)
+import Plot (plotSVG)
 
 panel :: IO Html
 panel = do 
@@ -39,6 +40,8 @@ panel = do
                 ("valid_tokens", [length valid_tokens])
             ]}
         </table>
+        <br>
+        <a href="/admin/metrics">Show metrics</a>
     |]
     where
         th x = [hsx|<th class="common-table-element">{x}</th>|]
@@ -52,6 +55,16 @@ panel = do
                 <td><a href={"/admin/browse/"++name}>Browse</a></td>
             </tr>
         |]
+
+metrics :: IO Html
+metrics = do
+    rows <- fmap toList <$> (getRows [] [] :: IO [Entity Visit])
+    print rows
+    plot <- plotSVG (fmap (read . (!!1)) rows :: [Int]) (fmap (read . (!!0)) rows)
+    return [hsx|
+        Visits over time:
+        {preEscapedToHtml plot}
+    |]
 
 browse :: String -> IO Html
 browse table = do 
@@ -134,6 +147,7 @@ browse table = do
         empty = [hsx||]
 
 route :: [String] -> IO Html
+route [_, "metrics"] = metrics
 route [_, "browse", table] = browse table
 route _ = panel
 
