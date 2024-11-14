@@ -126,6 +126,10 @@
                 environment.HOMEPAGE_DB = cfg.db.name;
                 environment.HOMEPAGE_DB_USER = cfg.db.user;
                 environment.HOMEPAGE_EDITOR_ROOT = cfg.editor.root;
+                path = with pkgs; [(python311.withPackages (py: with py; [
+                    matplotlib
+                    scipy
+                ]))];
                 serviceConfig = {
                     User = cfg.db.user;
                     WorkingDirectory = "${packages.${system}.default}";
@@ -142,6 +146,12 @@
                 users.${cfg.db.user} = {
                     isNormalUser = true;
                     group = "homepage";
+                    packages = with pkgs; [
+                        (python311.withPackages (py: with py; [
+                            matplotlib
+                            scipy
+                        ]))
+                    ];
                 };
                 groups.homepage = {};
             } else {};
