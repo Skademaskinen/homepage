@@ -15,7 +15,7 @@ import Database.Persist.MySQL (rawSql, mkColumns)
 import Logger (warning)
 import Plot (plotSVG, barSVG)
 import Data.List (nub)
-import Graphics.Matplotlib (toSvg, bar, onscreen, ylim, (%), ylabel, title)
+import Graphics.Matplotlib (toSvg, bar, onscreen, ylim, (%), ylabel, title, xlabel)
 
 panel :: IO Html
 panel = do 
@@ -58,52 +58,57 @@ panel = do
             </tr>
         |]
 
-aggregatedVisits :: IO [Int]
+aggregatedVisits :: IO ([Int], [Int])
 aggregatedVisits = do
     timestamps <- fmap (fromIntegral . visitTimestamp . entityVal) <$> getRows [] []
-    return $ nub $ map (\x -> div x (60*60*24)) timestamps
+    let unique = nub $ map (\x -> div x (60*60*24)) timestamps
+    return (unique, map (\x -> length $ filter (\y -> div y (60*60*24)==x) timestamps) unique)
 
-aggregatedGuestbook :: IO [Int]
+aggregatedGuestbook :: IO ([Int], [Int])
 aggregatedGuestbook = do
     timestamps <- fmap (fromIntegral . guestbookEntryTimestamp . entityVal) <$> getRows [] []
-    return $ nub $ map (\x -> div x (60*60*24)) timestamps
+    let unique = nub $ map (\x -> div x (60*60*24)) timestamps
+    return (unique, map (\x -> length $ filter (\y -> div y (60*60*24)==x) timestamps) unique)
 
-aggregatedLeaderboard :: IO [Int]
+aggregatedLeaderboard :: IO ([Int], [Int])
 aggregatedLeaderboard = do
     timestamps <- fmap (fromIntegral . snakeTimestamp . entityVal) <$> getRows [] []
-    return $ nub $ map (\x -> div x (60*60*24)) timestamps
+    let unique = nub $ map (\x -> div x (60*60*24)) timestamps
+    return (unique, map (\x -> length $ filter (\y -> div y (60*60*24)==x) timestamps) unique)
 
 metrics :: IO Html
 metrics = do
     visitsPlot <- do 
-        aggregated <- aggregatedVisits
+        (unique, aggregated) <- aggregatedVisits
         svg <- toSvg $
-            bar [show i | i <- [0 .. length aggregated - 1]] aggregated %
+            bar [show x | x <- unique] aggregated %
             ylim (head aggregated - 1) (last aggregated) %
-            ylabel "daysSinceEpoch" %
+            xlabel "daysSinceEpoch" %
+            ylabel "amount" %
             title "Visits"
         return $ case svg of
             Left x -> x
             Right x -> x
 
     guestbookPlot <- do
-        aggregated <- aggregatedGuestbook
-        print aggregated
+        (unique, aggregated) <- aggregatedGuestbook
         svg <- toSvg $
-            bar [show i | i <- [0 .. length aggregated - 1]] aggregated %
+            bar [show x | x <- unique] aggregated %
             ylim (head aggregated - 1) (last aggregated) %
-            ylabel "daysSinceEpoch" %
+            xlabel "daysSinceEpoch" %
+            ylabel "amount" %
             title "Guestbook"
         return $ case svg of
             Left x -> x
             Right x -> x
 
     leaderboardPlot <- do
-        aggregated <- aggregatedLeaderboard
+        (unique, aggregated) <- aggregatedLeaderboard
         svg <- toSvg $
-            bar [show i | i <- [0 .. length aggregated - 1]] aggregated %
+            bar [show x | x <- unique] aggregated %
             ylim (head aggregated - 1) (last aggregated) %
-            ylabel "daysSinceEpoch" %
+            xlabel "daysSinceEpoch" %
+            ylabel "amount" %
             title "Snake Leaderboard"
         return $ case svg of
             Left x -> x
