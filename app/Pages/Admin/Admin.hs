@@ -15,7 +15,7 @@ import Database.Persist.MySQL (rawSql, mkColumns)
 import Logger (warning)
 import Plot (plotSVG, barSVG)
 import Data.List (nub)
-import Graphics.Matplotlib (toSvg, bar, onscreen, ylim, (%), ylabel, title, xlabel)
+import Graphics.Matplotlib (toSvg, bar, onscreen, ylim, (%), ylabel, title, xlabel, setSizeInches, o1, (@@), o2, setParameter, Matplotlib)
 
 panel :: IO Html
 panel = do 
@@ -76,6 +76,13 @@ aggregatedLeaderboard = do
     let unique = nub $ map (\x -> div x (60*60*24)) timestamps
     return (unique, map (\x -> length $ filter (\y -> div y (60*60*24)==x) timestamps) unique)
 
+common :: Matplotlib
+common = setParameter "savefig.transparent" True %
+    setParameter "text.color" ([1,1,1,1] :: [Int]) %
+    setSizeInches (12 :: Int) (4 :: Int) %
+    xlabel "daysSinceEpoch" %
+    ylabel "amount"
+
 metrics :: IO Html
 metrics = do
     visitsPlot <- do 
@@ -83,9 +90,8 @@ metrics = do
         svg <- toSvg $
             bar [show x | x <- unique] aggregated %
             ylim (head aggregated - 1) (last aggregated) %
-            xlabel "daysSinceEpoch" %
-            ylabel "amount" %
-            title "Visits"
+            title "Visits" %
+            common
         return $ case svg of
             Left x -> x
             Right x -> x
@@ -95,9 +101,8 @@ metrics = do
         svg <- toSvg $
             bar [show x | x <- unique] aggregated %
             ylim (head aggregated - 1) (last aggregated) %
-            xlabel "daysSinceEpoch" %
-            ylabel "amount" %
-            title "Guestbook"
+            title "Guestbook" %
+            common
         return $ case svg of
             Left x -> x
             Right x -> x
@@ -107,22 +112,32 @@ metrics = do
         svg <- toSvg $
             bar [show x | x <- unique] aggregated %
             ylim (head aggregated - 1) (last aggregated) %
-            xlabel "daysSinceEpoch" %
-            ylabel "amount" %
-            title "Snake Leaderboard"
+            title "Snake Leaderboard" %
+            common
         return $ case svg of
             Left x -> x
             Right x -> x
 
     return [hsx|
+        <style>
+            .plot {
+                background-color: #222222;
+            }
+        </style>
         Visits over time:<br>
-        {preEscapedToHtml visitsPlot}
+        <div class="plot">
+            {preEscapedToHtml visitsPlot}
+        </div>
         <hr>
         Guestbook entries over time:<br>
-        {preEscapedToHtml guestbookPlot}
+        <div class="plot">
+            {preEscapedToHtml guestbookPlot}
+        </div>
         <hr>
         Snake leaderboard entries over time:<br>
-        {preEscapedToHtml leaderboardPlot}
+        <div class="plot">
+            {preEscapedToHtml leaderboardPlot}
+        </div>
     |]
 
 browse :: String -> IO Html
