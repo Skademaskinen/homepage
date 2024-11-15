@@ -15,8 +15,9 @@ import Database.Persist.MySQL (rawSql, mkColumns)
 import Logger (warning)
 import Plot (plotSVG, barSVG)
 import Data.List (nub)
-import Graphics.Matplotlib (toSvg, bar, onscreen, ylim, (%), ylabel, title, xlabel, setSizeInches, o1, (@@), o2, setParameter, Matplotlib)
+import Graphics.Matplotlib (toSvg, bar, onscreen, ylim, (%), (#), ylabel, title, xlabel, setSizeInches, o1, (@@), o2, setParameter, Matplotlib)
 import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
+import Text.RawString.QQ (r)
 
 panel :: IO Html
 panel = do 
@@ -59,30 +60,18 @@ panel = do
             </tr>
         |]
 
-aggregatedVisits :: IO ([Int], [Int])
-aggregatedVisits = do
-    timestamps <- fmap (fromIntegral . visitTimestamp . entityVal) <$> getRows [] []
+
+getTimestamps :: String -> IO [Int]
+getTimestamps "visits" = fmap (fromIntegral . visitTimestamp . entityVal) <$> getRows [] []
+getTimestamps "guestbook" = fmap (fromIntegral . guestbookEntryTimestamp . entityVal) <$> getRows [] []
+getTimestamps "snake" = fmap (fromIntegral . snakeTimestamp . entityVal) <$> getRows [] []
+getTimestamps _ = return []
+
+aggregate :: String -> IO ([Int], [Int])
+aggregate x = do
+    timestamps <- getTimestamps x
     let unique = nub $ map (\x -> div x (60*60*24)) timestamps
     return (unique, map (\x -> length $ filter (\y -> div y (60*60*24)==x) timestamps) unique)
-
-aggregatedGuestbook :: IO ([Int], [Int])
-aggregatedGuestbook = do
-    timestamps <- fmap (fromIntegral . guestbookEntryTimestamp . entityVal) <$> getRows [] []
-    let unique = nub $ map (\x -> div x (60*60*24)) timestamps
-    return (unique, map (\x -> length $ filter (\y -> div y (60*60*24)==x) timestamps) unique)
-
-aggregatedLeaderboard :: IO ([Int], [Int])
-aggregatedLeaderboard = do
-    timestamps <- fmap (fromIntegral . snakeTimestamp . entityVal) <$> getRows [] []
-    let unique = nub $ map (\x -> div x (60*60*24)) timestamps
-    return (unique, map (\x -> length $ filter (\y -> div y (60*60*24)==x) timestamps) unique)
-
-common :: Matplotlib
-common = setParameter "savefig.transparent" True %
-    setParameter "text.color" ([1,1,1,1] :: [Int]) %
-    setSizeInches (12 :: Int) (4 :: Int) %
-    xlabel "daysSinceEpoch" %
-    ylabel "amount"
 
 maxValue :: [Int] -> Int
 maxValue (x:y:xs) | x >= y = maxValue (x:xs)
@@ -98,59 +87,34 @@ minValue [] = 0
 
 metrics :: IO Html
 metrics = do
-    visitsPlot <- do 
-        (unique, aggregated) <- aggregatedVisits
+    plots <- mconcat $ map (\x -> do
+        (unique, aggregated) <- aggregate x
         svg <- toSvg $
             bar [(take 10 . show . posixSecondsToUTCTime . fromIntegral) (x*60*60*24) | x <- unique] aggregated %
-            ylim (minValue aggregated -1) (maxValue aggregated) %
-            title "Visits" %
-            common
+            ylim (minValue aggregated - 1) (maxValue aggregated + 1) %
+            setParameter "savefig.transparent" True %
+            setSizeInches (12 :: Int) (4 :: Int) %
+            xlabel "daysSinceEpoch" %
+            ylabel "amount" # 
+            ("\n" ++ [r|for key in ax.spines.keys(): ax.spines[key].set_color("white")|]) #
+            ("\n" ++ [r|for axis in ["x", "y"]: ax.tick_params(axis=axis, colors="white")|]) #
+            ("\n" ++ [r|ax.xaxis.label.set_color("white")|]) #
+            ("\n" ++ [r|ax.yaxis.label.set_color("white")|])
         return $ case svg of
-            Left x -> x
-            Right x -> x
-
-    guestbookPlot <- do
-        (unique, aggregated) <- aggregatedGuestbook
-        svg <- toSvg $
-            bar [(take 10 . show . posixSecondsToUTCTime . fromIntegral) (x*60*60*24) | x <- unique] aggregated %
-            ylim (minValue aggregated -1) (maxValue aggregated) %
-            title "Guestbook" %
-            common
-        return $ case svg of
-            Left x -> x
-            Right x -> x
-
-    leaderboardPlot <- do
-        (unique, aggregated) <- aggregatedLeaderboard
-        svg <- toSvg $
-            bar [(take 10 . show . posixSecondsToUTCTime . fromIntegral) (x*60*60*24) | x <- unique] aggregated %
-            ylim (minValue aggregated -1) (maxValue aggregated) %
-            title "Snake Leaderboard" %
-            common
-        return $ case svg of
-            Left x -> x
-            Right x -> x
-
+            Left err -> [hsx|Error: {err}|]
+            Right item -> [hsx|
+                <h2>{x} over time:</h2>
+                {preEscapedToHtml item}
+                <hr>
+            |]
+        ) ["visits", "guestbook", "snake"]
     return [hsx|
         <style>
             .plot {
                 background-color: #222222;
             }
         </style>
-        Visits over time:<br>
-        <div class="plot">
-            {preEscapedToHtml visitsPlot}
-        </div>
-        <hr>
-        Guestbook entries over time:<br>
-        <div class="plot">
-            {preEscapedToHtml guestbookPlot}
-        </div>
-        <hr>
-        Snake leaderboard entries over time:<br>
-        <div class="plot">
-            {preEscapedToHtml leaderboardPlot}
-        </div>
+        {plots}
     |]
 
 browse :: String -> IO Html
