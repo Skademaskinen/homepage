@@ -16,6 +16,7 @@ import Logger (warning)
 import Plot (plotSVG, barSVG)
 import Data.List (nub)
 import Graphics.Matplotlib (toSvg, bar, onscreen, ylim, (%), ylabel, title, xlabel, setSizeInches, o1, (@@), o2, setParameter, Matplotlib)
+import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 
 panel :: IO Html
 panel = do 
@@ -100,7 +101,7 @@ metrics = do
     visitsPlot <- do 
         (unique, aggregated) <- aggregatedVisits
         svg <- toSvg $
-            bar [show x | x <- unique] aggregated %
+            bar [(take 10 . show . posixSecondsToUTCTime . fromIntegral) (x*60*60*24) | x <- unique] aggregated %
             ylim (minValue aggregated -1) (maxValue aggregated) %
             title "Visits" %
             common
@@ -111,7 +112,7 @@ metrics = do
     guestbookPlot <- do
         (unique, aggregated) <- aggregatedGuestbook
         svg <- toSvg $
-            bar [show x | x <- unique] aggregated %
+            bar [(take 10 . show . posixSecondsToUTCTime . fromIntegral) (x*60*60*24) | x <- unique] aggregated %
             ylim (minValue aggregated -1) (maxValue aggregated) %
             title "Guestbook" %
             common
@@ -122,7 +123,7 @@ metrics = do
     leaderboardPlot <- do
         (unique, aggregated) <- aggregatedLeaderboard
         svg <- toSvg $
-            bar [show x | x <- unique] aggregated %
+            bar [(take 10 . show . posixSecondsToUTCTime . fromIntegral) (x*60*60*24) | x <- unique] aggregated %
             ylim (minValue aggregated -1) (maxValue aggregated) %
             title "Snake Leaderboard" %
             common
