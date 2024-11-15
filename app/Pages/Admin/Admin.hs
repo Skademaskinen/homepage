@@ -83,13 +83,19 @@ common = setParameter "savefig.transparent" True %
     xlabel "daysSinceEpoch" %
     ylabel "amount"
 
+maxValue :: [Int] -> Int
+maxValue (x:y:xs) | x >= y = maxValue (x:xs)
+                  | otherwise = maxValue (y:xs)
+maxValue [x] = x
+maxValue [] = 0
+
 metrics :: IO Html
 metrics = do
     visitsPlot <- do 
         (unique, aggregated) <- aggregatedVisits
         svg <- toSvg $
             bar [show x | x <- unique] aggregated %
-            ylim (head aggregated - 1) (last aggregated) %
+            ylim (head aggregated - 1) (maxValue aggregated) %
             title "Visits" %
             common
         return $ case svg of
@@ -100,7 +106,7 @@ metrics = do
         (unique, aggregated) <- aggregatedGuestbook
         svg <- toSvg $
             bar [show x | x <- unique] aggregated %
-            ylim (head aggregated - 1) (last aggregated) %
+            ylim (head aggregated - 1) (maxValue aggregated) %
             title "Guestbook" %
             common
         return $ case svg of
@@ -111,7 +117,7 @@ metrics = do
         (unique, aggregated) <- aggregatedLeaderboard
         svg <- toSvg $
             bar [show x | x <- unique] aggregated %
-            ylim (head aggregated - 1) (last aggregated) %
+            ylim (head aggregated - 1) (maxValue aggregated) %
             title "Snake Leaderboard" %
             common
         return $ case svg of
