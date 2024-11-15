@@ -15,7 +15,7 @@ import Database.Persist.MySQL (rawSql, mkColumns)
 import Logger (warning)
 import Plot (plotSVG, barSVG)
 import Data.List (nub)
-import Graphics.Matplotlib (toSvg, bar, onscreen, ylim, (%), (#), ylabel, title, xlabel, setSizeInches, o1, (@@), o2, setParameter, Matplotlib)
+import Graphics.Matplotlib (toSvg, bar, onscreen, ylim, (%), (#), ylabel, title, xlabel, setSizeInches, o1, (@@), o2, setParameter, Matplotlib, str)
 import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 import Text.RawString.QQ (r)
 
@@ -90,12 +90,12 @@ metrics = do
     plots <- mconcat $ map (\x -> do
         (unique, aggregated) <- aggregate x
         svg <- toSvg $
-            bar [(take 10 . show . posixSecondsToUTCTime . fromIntegral) (x*60*60*24) | x <- unique] aggregated %
+            bar [(take 10 . show . posixSecondsToUTCTime . fromIntegral) (x*60*60*24) | x <- unique] aggregated @@ [o2 "color" (str "#ff5500")] %
             ylim (minValue aggregated - 1) (maxValue aggregated + 1) %
             setParameter "savefig.transparent" True %
             setSizeInches (12 :: Int) (4 :: Int) %
-            xlabel "daysSinceEpoch" %
-            ylabel "amount" # 
+            xlabel "Date" %
+            ylabel "Amount" # 
             ("\n" ++ [r|for key in ax.spines.keys(): ax.spines[key].set_color("white")|]) #
             ("\n" ++ [r|for axis in ["x", "y"]: ax.tick_params(axis=axis, colors="white")|]) #
             ("\n" ++ [r|ax.xaxis.label.set_color("white")|]) #
