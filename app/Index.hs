@@ -10,9 +10,9 @@ import Page (Page, PageSetting (Description, EmbedImage, EmbedText, Route))
 import Section (section)
 import Database.Schema (EntityField(VisitTimestamp, VisitUuid), Visit (Visit, visitTimestamp, visitUuid))
 import Database.Persist ((>.), (==.), SelectOpt (LimitTo, Asc, Desc), Entity (Entity), selectList, PersistQueryRead (count))
-import Network.Wai (Request, getRequestBodyChunk)
+import Network.Wai (Request (requestHeaders), getRequestBodyChunk)
 import Utils (unpackBS)
-import State (getStates, visitId)
+import State (getStates, visitId, getCookies)
 
 intro :: Html
 intro = section [hsx|
@@ -43,8 +43,15 @@ intro = section [hsx|
     </div>
 |]
 
-page :: Request -> IO Html
-page request = do
+page :: Bool -> Request -> IO Html
+page False _ = return [hsx|
+    One moment, redirecting
+    <script>
+        setCookie("isBot=0;max.age=2147483647")
+        window.location.reload()
+    </script>
+|]
+page _ request = do
     let states = getStates request
     let uuid = visitId states
     uuidExists <- fmap (==0) <$> runDb $ count [VisitUuid ==. uuid]
@@ -91,4 +98,6 @@ settings = [
     ]
 
 index :: Page
-index = (settings, fmap layout . page)
+index = (settings, fmap layout . \req -> do 
+    let cookies = getCookies req
+    page (any (("isBot"==) . fst) cookies) req)
