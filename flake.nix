@@ -47,7 +47,7 @@
 
             vm = (nixpkgs.lib.nixosSystem {
                 inherit system;
-                modules = [nixosModules.${system}.default ({config, ...}: {
+                modules = [nixosModules.default ({config, ...}: {
                     system.stateVersion = "24.05";
                     users.users.root.password = "1234";
                     virtualisation.vmVariant = {
@@ -94,7 +94,7 @@
                 })];
             }).config.system.build.vm;
         };
-        nixosModules.${system}.default = {config, pkgs, lib, ...}: let
+        nixosModules.default = {config, pkgs, lib, ...}: let
             cfg = config.services.homepage;
         in {
             options.services.homepage = {
