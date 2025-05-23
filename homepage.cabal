@@ -1,6 +1,6 @@
 cabal-version:      2.4
 name:               homepage
-version:            0.1.0.0
+version:            0.1.1
 
 library lib-homepage
     exposed-modules:
@@ -17,7 +17,8 @@ library lib-homepage
         Scripts,
         Page,
         State,
-        Plot
+        Plot,
+        Calendar
     build-depends:
         base,
         ihp-hsx,

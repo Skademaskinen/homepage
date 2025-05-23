@@ -11,7 +11,7 @@ import Utils (getDefault, unpackBS)
 import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 
-import Data.Time.Clock.POSIX (getPOSIXTime)
+import Data.Time.Clock.POSIX (getPOSIXTime, getCurrentTime)
 import Data.UUID (toString)
 import Data.UUID.V4 (nextRandom)
 
@@ -25,7 +25,7 @@ import Data.Password.Bcrypt (PasswordCheck (PasswordCheckFail, PasswordCheckSucc
 import Data.Text (intercalate, pack, unpack, Text)
 import Data.Text.Array (Array (ByteArray))
 import Database.Persist (Entity (Entity, entityKey), Filter (Filter), FilterValue (FilterValue), PersistFilter (BackendSpecificFilter), insertEntity, selectList, PersistQueryWrite (deleteWhere), (==.), (=.), (>.), PersistField (toPersistValue), PersistStoreRead (get), PersistUniqueRead (getBy), PersistQueryRead (count))
-import Database.Schema (EntityField (TokenName, UserName, VisitUuid, TokenToken, GuestbookEntryId, VisitId, SnakeId, UserId, TokenId, GuestbookEntryParentId, VisitTimestamp), GuestbookEntry (GuestbookEntry, guestbookEntryContent, guestbookEntryName, guestbookEntryParentId, guestbookEntryTimestamp), Snake (Snake), Token (Token, tokenToken), User (User, userName, userPassword), Visit (Visit), Key (GuestbookEntryKey), Unique (Username))
+import Database.Schema (EntityField (TokenName, UserName, VisitUuid, TokenToken, GuestbookEntryId, VisitId, SnakeId, UserId, TokenId, GuestbookEntryParentId, VisitTimestamp), GuestbookEntry (GuestbookEntry, guestbookEntryContent, guestbookEntryName, guestbookEntryParentId, guestbookEntryTimestamp), Snake (Snake), Token (Token, tokenToken), User (User, userName, userPassword), Visit (Visit), Key (GuestbookEntryKey), Unique (Username), Member (Member))
 import Logger (info)
 import Text.StringRandom (stringRandomIO)
 
@@ -40,6 +40,7 @@ import Settings (getEditorRoot)
 import Tables (DatabaseDelete(DatabaseDelete, EmptyDatabaseDelete))
 import State (getCookies, getStates, loggedIn, accessToken)
 import Database.Persist.Sql (toSqlKey)
+import Calendar (generateEvent)
 
 type Header = (HeaderName, ByteString)
 type APIResponse = IO (Status, String, [Header])
@@ -136,6 +137,14 @@ apiMap = [
             handle <- openFile (editor_root ++ "/" ++ filename) ReadMode
             contents  <- hGetContents handle
             return (status200, contents, defaultHeaders)
+        ),
+        ("^/folkevognen.ical", \r -> do
+            -- Insert filter here that selects only events registered in the future
+            members <- getRows [] [] :: IO [Entity Member]
+            -- If its less than 8, generate new entries
+            date <- getCurrentTime
+            let calendarString = generateEvent "me" date
+            return (status200, calendarString, defaultHeaders)
         )
     ]),
     ("PUT", [

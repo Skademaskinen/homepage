@@ -14,7 +14,7 @@ import Database.Persist.TH (mkMigrate, mkPersist, persistLowerCase, share, sqlSe
 import Database.Persist.Types (EntityDef, FieldDef (fieldSqlType), fieldHaskell)
 import Database.Persist ((==.), (=.))
 import Database.Persist.Sql (BackendKey (SqlBackendKey), getBy)
-import Database.Schema (EntityField (TokenToken, VisitUuid), GuestbookEntry (GuestbookEntry), Snake (Snake), Token (tokenName, tokenToken, Token), User (userName, User), Visit (Visit, visitTimestamp, visitUuid), defs, migrateAll, Key (VisitKey, GuestbookEntryKey, SnakeKey, UserKey, TokenKey), Unique (ValidToken))
+import Database.Schema (EntityField (TokenToken, VisitUuid), GuestbookEntry (GuestbookEntry), Snake (Snake), Token (tokenName, tokenToken, Token), User (userName, User), Visit (Visit, visitTimestamp, visitUuid), defs, migrateAll, Key (VisitKey, GuestbookEntryKey, SnakeKey, UserKey, TokenKey, MemberKey), Unique (ValidToken), Member (Member))
 import Logger (info)
 import Tree (Tree (Tree))
 import Text.Blaze.Html (Html)
@@ -105,3 +105,8 @@ instance AdminTable Token where
     makeButton (Entity id a) = [hsx|<button id={"valid_tokens::"++(show $ getId id)} onclick="delete_row(this.id)">Delete</button>|]
     getRows f o = runDb (selectList f o)
     getId (TokenKey (SqlBackendKey id)) = fromIntegral id
+instance AdminTable Member where
+    toList (Entity id (Member name count)) = [show $ getId id, name, show count]
+    makeButton (Entity id a) = [hsx|<button id={"member::"++(show $ getId id)} onclick="delete_row(this.id)">Delete</button>|]
+    getRows f o = runDb (selectList f o)
+    getId (MemberKey (SqlBackendKey id)) = fromIntegral id
