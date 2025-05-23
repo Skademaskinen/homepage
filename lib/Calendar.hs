@@ -1,6 +1,6 @@
 module Calendar where
 
-import Data.Time (UTCTime (utctDay, UTCTime), formatTime, defaultTimeLocale, addDays, Day, getCurrentTime, secondsToDiffTime)
+import Data.Time (UTCTime (utctDay, UTCTime), formatTime, defaultTimeLocale, addDays, Day, getCurrentTime, secondsToDiffTime, dayOfWeek)
 import Database.Schema (Event(Event, eventDate, eventResponsible), Member (Member, memberName), EntityField (EventCancelled))
 import Database.Database (runDb, AdminTable (getRows, toList, getList, getLast, getAll))
 import Database.Persist (PersistStoreWrite(insert), Entity (Entity), PersistQueryRead (selectFirst), selectList, SelectOpt (LimitTo), (==.))
@@ -51,7 +51,7 @@ createEvent _ = do
         else do
             event <- getLast :: IO Event
             return $ (utctDay . eventDate) event
-    let startOfWeek = addDays (negate $ fromIntegral (dayOfWeek day - 1)) day
+    let startOfWeek = addDays (negate $ fromIntegral (fromEnum (dayOfWeek day) - 2)) day
     let tuesday = addDays 7 startOfWeek
     let targetDate = UTCTime tuesday 0
     members <- getAll :: IO [Member]
@@ -69,7 +69,4 @@ createEvents [] = return ()
 
 formatTime' :: UTCTime -> String
 formatTime' = formatTime defaultTimeLocale "%Y%m%dT%H%M%SZ"
-
-dayOfWeek :: Day -> Int
-dayOfWeek = (\d -> if d == 0 then 7 else d) . (\d -> fromEnum d `mod` 7)
 
