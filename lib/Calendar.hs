@@ -14,6 +14,7 @@ generateEvent (Event timestamp responsible cancelled) = unlines [
     "DTSTAMP:" ++ formatTime' timestamp,
     "DTSTART:" ++ formatTime' startTime,
     "DTEND:" ++ formatTime' endTime,
+    "CLASS:PUBLIC",
     "SUMMARY:Det Ugentilige Møde",
     "DESCRIPTION:"++responsible++" Folker vognen",
     "END:VEVENT"
