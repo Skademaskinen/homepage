@@ -5,10 +5,10 @@ import System.Exit (exitSuccess)
 import Data.List (intercalate)
 import Data.Password.Bcrypt (PasswordHash (PasswordHash), hashPassword, mkPassword)
 import Data.Text (pack, unpack)
-import Database.Database (runDb, AdminTable (getRows, toList), doMigration)
-import Database.Persist (PersistQueryWrite (deleteWhere), insertEntity, SelectOpt (LimitTo), Entity (Entity))
+import Database.Database (runDb, AdminTable (getRows, toList, getAll), doMigration)
+import Database.Persist (PersistQueryWrite (deleteWhere), insertEntity, SelectOpt (LimitTo), Entity (Entity, entityKey), PersistStoreWrite (insert, delete))
 import Database.Persist.MySQL ((==.))
-import Database.Schema (EntityField (UserName), User (User), Visit (Visit), GuestbookEntry (GuestbookEntry), Snake (Snake), Token (Token))
+import Database.Schema (EntityField (UserName, MemberName), User (User), Visit (Visit), GuestbookEntry (GuestbookEntry), Snake (Snake), Token (Token), Member (Member, memberName))
 import Logger (clearEnd, clearLine, right, up)
 import System.IO (hFlush, stdout)
 import Text.RawString.QQ (r)
@@ -28,13 +28,16 @@ doCommand ("help" : _) = do
         help = [r|
             Homepage CLI command list:
 
-            exit:       Exits the program
-            help:       Shows help about the CLI
-            drop:       Deletes a table and reruns init schema :: REMOVED
-            adduser:    Adds a user to the users table
-            show:       Show a table
-            migrate:    Migrate the database
-            removeuser: Removes a user from the users table
+            exit:           Exits the program
+            help:           Shows help about the CLI
+            drop:           Deletes a table and reruns init schema :: REMOVED
+            adduser:        Adds a user to the users table
+            show:           Show a table
+            migrate:        Migrate the database
+            removeuser:     Removes a user from the users table
+            addmember:      add a member to the folkevogn
+            deletemember:   delete a member from the folkevogn
+            showmembers:    show members currently registered for the folkevogn
         |]
 doCommand ("exit" : _) = do
     putStrLn "Exiting"
@@ -74,6 +77,20 @@ doCommand ["show", table] = doCommand ["show", table, "5"]
 doCommand ["migrate"] = do
     doMigration
     resetCursor 1
+    repl
+doCommand ["addmember", name] = do
+    runDb . insert $ Member name
+    resetCursor 1
+    repl
+doCommand ["deletemember", name] = do
+    id <- entityKey . head <$> (getRows [MemberName ==. name] [] :: IO [Entity Member])
+    runDb . delete $ id
+    resetCursor 1
+    repl
+doCommand ["showmembers"] = do
+    members <- getAll :: IO [Member]
+    putStrLn $ intercalate "\n" $ map memberName members
+    resetCursor $ length members + 1
     repl
 doCommand x = do
     putStrLn $ "Error, no such command: [" ++ unwords x ++ "]"

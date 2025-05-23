@@ -3,7 +3,7 @@
 
 module Api.Api where
 
-import Database.Database (runDb, AdminTable (getRows), toList, validateToken)
+import Database.Database (runDb, AdminTable (getRows, getList), toList, validateToken, getAll)
 import Pages.Projects.Brainfuck (code)
 import qualified Tables as T (Credentials (Credentials, EmptyCredentials), GuestbookEntry (EmptyGuestbook, GuestbookEntry), LeaderboardEntry (EmptyLeaderboard, LeaderboardEntry))
 import Utils (getDefault, unpackBS)
@@ -11,7 +11,7 @@ import Utils (getDefault, unpackBS)
 import IHP.HSX.QQ (hsx)
 import Text.Blaze.Html (Html)
 
-import Data.Time.Clock.POSIX (getPOSIXTime)
+import Data.Time.Clock.POSIX (getPOSIXTime, getCurrentTime)
 import Data.UUID (toString)
 import Data.UUID.V4 (nextRandom)
 
@@ -24,8 +24,8 @@ import Data.ByteString.Lazy (fromStrict, toStrict)
 import Data.Password.Bcrypt (PasswordCheck (PasswordCheckFail, PasswordCheckSuccess), PasswordHash (PasswordHash), checkPassword, mkPassword)
 import Data.Text (intercalate, pack, unpack, Text)
 import Data.Text.Array (Array (ByteArray))
-import Database.Persist (Entity (Entity, entityKey), Filter (Filter), FilterValue (FilterValue), PersistFilter (BackendSpecificFilter), insertEntity, selectList, PersistQueryWrite (deleteWhere), (==.), (=.), (>.), PersistField (toPersistValue), PersistStoreRead (get), PersistUniqueRead (getBy), PersistQueryRead (count))
-import Database.Schema (EntityField (TokenName, UserName, VisitUuid, TokenToken, GuestbookEntryId, VisitId, SnakeId, UserId, TokenId, GuestbookEntryParentId, VisitTimestamp), GuestbookEntry (GuestbookEntry, guestbookEntryContent, guestbookEntryName, guestbookEntryParentId, guestbookEntryTimestamp), Snake (Snake), Token (Token, tokenToken), User (User, userName, userPassword), Visit (Visit), Key (GuestbookEntryKey), Unique (Username))
+import Database.Persist (Entity (Entity, entityKey), Filter (Filter), FilterValue (FilterValue), PersistFilter (BackendSpecificFilter), insertEntity, selectList, PersistQueryWrite (deleteWhere), (==.), (=.), (>.), PersistField (toPersistValue), PersistStoreRead (get), PersistUniqueRead (getBy), PersistQueryRead (count), PersistStoreWrite (insert))
+import Database.Schema (EntityField (TokenName, UserName, VisitUuid, TokenToken, GuestbookEntryId, VisitId, SnakeId, UserId, TokenId, GuestbookEntryParentId, VisitTimestamp, EventDate), GuestbookEntry (GuestbookEntry, guestbookEntryContent, guestbookEntryName, guestbookEntryParentId, guestbookEntryTimestamp), Snake (Snake), Token (Token, tokenToken), User (User, userName, userPassword), Visit (Visit), Key (GuestbookEntryKey), Unique (Username), Member (Member), Event (Event))
 import Logger (info)
 import Text.StringRandom (stringRandomIO)
 
@@ -40,6 +40,8 @@ import Settings (getEditorRoot)
 import Tables (DatabaseDelete(DatabaseDelete, EmptyDatabaseDelete))
 import State (getCookies, getStates, loggedIn, accessToken)
 import Database.Persist.Sql (toSqlKey)
+import Calendar (generateCalendar, createEvents)
+import Data.Time (addUTCTime, nominalDay)
 
 type Header = (HeaderName, ByteString)
 type APIResponse = IO (Status, String, [Header])
@@ -136,6 +138,19 @@ apiMap = [
             handle <- openFile (editor_root ++ "/" ++ filename) ReadMode
             contents  <- hGetContents handle
             return (status200, contents, defaultHeaders)
+        ),
+        ("^/folkevognen.ics$", \r -> do
+            members <- getAll :: IO [Member]
+            today <- getCurrentTime
+            futureEvents <- getList [EventDate >. today] [] :: IO [Event]
+            if length futureEvents < 8 then do
+                let missing = 8 - length futureEvents
+                createEvents [1..missing]
+            else
+                putStrLn "No new events need to be created"
+            futureEvents <- getList [EventDate >. today] [] :: IO [Event]
+            let calendar = generateCalendar futureEvents
+            return (status200, calendar, [("Content-Type", "text/calendar")])
         )
     ]),
     ("PUT", [
@@ -172,6 +187,12 @@ apiMap = [
             handle <- openFile (editor_root ++ "/" ++ filename) WriteMode
             hPutStr handle content
             hClose handle
+            return (status200, messageResponse "ok", jsonHeaders)
+        ),
+        ("^/folkevognen/add$", \r -> do
+            body <- getRequestBodyChunk r
+            let name = unpackBS body
+            runDb . insert $ Member name
             return (status200, messageResponse "ok", jsonHeaders)
         )
     ]),
