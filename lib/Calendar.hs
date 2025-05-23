@@ -19,8 +19,8 @@ generateEvent (Event timestamp responsible cancelled) = unlines [
     "END:VEVENT"
     ]
     where
-        startTime = UTCTime (utctDay timestamp) (secondsToDiffTime $ 16 * 3600 + 30 * 60)
-        endTime   = UTCTime (utctDay timestamp) (secondsToDiffTime $ 21 * 3600)
+        startTime = UTCTime (utctDay timestamp) (secondsToDiffTime $ 14 * 3600 + 30 * 60)
+        endTime   = UTCTime (utctDay timestamp) (secondsToDiffTime $ 19 * 3600)
 
 generateCalendar :: [Event] -> String
 generateCalendar events = unlines [
