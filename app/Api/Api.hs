@@ -25,7 +25,7 @@ import Data.Password.Bcrypt (PasswordCheck (PasswordCheckFail, PasswordCheckSucc
 import Data.Text (intercalate, pack, unpack, Text)
 import Data.Text.Array (Array (ByteArray))
 import Database.Persist (Entity (Entity, entityKey), Filter (Filter), FilterValue (FilterValue), PersistFilter (BackendSpecificFilter), insertEntity, selectList, PersistQueryWrite (deleteWhere), (==.), (=.), (>.), PersistField (toPersistValue), PersistStoreRead (get), PersistUniqueRead (getBy), PersistQueryRead (count), PersistStoreWrite (insert))
-import Database.Schema (EntityField (TokenName, UserName, VisitUuid, TokenToken, GuestbookEntryId, VisitId, SnakeId, UserId, TokenId, GuestbookEntryParentId, VisitTimestamp, EventDate), GuestbookEntry (GuestbookEntry, guestbookEntryContent, guestbookEntryName, guestbookEntryParentId, guestbookEntryTimestamp), Snake (Snake), Token (Token, tokenToken), User (User, userName, userPassword), Visit (Visit), Key (GuestbookEntryKey), Unique (Username), Member (Member), Event (Event))
+import Database.Schema (EntityField (TokenName, UserName, VisitUuid, TokenToken, GuestbookEntryId, VisitId, SnakeId, UserId, TokenId, GuestbookEntryParentId, VisitTimestamp, EventDate, EventCancelled), GuestbookEntry (GuestbookEntry, guestbookEntryContent, guestbookEntryName, guestbookEntryParentId, guestbookEntryTimestamp), Snake (Snake), Token (Token, tokenToken), User (User, userName, userPassword), Visit (Visit), Key (GuestbookEntryKey), Unique (Username), Member (Member), Event (Event))
 import Logger (info)
 import Text.StringRandom (stringRandomIO)
 
@@ -148,7 +148,7 @@ apiMap = [
                 createEvents [1..missing]
             else
                 putStrLn "No new events need to be created"
-            futureEvents <- getList [EventDate >. today] [] :: IO [Event]
+            futureEvents <- getList [EventDate >. today, EventCancelled ==. False] [] :: IO [Event]
             let calendar = generateCalendar futureEvents
             return (status200, calendar, [("Content-Type", "text/calendar")])
         )
