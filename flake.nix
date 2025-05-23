@@ -24,6 +24,7 @@
                     ipython
                     scipy
                 ]))
+                sqlite-interactive
  
             ];
         };

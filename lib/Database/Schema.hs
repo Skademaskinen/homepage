@@ -50,9 +50,9 @@ share [mkPersist sqlSettings, mkMigrate "migrateAll", mkEntityDefList "defs"] [p
     Event                                               sql=events
         date                    UTCTime                 sql=date
         responsible             String                  sql=responsible
+        cancelled               Bool                    sql=cancelled
         deriving Eq Show
     Member                                              sql=members
         name                    String                  sql=name
-        count                   Int                     sql=count
         deriving Eq Show
 |]
