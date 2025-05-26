@@ -7,8 +7,8 @@ import Data.Password.Bcrypt (PasswordHash (PasswordHash), hashPassword, mkPasswo
 import Data.Text (pack, unpack)
 import Database.Database (runDb, AdminTable (getRows, toList, getAll), doMigration)
 import Database.Persist (PersistQueryWrite (deleteWhere), insertEntity, SelectOpt (LimitTo), Entity (Entity, entityKey), PersistStoreWrite (insert, delete))
-import Database.Persist.MySQL ((==.))
-import Database.Schema (EntityField (UserName, MemberName), User (User), Visit (Visit), GuestbookEntry (GuestbookEntry), Snake (Snake), Token (Token), Member (Member, memberName))
+import Database.Persist.MySQL ((==.), toSqlKey)
+import Database.Schema (EntityField (UserName, MemberName, EventId), User (User), Visit (Visit), GuestbookEntry (GuestbookEntry), Snake (Snake), Token (Token), Member (Member, memberName), Key (EventKey), Event (Event))
 import Logger (clearEnd, clearLine, right, up)
 import System.IO (hFlush, stdout)
 import Text.RawString.QQ (r)
@@ -37,7 +37,9 @@ doCommand ("help" : _) = do
             removeuser:     Removes a user from the users table
             addmember:      add a member to the folkevogn
             deletemember:   delete a member from the folkevogn
-            showmembers:    show members currently registered for the folkevogn
+            members:        show members currently registered for the folkevogn
+            deleteevent:    delete an event
+            events:         show all events
         |]
 doCommand ("exit" : _) = do
     putStrLn "Exiting"
@@ -87,10 +89,19 @@ doCommand ["deletemember", name] = do
     runDb . delete $ id
     resetCursor 1
     repl
-doCommand ["showmembers"] = do
+doCommand ["members"] = do
     members <- getAll :: IO [Member]
     putStrLn $ intercalate "\n" $ map memberName members
     resetCursor $ length members + 1
+    repl
+doCommand ["deleteevent", id] = do
+    runDb . delete $ (toSqlKey (read id) :: Key Event)
+    resetCursor 1
+    repl
+doCommand ["events"] = do
+    events <- map toList <$> (getRows [] [] :: IO [Entity Event])
+    putStrLn $ intercalate "\n" $ map (intercalate "\t|\t\t") events
+    resetCursor $ length events + 1
     repl
 doCommand x = do
     putStrLn $ "Error, no such command: [" ++ unwords x ++ "]"
