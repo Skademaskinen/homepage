@@ -142,7 +142,7 @@ apiMap = [
         ("^/folkevognen.ics$", \r -> do
             members <- getAll :: IO [Member]
             today <- getCurrentTime
-            futureEvents <- getList [EventDate >. today] [] :: IO [Event]
+            futureEvents <- getList [EventDate >. today, EventCancelled ==. False] [] :: IO [Event]
             if length futureEvents < 8 then do
                 let missing = 8 - length futureEvents
                 createEvents [1..missing]

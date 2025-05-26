@@ -6,9 +6,9 @@ import Data.List (intercalate)
 import Data.Password.Bcrypt (PasswordHash (PasswordHash), hashPassword, mkPassword)
 import Data.Text (pack, unpack)
 import Database.Database (runDb, AdminTable (getRows, toList, getAll), doMigration)
-import Database.Persist (PersistQueryWrite (deleteWhere), insertEntity, SelectOpt (LimitTo), Entity (Entity, entityKey), PersistStoreWrite (insert, delete))
-import Database.Persist.MySQL ((==.), toSqlKey)
-import Database.Schema (EntityField (UserName, MemberName, EventId), User (User), Visit (Visit), GuestbookEntry (GuestbookEntry), Snake (Snake), Token (Token), Member (Member, memberName), Key (EventKey), Event (Event))
+import Database.Persist (PersistQueryWrite (deleteWhere), insertEntity, SelectOpt (LimitTo), Entity (Entity, entityKey), PersistStoreWrite (insert, delete, update), PersistQueryRead (selectFirst), PersistStoreRead (get))
+import Database.Persist.MySQL ((==.), (=.), toSqlKey)
+import Database.Schema (EntityField (UserName, MemberName, EventId, EventCancelled), User (User), Visit (Visit), GuestbookEntry (GuestbookEntry), Snake (Snake), Token (Token), Member (Member, memberName), Key (EventKey), Event (Event, eventCancelled))
 import Logger (clearEnd, clearLine, right, up)
 import System.IO (hFlush, stdout)
 import Text.RawString.QQ (r)
@@ -39,6 +39,7 @@ doCommand ("help" : _) = do
             deletemember:   delete a member from the folkevogn
             members:        show members currently registered for the folkevogn
             deleteevent:    delete an event
+            toggleevent:    toggle cancellation of event
             events:         show all events
         |]
 doCommand ("exit" : _) = do
@@ -102,6 +103,17 @@ doCommand ["events"] = do
     events <- map toList <$> (getRows [] [] :: IO [Entity Event])
     putStrLn $ intercalate "\n" $ map (intercalate "\t|\t\t") events
     resetCursor $ length events + 1
+    repl
+doCommand ["toggleevent", id] = do
+    maybeEvent <- runDb $ get (toSqlKey (read id) :: Key Event)
+    case maybeEvent of
+        (Just event) -> do
+            let status = eventCancelled event
+            runDb $ update (toSqlKey (read id) :: Key Event) [EventCancelled =. not status]
+            resetCursor 1
+        Nothing -> do
+            putStrLn "Error, no such id"
+            resetCursor 2
     repl
 doCommand x = do
     putStrLn $ "Error, no such command: [" ++ unwords x ++ "]"
