@@ -10,7 +10,7 @@ newtype CalendarData = CalendarData [Event]
 generateEvent :: Event -> String
 generateEvent (Event timestamp responsible cancelled) = unlines [
     "BEGIN:VEVENT",
-    "UID:mast3r@skade.dev",
+    "UID:" ++ formatTime' timestamp ++ "@skade.dev",
     "DTSTAMP:" ++ formatTime' timestamp,
     "DTSTART:" ++ formatTime' startTime,
     "DTEND:" ++ formatTime' endTime,
@@ -20,7 +20,7 @@ generateEvent (Event timestamp responsible cancelled) = unlines [
     "END:VEVENT"
     ]
     where
-        startTime = UTCTime (utctDay timestamp) (secondsToDiffTime $ 14 * 3600 + 30 * 60)
+        startTime = UTCTime (utctDay timestamp) (secondsToDiffTime $ 15 * 3600 + 30 * 60)
         endTime   = UTCTime (utctDay timestamp) (secondsToDiffTime $ 19 * 3600)
 
 generateCalendar :: [Event] -> String
