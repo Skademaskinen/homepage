@@ -197,9 +197,13 @@ browse table = do
         _row [] = [hsx||]
         empty = [hsx||]
 
+calendar :: IO Html
+calendar = return [hsx||]
+
 route :: [String] -> IO Html
 route [_, "metrics"] = metrics
 route [_, "browse", table] = browse table
+route [_, "calendar"] = calendar
 route _ = panel
 
 login :: Html
