@@ -214,7 +214,7 @@ login = [hsx|
             fetch("/api/login", {
                 method: "POST",
                 body: JSON.stringify({
-                    username:username,
+                    name:username,
                     password:password
                 })
             }).then(response => {
