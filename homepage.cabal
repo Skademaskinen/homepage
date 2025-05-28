@@ -11,7 +11,6 @@ library lib-homepage
         Section,
         Tree,
         Utils,
-        Tables,
         Logger,
         Repl,
         Scripts,
@@ -81,7 +80,12 @@ executable homepage
         Pages.Sources.Sources,
         Pages.Sources.Repo,
         Pages.Admin.Admin,
-        Api.Api
+        Api.Api,
+        Api.Delete,
+        Api.Get,
+        Api.Post,
+        Api.Put,
+        Api.Types
 
     build-depends:
         base,

@@ -92,6 +92,7 @@ page = do
                 fetch("/api/guestbook/add", {
                     method:"PUT",
                     body: JSON.stringify({
+                        timestamp: Math.floor(Date.now() / 1000),
                         name: name,
                         content: text,
                         parentId: Number(id)

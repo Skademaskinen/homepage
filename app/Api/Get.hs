@@ -1,0 +1,62 @@
+module Api.Get where
+import Api.Types (APIEndpoint, j2s, jsonHeaders, defaultHeaders, APIRoute)
+import Data.Aeson.QQ (aesonQQ)
+import Database.Schema (GuestbookEntry(GuestbookEntry), Member (Member), Event (Event), EntityField (VisitTimestamp, EventDate, EventCancelled))
+import Database.Database (AdminTable(getAll, getRows, toList, getList), runDb)
+import Database.Persist (Entity(Entity), PersistQueryRead (count), (>.), (==.))
+import Api.Post (postMap)
+import Api.Put (putMap)
+import Network.HTTP.Types (status200)
+import Api.Delete (deleteMap)
+import Settings (getEditorRoot)
+import System.Directory (getDirectoryContents)
+import Data.Text (unpack)
+import Network.Wai (Request(pathInfo))
+import System.IO (openFile, IOMode (ReadMode), hGetContents)
+import Data.Time (getCurrentTime)
+import Calendar (generateCalendar, createEvents)
+
+getMap :: [APIRoute] -> [APIEndpoint]
+getMap apiMap = [
+    ("^(/|)$", \_ -> do
+        let apiData = map (\(method, routes) -> [aesonQQ|{
+            "method":#{method},
+            "routes":#{map fst routes}
+        }|]) apiMap
+        return (status200, j2s [aesonQQ|#{apiData}|], jsonHeaders)
+    ),
+    ("^/visits/get(/|)$", \_ -> do
+        visits <- runDb $ count [VisitTimestamp >. 0]
+        return (status200, j2s [aesonQQ|{"visits":#{visits}}|], jsonHeaders)
+    ),
+    ("^/guestbook/get(/|)$", \_ -> do
+        entries <- getRows [] [] :: IO [Entity GuestbookEntry]
+        let l = map toList entries
+        return (status200, j2s [aesonQQ|{"entries":#{l}}|], jsonHeaders)
+    ),
+    ("^/editor/sidebar(/|)$", \_ -> do
+        editor_root <- getEditorRoot
+        files <- getDirectoryContents editor_root
+        return (status200, j2s [aesonQQ|#{files}|], jsonHeaders)
+    ),
+    ("^/editor/content/.*(/|)$", \r -> do
+        let filename = unpack $ last $ pathInfo r
+        editor_root <- getEditorRoot
+        handle <- openFile (editor_root ++ "/" ++ filename) ReadMode
+        contents  <- hGetContents handle
+        return (status200, contents, defaultHeaders)
+    ),
+    ("^/folkevognen.ics$", \r -> do
+        members <- getAll :: IO [Member]
+        today <- getCurrentTime
+        futureEvents <- getList [EventDate >. today, EventCancelled ==. False] [] :: IO [Event]
+        if length futureEvents < 8 then do
+            let missing = 8 - length futureEvents
+            createEvents [1..missing]
+        else
+            putStrLn "No new events need to be created"
+        futureEvents <- getList [EventDate >. today, EventCancelled ==. False] [] :: IO [Event]
+        let calendar = generateCalendar futureEvents
+        return (status200, calendar, [("Content-Type", "text/calendar")])
+    )
+    ]

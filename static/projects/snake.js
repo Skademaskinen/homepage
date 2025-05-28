@@ -92,8 +92,8 @@ async function launchGame() {
             fetch("/api/snake/add", {
                 method: "PUT",
                 body: JSON.stringify({
+                    timestamp: Math.floor(Date.now() / 1000),
                     name: document.getElementById("player-name").value,
-                    timestamp: time,
                     score: score,
                     speed: speed,
                     fruits: fruit_count
