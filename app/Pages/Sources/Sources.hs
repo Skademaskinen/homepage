@@ -18,10 +18,7 @@ page = do
             {linkImage "IHP" "https://ihp.digitallyinduced.com/ihp.svg" "https://ihp.digitallyinduced.com/"}
             {linkImage "Haskell" "https://wiki.haskell.org/wikiupload/4/4a/HaskellLogoStyPreview-1.png" "https://haskell.org"}
             {linkImage "Nix" "https://raw.githubusercontent.com/NixOS/nixos-artwork/53ea652ec7d8af5d21fd2b79b6c49cb39078ddfb/logo/nix-snowflake-colours.svg" "https://nixos.org"}
-            <br>
-            Source code: <a href="https://github.com/Mast3rwaf1z/homepage">
-                <img src="/static/github.svg" height="20">
-            </a>
+            {linkImage "Source Code" "/static/github.svg" "https://github.com/Skademaskinen/homepage"}
             <br>
             {commitHistory}
         </div>
