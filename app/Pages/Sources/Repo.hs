@@ -39,7 +39,7 @@ instance FromJSON Author where
 
 get :: IO [CommitData]
 get = do
-    initialRequest <- parseRequest "https://api.github.com/repos/Mast3rwaf1z/homepage/commits"
+    initialRequest <- parseRequest "https://api.github.com/repos/Skademaskinen/homepage/commits"
     let request = initialRequest{method = "GET", requestHeaders = [("User-Agent", "Website")]}
     response <- httpJSON request
     return (getResponseBody response :: [CommitData])
