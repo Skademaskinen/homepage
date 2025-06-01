@@ -1,5 +1,5 @@
 module Api.Types where
-import Network.HTTP.Types (HeaderName, Status, status400)
+import Network.HTTP.Types (HeaderName, Status, status400, Query)
 import Data.ByteString (ByteString, toStrict)
 import Data.Aeson (Value, encode)
 import Data.Aeson.QQ (aesonQQ)
@@ -36,6 +36,11 @@ redirect url = renderHtml [hsx|
       <meta http-equiv="Refresh" content={"0; URL="++url} />
     </head>
 |]
+
+getQueryValue :: String -> Query -> String
+getQueryValue key ((key', Just value):xs) | key == unpackBS key' = unpackBS value
+                                          | otherwise   = getQueryValue key xs
+getQueryValue _ []                        = undefined
 
 (<!>) :: [APIRoute] -> String -> [APIEndpoint]
 ((method, value):xs) <!> target | method == target  = value

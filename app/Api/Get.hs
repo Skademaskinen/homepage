@@ -1,5 +1,5 @@
 module Api.Get where
-import Api.Types (APIEndpoint, j2s, jsonHeaders, defaultHeaders, APIRoute, messageResponse, redirect, redirectHeaders)
+import Api.Types (APIEndpoint, j2s, jsonHeaders, defaultHeaders, APIRoute, messageResponse, redirect, redirectHeaders, getQueryValue)
 import Data.Aeson.QQ (aesonQQ)
 import Database.Schema (GuestbookEntry(GuestbookEntry), Member (Member), Event (Event), EntityField (VisitTimestamp, EventDate, EventCancelled))
 import Database.Database (AdminTable(getAll, getRows, toList, getList), runDb)
@@ -18,13 +18,6 @@ import Calendar (generateCalendar, createEvents)
 import Data.ByteString (fromStrict)
 import Utils (unpackBS)
 import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
-
-
-getQueryValue :: String -> Query -> String
-getQueryValue key ((key', Just value):xs) | key == unpackBS key' = unpackBS value
-                                          | otherwise   = getQueryValue key xs
-getQueryValue _ []                        = undefined
-
 
 getMap :: [APIRoute] -> [APIEndpoint]
 getMap apiMap = [
