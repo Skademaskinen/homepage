@@ -87,27 +87,6 @@ page = do
                     reply.style.display = "none"
                 }
             }
-            function post(id) {
-                var text = document.getElementById("guestbook-text::"+id).value
-                var name = document.getElementById("guestbook-name::"+id).value
-                console.log(id)
-                fetch("/api/guestbook/add", {
-                    method:"PUT",
-                    body: JSON.stringify({
-                        timestamp: Math.floor(Date.now() / 1000),
-                        name: name,
-                        content: text,
-                        parentId: Number(id)
-                    })
-                }).then(response => {
-                    if(response.status == 200){
-                        window.location.reload()
-                    }
-                    else response.json().then(data => {
-                        alert(response.status + "\n" + data.message)
-                    })
-                })
-            }
         </script>
         <h1>Guestbook</h1>
         Write a message for me :)<br>
