@@ -50,8 +50,8 @@ prettifyGuestbook [] = [hsx||]
 guestbookInput :: Int -> Bool -> Html
 guestbookInput parent False = [hsx|
     <form action="/api/guestbook/add">
-        <textarea class="guestbook-text" name="guestbook-text" type="text"></textarea><br><br>
-        Name: <input class="guestbook-name" name="guestbook-name" type="textarea"/>
+        <textarea class="guestbook-text" name="content" type="text"></textarea><br><br>
+        Name: <input class="guestbook-name" name="name" type="text"/>
         <input type="hidden" name="id" value={show parent}/>
         <input type="submit" value="Post" class="guestbook-button"/>
     </form>
