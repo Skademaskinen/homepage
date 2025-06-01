@@ -39,17 +39,16 @@ getMap apiMap = [
     ),
     ("^/guestbook/add?*$", \r -> do
         let query = queryString r
-        let name = getQueryValue "guestbook-name" query
-        let text = getQueryValue "guestbook-text" query
-        let id = getQueryValue "id" query
-        if null name then
-            return (status400, "Error, name cannot be empty", defaultHeaders)
-        else if null text then
-            return (status400, "Error, content cannot be empty", defaultHeaders)
-        else do
-            now <- getCurrentTime
-            runDb $ insert $ GuestbookEntry (read $ formatTime defaultTimeLocale "%s" now) name text (read id :: Int)
-            return (status308, redirect "/guestbook", redirectHeaders)
+        let name = getQueryValue "name" query
+        let content = getQueryValue "content" query
+        let id = read $ getQueryValue "id" query :: Int
+        case (name, content, id) of
+            ("", _, _) -> return (status400, "Error, name cannot be empty", defaultHeaders)
+            (_, "", _) -> return (status400, "Error, content cannot be empty", defaultHeaders)
+            (name, content, id) -> do
+                now <- read . formatTime defaultTimeLocale "%s" <$> getCurrentTime
+                runDb $ insert $ GuestbookEntry now name content id
+                return (status308, redirect "/guestbook", redirectHeaders)
     ),
     ("^/editor/sidebar(/|)$", \_ -> do
         editor_root <- getEditorRoot
