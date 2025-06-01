@@ -1,20 +1,30 @@
 module Api.Get where
-import Api.Types (APIEndpoint, j2s, jsonHeaders, defaultHeaders, APIRoute)
+import Api.Types (APIEndpoint, j2s, jsonHeaders, defaultHeaders, APIRoute, messageResponse, redirect, redirectHeaders)
 import Data.Aeson.QQ (aesonQQ)
 import Database.Schema (GuestbookEntry(GuestbookEntry), Member (Member), Event (Event), EntityField (VisitTimestamp, EventDate, EventCancelled))
 import Database.Database (AdminTable(getAll, getRows, toList, getList), runDb)
-import Database.Persist (Entity(Entity), PersistQueryRead (count), (>.), (==.))
+import Database.Persist (Entity(Entity), PersistQueryRead (count), (>.), (==.), PersistStoreWrite (insert))
 import Api.Post (postMap)
 import Api.Put (putMap)
-import Network.HTTP.Types (status200)
+import Network.HTTP.Types (status200, Query, status400, status308)
 import Api.Delete (deleteMap)
 import Settings (getEditorRoot)
 import System.Directory (getDirectoryContents)
 import Data.Text (unpack)
-import Network.Wai (Request(pathInfo))
+import Network.Wai (Request(pathInfo, queryString))
 import System.IO (openFile, IOMode (ReadMode), hGetContents)
-import Data.Time (getCurrentTime)
+import Data.Time (getCurrentTime, defaultTimeLocale, formatTime)
 import Calendar (generateCalendar, createEvents)
+import Data.ByteString (fromStrict)
+import Utils (unpackBS)
+import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
+
+
+getQueryValue :: String -> Query -> String
+getQueryValue key ((key', Just value):xs) | key == unpackBS key' = unpackBS value
+                                          | otherwise   = getQueryValue key xs
+getQueryValue _ []                        = undefined
+
 
 getMap :: [APIRoute] -> [APIEndpoint]
 getMap apiMap = [
@@ -33,6 +43,20 @@ getMap apiMap = [
         entries <- getRows [] [] :: IO [Entity GuestbookEntry]
         let l = map toList entries
         return (status200, j2s [aesonQQ|{"entries":#{l}}|], jsonHeaders)
+    ),
+    ("^/guestbook/add?*$", \r -> do
+        let query = queryString r
+        let name = getQueryValue "guestbook-name" query
+        let text = getQueryValue "guestbook-text" query
+        let id = getQueryValue "id" query
+        if null name then
+            return (status400, messageResponse "Error, name cannot be empty", jsonHeaders)
+        else if null text then
+            return (status400, messageResponse "Error, content cannot be empty", jsonHeaders)
+        else do
+            now <- getCurrentTime
+            runDb $ insert $ GuestbookEntry (read $ formatTime defaultTimeLocale "%s" now) name text (read id :: Int)
+            return (status308, redirect "/guestbook", redirectHeaders)
     ),
     ("^/editor/sidebar(/|)$", \_ -> do
         editor_root <- getEditorRoot

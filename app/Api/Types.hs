@@ -5,6 +5,8 @@ import Data.Aeson (Value, encode)
 import Data.Aeson.QQ (aesonQQ)
 import Utils (unpackBS)
 import Network.Wai (Request)
+import Text.Blaze.Html.Renderer.String (renderHtml)
+import IHP.HSX.QQ (hsx)
 
 type Header = (HeaderName, ByteString)
 type APIResponse = IO (Status, String, [Header])
@@ -24,6 +26,16 @@ messageResponse :: String -> String
 messageResponse value = j2s [aesonQQ|{
     "message":#{value}
 }|]
+
+redirectHeaders :: [Header]
+redirectHeaders = [("Content-Type", "text/html")]
+
+redirect :: String -> String
+redirect url = renderHtml [hsx|
+    <head>
+      <meta http-equiv="Refresh" content={"0; URL="++url} />
+    </head>
+|]
 
 (<!>) :: [APIRoute] -> String -> [APIEndpoint]
 ((method, value):xs) <!> target | method == target  = value
