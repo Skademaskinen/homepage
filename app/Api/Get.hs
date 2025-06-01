@@ -50,9 +50,9 @@ getMap apiMap = [
         let text = getQueryValue "guestbook-text" query
         let id = getQueryValue "id" query
         if null name then
-            return (status400, messageResponse "Error, name cannot be empty", jsonHeaders)
+            return (status400, "Error, name cannot be empty", defaultHeaders)
         else if null text then
-            return (status400, messageResponse "Error, content cannot be empty", jsonHeaders)
+            return (status400, "Error, content cannot be empty", defaultHeaders)
         else do
             now <- getCurrentTime
             runDb $ insert $ GuestbookEntry (read $ formatTime defaultTimeLocale "%s" now) name text (read id :: Int)
