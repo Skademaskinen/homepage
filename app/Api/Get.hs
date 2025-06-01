@@ -1,12 +1,12 @@
 module Api.Get where
-import Api.Types (APIEndpoint, j2s, jsonHeaders, defaultHeaders, APIRoute, messageResponse, redirect, getQueryValue)
+import Api.Types (APIEndpoint, j2s, jsonHeaders, defaultHeaders, APIRoute, redirect, getQueryValue)
 import Data.Aeson.QQ (aesonQQ)
 import Database.Schema (GuestbookEntry(GuestbookEntry), Member (Member), Event (Event), EntityField (VisitTimestamp, EventDate, EventCancelled))
 import Database.Database (AdminTable(getAll, getRows, toList, getList), runDb)
 import Database.Persist (Entity(Entity), PersistQueryRead (count), (>.), (==.), PersistStoreWrite (insert))
 import Api.Post (postMap)
 import Api.Put (putMap)
-import Network.HTTP.Types (status200, Query, status400, status308)
+import Network.HTTP.Types (status200, status400)
 import Api.Delete (deleteMap)
 import Settings (getEditorRoot)
 import System.Directory (getDirectoryContents)
@@ -15,9 +15,6 @@ import Network.Wai (Request(pathInfo, queryString))
 import System.IO (openFile, IOMode (ReadMode), hGetContents)
 import Data.Time (getCurrentTime, defaultTimeLocale, formatTime)
 import Calendar (generateCalendar, createEvents)
-import Data.ByteString (fromStrict)
-import Utils (unpackBS)
-import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 
 getMap :: [APIRoute] -> [APIEndpoint]
 getMap apiMap = [
