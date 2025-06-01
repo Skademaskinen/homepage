@@ -1,10 +1,14 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Api.Types where
-import Network.HTTP.Types (HeaderName, Status, status400)
-import Data.ByteString (ByteString, toStrict)
+import Network.HTTP.Types (HeaderName, Status, status400, Query, status308)
+import Data.ByteString (ByteString, toStrict, pack)
 import Data.Aeson (Value, encode)
 import Data.Aeson.QQ (aesonQQ)
 import Utils (unpackBS)
 import Network.Wai (Request)
+import Text.Blaze.Html.Renderer.String (renderHtml)
+import IHP.HSX.QQ (hsx)
 
 type Header = (HeaderName, ByteString)
 type APIResponse = IO (Status, String, [Header])
@@ -24,6 +28,14 @@ messageResponse :: String -> String
 messageResponse value = j2s [aesonQQ|{
     "message":#{value}
 }|]
+
+redirect :: ByteString -> (Status, String, [Header])
+redirect url = (status308, "", [("Content-Type", "text/html"), ("Location", url)])
+
+getQueryValue :: String -> Query -> String
+getQueryValue key ((key', Just value):xs) | key == unpackBS key' = unpackBS value
+                                          | otherwise   = getQueryValue key xs
+getQueryValue _ []                        = undefined
 
 (<!>) :: [APIRoute] -> String -> [APIEndpoint]
 ((method, value):xs) <!> target | method == target  = value

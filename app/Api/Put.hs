@@ -17,19 +17,6 @@ import System.IO (IOMode(WriteMode), openFile, hPutStr, hClose)
 
 putMap :: [APIEndpoint]
 putMap = [
-    ("^/guestbook/add(/|)$", \r -> do
-        body <- getRequestBodyChunk r
-        case decode $ fromStrict body of
-            (Just (GuestbookEntry _ "" _ _)) -> 
-                return (status400, messageResponse "Error, name cannot be empty", jsonHeaders)
-            (Just (GuestbookEntry _ _ "" _)) -> 
-                return (status400, messageResponse "Error, content cannot be empty", jsonHeaders)
-            (Just (GuestbookEntry time name content parentId)) -> do
-                runDb $ insert $ GuestbookEntry time name content parentId
-                return (status200, messageResponse "Success", jsonHeaders)
-            _ -> do
-                return (status500, messageResponse "Error, server failed", jsonHeaders)
-    ),
     ("^/snake/add(/|)$", \r -> do
         body <- getRequestBodyChunk r
         case decode $ fromStrict body :: Maybe Snake of

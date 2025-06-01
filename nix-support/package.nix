@@ -1,8 +1,8 @@
-{pkgs, ...}:
+{ pkgs, version, ... }:
 
 pkgs.haskellPackages.mkDerivation {
+    version = version;
     pname = "homepage-bin";
-    version = "0.1.1";
     src = ./..;
     isLibrary = false;
     isExecutable = true;
@@ -10,7 +10,7 @@ pkgs.haskellPackages.mkDerivation {
         aeson base blaze-builder blaze-html bytestring cryptonite directory
         http-conduit http-types ihp-hsx monad-logger password persistent
         persistent-mysql regex-compat split string-random text time
-        utf8-string uuid wai warp yaml
+        utf8-string uuid wai warp yaml persistent-postgresql
     ];
     executableHaskellDepends = with pkgs.haskellPackages; [
         aeson aeson-qq base blaze-builder blaze-html bytestring cryptonite

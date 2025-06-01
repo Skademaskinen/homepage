@@ -49,10 +49,12 @@ prettifyGuestbook [] = [hsx||]
 
 guestbookInput :: Int -> Bool -> Html
 guestbookInput parent False = [hsx|
-    <textarea class="guestbook-text" id={"guestbook-text::"++show parent} type="text"></textarea>
-    <br>
-    Name: <input id={"guestbook-name::"++show parent} class="guestbook-name" type="text">
-    <button id={show parent} onclick="post(this.id)">Post</button>
+    <form action="/api/guestbook/add">
+        <textarea class="guestbook-text" name="content" type="text"></textarea><br><br>
+        Name: <input class="guestbook-name" name="name" type="text"/>
+        <input type="hidden" name="id" value={show parent}/>
+        <input type="submit" value="Post" class="guestbook-button"/>
+    </form>
 |]
 guestbookInput parent True = [hsx|
     <button id={show parent} onclick="guestbookToggleInput(this.id)">New reply</button>
@@ -84,27 +86,6 @@ page = do
                 else {
                     reply.style.display = "none"
                 }
-            }
-            function post(id) {
-                var text = document.getElementById("guestbook-text::"+id).value
-                var name = document.getElementById("guestbook-name::"+id).value
-                console.log(id)
-                fetch("/api/guestbook/add", {
-                    method:"PUT",
-                    body: JSON.stringify({
-                        timestamp: Math.floor(Date.now() / 1000),
-                        name: name,
-                        content: text,
-                        parentId: Number(id)
-                    })
-                }).then(response => {
-                    if(response.status == 200){
-                        window.location.reload()
-                    }
-                    else response.json().then(data => {
-                        alert(response.status + "\n" + data.message)
-                    })
-                })
             }
         </script>
         <h1>Guestbook</h1>

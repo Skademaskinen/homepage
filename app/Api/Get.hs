@@ -1,19 +1,19 @@
 module Api.Get where
-import Api.Types (APIEndpoint, j2s, jsonHeaders, defaultHeaders, APIRoute)
+import Api.Types (APIEndpoint, j2s, jsonHeaders, defaultHeaders, APIRoute, redirect, getQueryValue)
 import Data.Aeson.QQ (aesonQQ)
 import Database.Schema (GuestbookEntry(GuestbookEntry), Member (Member), Event (Event), EntityField (VisitTimestamp, EventDate, EventCancelled))
 import Database.Database (AdminTable(getAll, getRows, toList, getList), runDb)
-import Database.Persist (Entity(Entity), PersistQueryRead (count), (>.), (==.))
+import Database.Persist (Entity(Entity), PersistQueryRead (count), (>.), (==.), PersistStoreWrite (insert))
 import Api.Post (postMap)
 import Api.Put (putMap)
-import Network.HTTP.Types (status200)
+import Network.HTTP.Types (status200, status400)
 import Api.Delete (deleteMap)
 import Settings (getEditorRoot)
 import System.Directory (getDirectoryContents)
 import Data.Text (unpack)
-import Network.Wai (Request(pathInfo))
+import Network.Wai (Request(pathInfo, queryString))
 import System.IO (openFile, IOMode (ReadMode), hGetContents)
-import Data.Time (getCurrentTime)
+import Data.Time (getCurrentTime, defaultTimeLocale, formatTime)
 import Calendar (generateCalendar, createEvents)
 
 getMap :: [APIRoute] -> [APIEndpoint]
@@ -33,6 +33,19 @@ getMap apiMap = [
         entries <- getRows [] [] :: IO [Entity GuestbookEntry]
         let l = map toList entries
         return (status200, j2s [aesonQQ|{"entries":#{l}}|], jsonHeaders)
+    ),
+    ("^/guestbook/add?*$", \r -> do
+        let query = queryString r
+        let name = getQueryValue "name" query
+        let content = getQueryValue "content" query
+        let id = read $ getQueryValue "id" query :: Int
+        case (name, content, id) of
+            ("", _, _) -> return (status400, "Error, name cannot be empty", defaultHeaders)
+            (_, "", _) -> return (status400, "Error, content cannot be empty", defaultHeaders)
+            (name, content, id) -> do
+                now <- read . formatTime defaultTimeLocale "%s" <$> getCurrentTime
+                runDb $ insert $ GuestbookEntry now name content id
+                return $ redirect "/guestbook"
     ),
     ("^/editor/sidebar(/|)$", \_ -> do
         editor_root <- getEditorRoot

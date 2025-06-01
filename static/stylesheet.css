@@ -101,6 +101,24 @@ button:active {
     background-color: #262626;
 }
 
+.guestbook-button {
+    border-radius: 5px;
+    width: 100px;
+    height: 40px;
+    margin: 5px;
+    padding: 1px;
+    background-color: #232323;
+    color: white;
+    border: 1px solid black;
+}
+  
+.guestbook-button:hover {
+    background-color: #151515;
+}
+.guestbook-button:active {
+    background-color: #111111;
+}
+
 
 .common-table {
     display:inline-block;

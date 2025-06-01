@@ -35,6 +35,15 @@ getDatabaseName = argOrEnvOrDefault "--db" "HOMEPAGE_DB" "homepage"
 getDatabaseUser :: IO String
 getDatabaseUser = argOrEnvOrDefault "--dbuser" "HOMEPAGE_DB_USER" "homepage"
 
+getDatabaseHost :: IO String
+getDatabaseHost = argOrEnvOrDefault "--dbhost" "HOMEPAGE_DB_HOST" "localhost"
+
+getDatabasePort :: IO String
+getDatabasePort = argOrEnvOrDefault "--dbport" "HOMEPAGE_DB_PORT" "3306"
+
+getDatabasePassword :: IO String
+getDatabasePassword = argOrEnvOrDefault "--dbpassword" "HOMEPAGE_DB_PASSWORD" ""
+
 getPort :: IO Int
 getPort = do
     var <- argOrEnvOrDefault "--port" "HOMEPAGE_PORT" "8000"
@@ -63,5 +72,5 @@ getMigrate = argOrEnvOrBool "--migrate" "HOMEPAGE_MIGRATE"
 getEditorRoot :: IO String
 getEditorRoot = argOrEnvOrDefault "--editor_root" "HOMEPAGE_EDITOR_ROOT" "./editor_root"
 
-getLocal :: IO Bool
-getLocal = argOrEnvOrBool "--local" "HOMEPAGE_LOCAL"
+getDialect :: IO String
+getDialect = argOrEnvOrDefault "--dialect" "HOMEPAGE_DIALECT" "mysql"

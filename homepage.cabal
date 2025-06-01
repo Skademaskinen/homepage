@@ -43,6 +43,7 @@ library lib-homepage
         persistent,
         persistent-mysql,
         persistent-sqlite,
+        persistent-postgresql,
         monad-logger,
         raw-strings-qq,
         matplotlib
