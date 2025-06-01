@@ -1,5 +1,5 @@
 module Api.Get where
-import Api.Types (APIEndpoint, j2s, jsonHeaders, defaultHeaders, APIRoute, messageResponse, redirect, redirectHeaders, getQueryValue)
+import Api.Types (APIEndpoint, j2s, jsonHeaders, defaultHeaders, APIRoute, messageResponse, redirect, getQueryValue)
 import Data.Aeson.QQ (aesonQQ)
 import Database.Schema (GuestbookEntry(GuestbookEntry), Member (Member), Event (Event), EntityField (VisitTimestamp, EventDate, EventCancelled))
 import Database.Database (AdminTable(getAll, getRows, toList, getList), runDb)
@@ -48,7 +48,7 @@ getMap apiMap = [
             (name, content, id) -> do
                 now <- read . formatTime defaultTimeLocale "%s" <$> getCurrentTime
                 runDb $ insert $ GuestbookEntry now name content id
-                return (status308, redirect "/guestbook", redirectHeaders)
+                return $ redirect "/guestbook"
     ),
     ("^/editor/sidebar(/|)$", \_ -> do
         editor_root <- getEditorRoot

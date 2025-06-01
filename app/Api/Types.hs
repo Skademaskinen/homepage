@@ -1,6 +1,8 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Api.Types where
-import Network.HTTP.Types (HeaderName, Status, status400, Query)
-import Data.ByteString (ByteString, toStrict)
+import Network.HTTP.Types (HeaderName, Status, status400, Query, status308)
+import Data.ByteString (ByteString, toStrict, pack)
 import Data.Aeson (Value, encode)
 import Data.Aeson.QQ (aesonQQ)
 import Utils (unpackBS)
@@ -27,15 +29,8 @@ messageResponse value = j2s [aesonQQ|{
     "message":#{value}
 }|]
 
-redirectHeaders :: [Header]
-redirectHeaders = [("Content-Type", "text/html")]
-
-redirect :: String -> String
-redirect url = renderHtml [hsx|
-    <head>
-      <meta http-equiv="Refresh" content={"0; URL="++url} />
-    </head>
-|]
+redirect :: ByteString -> (Status, String, [Header])
+redirect url = (status308, "", [("Content-Type", "text/html"), ("Location", url)])
 
 getQueryValue :: String -> Query -> String
 getQueryValue key ((key', Just value):xs) | key == unpackBS key' = unpackBS value
