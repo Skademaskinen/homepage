@@ -3,7 +3,7 @@
 
 module Database.Database where
 
-import Settings (getDatabaseName, getDatabaseUser, getLocal)
+import Settings (getDatabaseName, getDatabaseUser, getDialect, getDatabasePassword, getDatabasePort, getDatabaseHost)
 
 import Control.Monad.Logger (NoLoggingT (runNoLoggingT))
 import Data.List (inits, intercalate)
@@ -19,10 +19,12 @@ import Logger (info)
 import Tree (Tree (Tree))
 import Text.Blaze.Html (Html)
 import IHP.HSX.QQ (hsx)
+import Data.ByteString.UTF8 (fromString)
 import Data.Time.Clock.POSIX (getPOSIXTime)
 import Data.UUID.V4 (nextRandom)
 import Data.UUID (toString)
 import Database.Persist.Sqlite (withSqliteConn)
+import Database.Persist.Postgresql (withPostgresqlConn)
 
 -- Database boilerplate
 
@@ -32,15 +34,24 @@ connectInfo = do
     user <- getDatabaseUser
     return defaultConnectInfo { connectDatabase = db, connectUser = user }
 
+connectString :: IO String
+connectString = do
+    db <- getDatabaseName
+    user <- getDatabaseUser
+    host <- getDatabaseHost
+    port <- getDatabasePort
+    password <- getDatabasePassword
+    return $ "host="++host++" port="++port++" user="++user++" dbname="++db++" password="++password
+
 runDb :: SqlPersistT (NoLoggingT IO) a -> IO a
 runDb cmd = do
     info <- connectInfo
-    local <- getLocal
-    if local then
-        runNoLoggingT . withSqliteConn "test.db3" . runSqlConn $ cmd
-    else
-        runNoLoggingT . withMySQLConn info . runSqlConn $ cmd
-
+    string <- fromString <$> connectString
+    dialect <- getDialect
+    case dialect of
+        "sqlite" -> runNoLoggingT . withSqliteConn "test.db3" . runSqlConn $ cmd
+        "mysql" -> runNoLoggingT . withMySQLConn info . runSqlConn $ cmd
+        "postgresql" -> runNoLoggingT . withPostgresqlConn string . runSqlConn $ cmd
 
 doMigration :: IO ()
 doMigration = runDb $ runMigration migrateAll
