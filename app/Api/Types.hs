@@ -24,6 +24,9 @@ defaultHeaders = [("Content-Type", "text/plain")]
 jsonHeaders :: [Header]
 jsonHeaders = [("Content-Type", "application/json")]
 
+yamlHeaders :: [Header]
+yamlHeaders = [("Content-Type", "application/yaml")]
+
 messageResponse :: String -> String
 messageResponse value = j2s [aesonQQ|{
     "message":#{value}
