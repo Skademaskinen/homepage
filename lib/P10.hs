@@ -239,6 +239,73 @@ prerequisites = aesonToKubeconfig [[aesonQQ|
         type: "NodePort"
     }
 }
+|], [aesonQQ|
+{
+    apiVersion: "v1",
+    kind: "ConfigMap",
+    metadata: {
+        name: "prometheus-config",
+        labels: {
+            name: "prometheus-config"
+        }
+    },
+    data: {
+        "prometheus.yml": "global:\n  scrape_interval: 15s\nscrape_configs:\n  - job_name: 'kubernetes-nodes'\n    static_configs:\n      - targets: ['localhost:9100']\n"
+    }
+}
+|], [aesonQQ|
+{
+    "apiVersion": "apps/v1",
+    "kind": "Deployment",
+    "metadata": {
+        "name": "prometheus-deployment"
+    },
+    "spec": {
+        "replicas": 1,
+        "selector": {
+            "matchLabels": {
+                "app": "prometheus"
+            }
+        },
+        "template": {
+            "metadata": {
+                "labels": {
+                    "app": "prometheus"
+                }
+            },
+            "spec": {
+                "containers": [
+                    {
+                        "name": "prometheus",
+                        "image": "prom/prometheus",
+                        "args": [
+                            "--config.file=/etc/prometheus/prometheus.yml"
+                        ],
+                        "ports": [
+                            {
+                                "containerPort": 9090
+                            }
+                        ],
+                        "volumeMounts": [
+                            {
+                                "name": "prometheus-config-volume",
+                                "mountPath": "/etc/prometheus/"
+                            }
+                        ]
+                    }
+                ],
+                "volumes": [
+                    {
+                        "name": "prometheus-config-volume",
+                        "configMap": {
+                            "name": "prometheus-config"
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}
 |]]
 
 migrate :: String
