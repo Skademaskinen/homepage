@@ -18,7 +18,11 @@ library lib-homepage
         State,
         Plot,
         Calendar,
-        P10
+        P10.Autoscaler,
+        P10.Constants,
+        P10.Migrate,
+        P10.Monitor,
+        P10.Prerequisites
     build-depends:
         base,
         ihp-hsx,

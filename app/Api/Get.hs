@@ -15,7 +15,10 @@ import Network.Wai (Request(pathInfo, queryString))
 import System.IO (openFile, IOMode (ReadMode), hGetContents)
 import Data.Time (getCurrentTime, defaultTimeLocale, formatTime)
 import Calendar (generateCalendar, createEvents)
-import P10 (cleanup, migrate, prerequisites, autoscaler)
+import P10.Migrate (migrate)
+import P10.Prerequisites (prerequisites)
+import P10.Autoscaler (autoscaler)
+import P10.Monitor (monitor)
 
 getMap :: [APIRoute] -> [APIEndpoint]
 getMap apiMap = [
@@ -73,11 +76,11 @@ getMap apiMap = [
         let calendar = generateCalendar futureEvents
         return (status200, calendar, [("Content-Type", "text/calendar")])
     ),
-    ("^/p10/k8s/cleanup.sh", \r -> do
-        return (status200, cleanup, defaultHeaders)
-    ),
     ("^/p10/k8s/migrate.sh", \r -> do
         return (status200, migrate, defaultHeaders)
+    ),
+    ("^/p10/k8s/monitor.sh", \r -> do
+        return (status200, monitor, defaultHeaders)
     ),
     ("^/p10/k8s/prerequisites.yml", \r -> do
         return (status200, prerequisites, yamlHeaders)
