@@ -288,8 +288,7 @@ prometheusService = [aesonQQ|
                     targetPort: 9090,
                     nodePort: 30090
                 }
-            ],
-            type: "ClusterIP"
+            ]
         }
     }
 |]
