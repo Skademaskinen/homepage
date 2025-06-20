@@ -1,6 +1,6 @@
 module P10.Prerequisites where
 
-import P10.Constants (workloadPort, generatorPort, generatorExposedPort, aesonToKubeconfig)
+import P10.Constants (workloadPort, generatorPort, generatorExposedPort, aesonToKubeconfig, dbPort, dbUser, dbPassword, dbName)
 import Data.Aeson.QQ (aesonQQ)
 import Data.Aeson (Value)
 
@@ -274,7 +274,7 @@ prometheusService = [aesonQQ|
         apiVersion: "v1",
         kind: "Service",
         metadata: {
-            name: "prometheus-service"
+            name: "prometheus"
         },
         spec: {
             selector: {
@@ -307,8 +307,8 @@ postgresqlService = [aesonQQ|
         },
         ports: [
             {
-                port: 5432,
-                targetPort: 5432
+                port: #{read dbPort :: Int},
+                targetPort: #{read dbPort :: Int}
             }
         ]
     }
@@ -364,21 +364,21 @@ postgresqlDeployment = [aesonQQ|
                             image: "postgres:16",
                             ports: [
                                 {
-                                    containerPort: 5432
+                                    containerPort: #{read dbPort :: Int}
                                 }
                             ],
                             env: [
                                 {
                                     name: "POSTGRES_USER",
-                                    value: "root"
+                                    value: #{dbUser}
                                 },
                                 {
                                     name: "POSTGRES_PASSWORD",
-                                    value: "password"
+                                    value: #{dbPassword}
                                 },
                                 {
                                     name: "POSTGRES_DB",
-                                    value: "autoscaler"
+                                    value: #{dbName}
                                 }
                             ],
                             volumeMounts: [

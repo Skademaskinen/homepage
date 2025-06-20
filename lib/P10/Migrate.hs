@@ -1,6 +1,6 @@
 module P10.Migrate where
 import Data.String.QM (qm)
-import P10.Constants (dbName, dbUser, dbHost, dbPort)
+import P10.Constants (dbName, dbUser, dbHost, dbPort, dbExposedPort)
 
 
 migrate :: String
@@ -8,7 +8,7 @@ migrate = [qm|
     #!/usr/bin/env bash
 
     migrate() {
-        echo "$1" | psql "${dbName}" -U "${dbUser}" -h "${dbHost}" -p "${dbPort}"
+        echo "$1" | psql "${dbName}" -U "${dbUser}" -h "localhost" -p "${dbExposedPort}"
     }
 
     if ! command -v psql > /dev/null 2>&1; then

@@ -32,6 +32,8 @@ dbHost :: String
 dbHost = "postgres"
 dbPort :: String
 dbPort = "5432"
+dbExposedPort :: String
+dbExposedPort = show $ expose 5432
 dbUser :: String
 dbUser = "root"
 dbPassword :: String

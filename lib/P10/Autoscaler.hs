@@ -132,7 +132,7 @@ autoscaler = aesonToKubeconfig [[aesonQQ|
                                 },
                                 {
                                     name: "Autoscaler__Apis__Prometheus__Url",
-                                    value: "http://prometheus-server"
+                                    value: "http://prometheus"
                                 },
                                 {
                                     name: "Autoscaler__Apis__Prometheus__Mock",
