@@ -1,6 +1,6 @@
 module P10.Prerequisites where
 
-import P10.Constants (workloadPort, generatorPort, generatorExposedPort, aesonToKubeconfig, dbPort, dbUser, dbPassword, dbName)
+import P10.Constants (workloadPort, generatorPort, generatorExposedPort, aesonToKubeconfig, dbPort, dbUser, dbPassword, dbName, dbExposedPort)
 import Data.Aeson.QQ (aesonQQ)
 import Data.Aeson (Value)
 
@@ -277,6 +277,7 @@ prometheusService = [aesonQQ|
             name: "prometheus"
         },
         spec: {
+            type: "NodePort",
             selector: {
                 app: "prometheus"
             },
@@ -284,7 +285,8 @@ prometheusService = [aesonQQ|
                 {
                     protocol: "TCP",
                     port: 80,
-                    targetPort: 9090
+                    targetPort: 9090,
+                    nodePort: 30090
                 }
             ],
             type: "ClusterIP"
@@ -301,14 +303,15 @@ postgresqlService = [aesonQQ|
         name: "postgres"
     },
     spec: {
-        type: "ClusterIP",
+        type: "NodePort",
         selector: {
             app: "postgres"
         },
         ports: [
             {
                 port: #{read dbPort :: Int},
-                targetPort: #{read dbPort :: Int}
+                targetPort: #{read dbPort :: Int},
+                nodePort: #{read dbExposedPort :: Int}
             }
         ]
     }
