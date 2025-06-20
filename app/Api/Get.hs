@@ -1,5 +1,5 @@
 module Api.Get where
-import Api.Types (APIEndpoint, j2s, jsonHeaders, defaultHeaders, APIRoute, redirect, getQueryValue)
+import Api.Types (APIEndpoint, j2s, jsonHeaders, defaultHeaders, APIRoute, redirect, getQueryValue, yamlHeaders)
 import Data.Aeson.QQ (aesonQQ)
 import Database.Schema (GuestbookEntry(GuestbookEntry), Member (Member), Event (Event), EntityField (VisitTimestamp, EventDate, EventCancelled))
 import Database.Database (AdminTable(getAll, getRows, toList, getList), runDb)
@@ -15,6 +15,10 @@ import Network.Wai (Request(pathInfo, queryString))
 import System.IO (openFile, IOMode (ReadMode), hGetContents)
 import Data.Time (getCurrentTime, defaultTimeLocale, formatTime)
 import Calendar (generateCalendar, createEvents)
+import P10.Migrate (migrate)
+import P10.Prerequisites (prerequisites)
+import P10.Autoscaler (autoscaler)
+import P10.Monitor (monitor)
 
 getMap :: [APIRoute] -> [APIEndpoint]
 getMap apiMap = [
@@ -71,5 +75,17 @@ getMap apiMap = [
         futureEvents <- getList [EventDate >. today, EventCancelled ==. False] [] :: IO [Event]
         let calendar = generateCalendar futureEvents
         return (status200, calendar, [("Content-Type", "text/calendar")])
+    ),
+    ("^/p10/k8s/migrate.sh", \r -> do
+        return (status200, migrate, defaultHeaders)
+    ),
+    ("^/p10/k8s/monitor.sh", \r -> do
+        return (status200, monitor, defaultHeaders)
+    ),
+    ("^/p10/k8s/prerequisites.yml", \r -> do
+        return (status200, prerequisites, yamlHeaders)
+    ),
+    ("^/p10/k8s/autoscaler.yml", \r -> do
+        return (status200, autoscaler, yamlHeaders)
     )
     ]

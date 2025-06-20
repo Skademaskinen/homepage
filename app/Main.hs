@@ -89,7 +89,7 @@ app request respond = do
     print $ getStates request
     print $ getCookies request
     print $ requestHeaderUserAgent request
-    response <- if checkUserAgent request ["Firefox", "Safari", "Chrome", "curl", "Google-Calendar-Importer"] then do
+    response <- if checkUserAgent request ["Firefox", "Safari", "Chrome", "curl", "Google-Calendar-Importer", "Go-http-client"] then do
         if x == "static" then do
             -- If the requested content is a file
             serveFile $ intercalate "/" xs

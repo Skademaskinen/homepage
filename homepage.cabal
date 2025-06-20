@@ -17,7 +17,12 @@ library lib-homepage
         Page,
         State,
         Plot,
-        Calendar
+        Calendar,
+        P10.Autoscaler,
+        P10.Constants,
+        P10.Migrate,
+        P10.Monitor,
+        P10.Prerequisites
     build-depends:
         base,
         ihp-hsx,
@@ -33,6 +38,7 @@ library lib-homepage
         uuid,
         directory,
         aeson,
+        aeson-qq,
         split,
         password,
         cryptonite,
@@ -46,6 +52,7 @@ library lib-homepage
         persistent-postgresql,
         monad-logger,
         raw-strings-qq,
+        rawstring-qm,
         matplotlib
     hs-source-dirs:   lib
     default-language: GHC2021
