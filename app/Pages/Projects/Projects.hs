@@ -73,6 +73,10 @@ projectsTree = Tree defaultProject [
             This is my pre-specialization project, it is focused on distributed systems, and how to more efficiently schedule pods in Kubernetes.<br>
 
             In this project we're attempting to use machine learning to predict the traffic of a system, then scale the system up based on the predictions.
+        |]) [],
+        Tree ("P10", section [hsx|
+            This is my master's thesis! In this project we spent the entire semester perfecting our machine learning pipeline, by implementing our own model selection system based on statistical data about our data based on backtesting with a validation set and the first portion of the predicted set.<br>
+            An improvement to our paper would have been to document how we designed our model selection algorithmically, while our machine learning would also have benefitted from being based around an event-driven system like Apache Kafka, as we essentially used postgres as our event storage.
         |]) []
     ], Tree ("Personal Projects", section [hsx|
         I find it fun coding in my free time, i do it a lot and as such this website was also born!
@@ -162,6 +166,10 @@ projectsTree = Tree defaultProject [
             Additionally it was written with a lot more tests and proper CI, to make sure it computes word counts and stuff correctly.
             <br>
             <a href="https://github.com/Skademaskinen/rp-utils">https://github.com/Skademaskinen/rp-utils</a>
+        |]) [],
+        Tree ("WoW Addon", section [hsx|
+            I have written an Addon for World of Warcraft that is essentially an extension of TwitchEmotes.<br>
+            It is up on CurseForge <a href="https://www.curseforge.com/wow/addons/twitchemotes-paradox">here</a>, it adds emotes specifically added on requests from my guild in World of Warcraft. 
         |]) []
     ]
     ]
