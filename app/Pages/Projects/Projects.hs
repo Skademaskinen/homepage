@@ -151,7 +151,14 @@ projectsTree = Tree defaultProject [
             <div style="text-align:center;">
                 {services}
             </div>
-        |]) [],
+        |]) [
+            Tree ("Archerus", section [hsx|
+                This is my collection of NixOS configuration. I will extend this constantly and contains NixOS configurations for all systems i run NixOS on. It has modules that can all be loaded individually or pulled in together.<br>
+                The project is available <a href="https://github.com/Skademaskinen/Archerus">here</a><br>
+                A set of configuration options are also defined, all are available <a href="https://server.skade.dev/options.html">here</a><br>
+                Finally an architecture diagram is auto generated and also available on this server <a href="https://server.skade.dev/arch.html">here</a>
+            |]) []
+        ],
         Tree ("Discord bots", section [hsx|
             I have written a few bots for discord, all of them were in Java using the dv8tion JDA (java bindings for the discord API). The first version was Mør Bot. It provided commands before slash commands that could play music from youtube and soundcloud, attached an emote to random messages, and showed a leaderboard for these emotes. It also allowed for setting roles.
             <br>
