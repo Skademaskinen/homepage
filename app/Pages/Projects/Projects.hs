@@ -156,7 +156,7 @@ projectsTree = Tree defaultProject [
                 This is my collection of NixOS configuration. I will extend this constantly and contains NixOS configurations for all systems i run NixOS on. It has modules that can all be loaded individually or pulled in together.<br>
                 The project is available <a href="https://github.com/Skademaskinen/Archerus">here</a><br>
                 A set of configuration options are also defined, all are available <a href="https://docs.skade.dev/Options">here</a><br>
-                Finally an architecture diagram is auto generated and also available on this server <a href="https://server.skade.dev/Architecture">here</a>
+                Finally an architecture diagram is auto generated and also available on this server <a href="https://docs.skade.dev/Architecture">here</a>
             |]) []
         ],
         Tree ("Discord bots", section [hsx|
