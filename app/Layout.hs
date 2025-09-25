@@ -22,6 +22,7 @@ layout content = [hsx|
             ("Contact", "/contact"),
             ("Projects", "/projects"),
             ("Sources", "/sources"),
+            ("Documentation", "https://docs.skade.dev"),
             ("Guestbook", "/guestbook"),
             ("Old Site", "https://about.skademaskinen.win")
         ]}
